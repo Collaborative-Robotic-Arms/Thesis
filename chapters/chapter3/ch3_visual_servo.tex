@@ -1,58 +1,3 @@
-\documentclass{article}
-
-\usepackage{graphicx}
-\usepackage[utf8]{inputenc}
-\usepackage{fancyvrb}
-\usepackage{amsmath}
-\usepackage{booktabs}
-\usepackage{float}
-\usepackage{caption}
-\usepackage{subcaption}
-\usepackage{hyperref}
-\usepackage{booktabs}   % for nicer tables
-\usepackage{float}      % for [H] placement
-
-\setlength{\parindent}{0pt}
-% --- Packages ---
-\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
-\usepackage{amsmath, amssymb} 
-\usepackage{graphicx} 
-\usepackage{fancyhdr}
-\usepackage{xcolor}
-\usepackage{booktabs}          
-\usepackage{hyperref}          
-\usepackage{geometry}
-\usepackage{cite}
-\addto\captionsenglish{\renewcommand{\bibname}{References}}
-\geometry{
-    a4paper,
-    left=2cm,
-    right=2cm,
-    top=4cm,         % space for header
-    bottom=2.5cm,      % space for footer
-    headheight=3.7cm,
-    headsep=0.8cm,
-    footskip=1.2cm      % distance from bottom of text to baseline of footer
-}
-% Set up fancy header/footer
-\pagestyle{fancy}
-\fancyhf{}  % Clear all header/footer fields
-
-% Header
-\fancyhead[L]{\includegraphics[height=2.3cm]{Figures/Logos/1.jpeg}}  % Left: Logo
-\fancyhead[R]{\textbf{CRSBA}}  
-
-% Footer
-\fancyfoot[R]{Page \thepage}  
-
-\renewcommand{\headrulewidth}{0.1pt} 
-\renewcommand{\footrulewidth}{0.2pt} 
-\renewcommand{\headrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \headrulewidth\hfill}} 
-\renewcommand{\footrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \footrulewidth\hfill}}
-
-\begin{document}
-
 \section{Introduction}
 In collaborative robotic tasks, achieving high-precision alignment for grasping objects is a significant challenge, particularly when the environment and arm cameras have different perspectives. This chapter details the development of a "Fine Control" layer for the AR4 robotic arm using Image-Based Visual Servoing (IBVS) and Homography-based mapping. Our approach utilizes a dual-camera system: a fixed global RealSense camera for initial brick detection and a local ESP32-CAM mounted on the end-effector for precise alignment. By bridging these two views with homography, we enable the robot to perform complex "Pick and Place" operations with high reliability and reduced computational overhead.
 
@@ -68,7 +13,7 @@ The foundation of visual servoing rests on the geometric mapping of 3D points in
 \begin{figure}[H]
     \centering
     % Ensure you have uploaded the image as pinhole_model.jpg
-    \includegraphics[width=0.6\textwidth]{Figures/VISP/pinhole_model.png}
+    \includegraphics[width=0.6\textwidth]{Figures/chapter3/VISP/pinhole_model.png}
     \caption{Perspective projection geometry showing the relationship between a 3D point $P$ and its 2D image projection $p$ \cite{Hutchinson1996}.}
     \label{fig:pinhole_model}
 \end{figure}
@@ -134,13 +79,13 @@ The two primary paradigms in visual servoing differ in how they define the error
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Figures/VISP/pbvs_diagram.png}
+        \includegraphics[width=\textwidth]{Figures/chapter3/VISP/pbvs_diagram.png}
         \caption{Position-Based (PBVS) \cite{Hutchinson1996}}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Figures/VISP/ibvs_diagram.png}
+        \includegraphics[width=\textwidth]{Figures/chapter3/VISP/ibvs_diagram.png}
         \caption{Image-Based (IBVS) \cite{Hutchinson1996}}
     \end{subfigure}
     \caption{Control loop architectures. PBVS (left) relies on a 3D pose estimation block, while IBVS (right) regulates error directly in the image plane \cite{Hutchinson1996}.}
@@ -165,7 +110,7 @@ A significant advancement in bridging the gap between 2D features and 3D control
 \begin{figure}[H]
     \centering
     % Ensure the physical file is named exactly: homography_schematic.jpg
-    \includegraphics[width=0.4\textwidth]{Figures/VISP/homography_geometry.png}
+    \includegraphics[width=0.4\textwidth]{Figures/chapter3/VISP/homography_geometry.png}
     \caption{Schematic diagram of the planar homography transformation relationship between current and desired camera frames.\cite{MDPI2023}}
     \label{fig:homography_geometry}
 \end{figure}
@@ -186,7 +131,7 @@ The objective is to minimize an error vector $e(t) = s - s^*$, representing the 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Figures/VISP/VisualServoDiagram.png}
+    \includegraphics[width=0.6\textwidth]{Figures/chapter3/VISP/VisualServoDiagram.png}
     \caption{System Architecture Flowchart: Integration of Global Perception and Local IBVS Control.}
     \label{fig:flow_diagram}
 \end{figure}
@@ -236,4 +181,3 @@ Experimental trials focused on stability and convergence. The pixel error norm s
 \bibitem{Bai2023} Y. Bai, et al., "EA-CTFVS: An Environment-Agnostic Coarse-to-Fine Visual Servoing Method for Sub-Millimeter-Accurate Assembly," \textit{Actuators}, vol. 12, no. 1, 2023.
 \bibitem{MDPI2023} A. G. Schiano, et al., "A Review of Homography Estimation: Advances and Challenges," \textit{MDPI: Sensors}, vol. 23, 2023.
 \end{thebibliography}
-\end{document}
