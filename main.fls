@@ -141,8 +141,14 @@ INPUT /usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT /usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT /usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
-OUTPUT main.out
+INPUT ./main.out
+INPUT ./main.out
+INPUT main.out
+INPUT main.out
 OUTPUT main.pdf
+INPUT ./main.out
+INPUT ./main.out
+OUTPUT main.out
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
@@ -165,6 +171,9 @@ INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr17.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT ./main.toc
+INPUT ./main.toc
+INPUT main.toc
 OUTPUT main.toc
 INPUT ./chapters/ch1_intro.tex
 INPUT ./chapters/ch1_intro.tex
@@ -190,15 +199,6 @@ INPUT ./chapters/ch3_sys_design.tex
 INPUT ./chapters/ch3_sys_design.tex
 INPUT ./chapters/ch3_sys_design.tex
 INPUT chapters/ch3_sys_design.tex
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
-INPUT ./Figures/Logos/1.jpeg
 INPUT ./Figures/Logos/1.jpeg
 INPUT ./Figures/Logos/1.jpeg
 INPUT ./Figures/Logos/1.jpeg
@@ -212,6 +212,10 @@ INPUT ./Figures/Calibration/Poly_corrections.png
 INPUT ./Figures/Calibration/Poly_corrections.png
 INPUT ./Figures/Calibration/Poly_corrections.png
 INPUT ./Figures/Calibration/Poly_corrections.png
+INPUT ./Figures/Logos/1.jpeg
+INPUT ./Figures/Logos/1.jpeg
+INPUT ./Figures/Logos/1.jpeg
+INPUT ./Figures/Logos/1.jpeg
 INPUT ./Figures/Calibration/Poly_3D.png
 INPUT ./Figures/Calibration/Poly_3D.png
 INPUT ./Figures/Calibration/Poly_3D.png
@@ -257,4 +261,3 @@ INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb
-INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
