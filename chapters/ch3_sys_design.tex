@@ -1,5 +1,72 @@
 \chapter{System Design and Methodology}
+\section{AR4 Restoration and Hardware Modifications}
+The AR4 robotic manipulator was handed over to the current
+team by the previous graduation project team after their completion of the project.
+At the time of handover, the robot was delivered in a fully assembled
+condition and was generally operational. The unit is an AR4 MK3 model designed by
+Chris Annin. However, due to the duration and intensity of prior
+usage during development and testing, several components exhibited
+wear and assembly-related issues. As a result, multiple mechanical
+and electrical corrective actions were required before the 
+robot could be considered reliable for accurate motion execution and 
+experimental work.
+\subsection{Joint 3 Mechanical Transmission Upgrade}
+Joint~3 of the AR4 robot exhibited significant backlash due 
+to wear and limitations in the original mechanical transmission 
+design. To address this issue, the joint transmission system was 
+completely replaced in accordance with the official upgrade 
+provided by Chris Annin. The upgrade consisted of a redesigned 
+gear set and a new timing belt, both intended to improve torque 
+transmission and reduce mechanical play within the joint.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/AR4 modifications/Joint3_mods.png}
+    \caption{Upgraded mechanical transmission of Joint~3 }
+    \label{fig:joint3_upgrade}
+\end{figure}
+
+After implementing the upgraded components, the backlash in 
+Joint~3 was reduced from approximately $6^\circ$ to $3^\circ$. 
+This reduction resulted in smoother joint motion and improved 
+positioning accuracy, directly enhancing the overall kinematic 
+performance of the robot.
+
+\subsection{Shaft Key Re-Manufacturing in Joint 3}
+Despite the improvements achieved through the mechanical 
+transmission upgrade, residual backlash was still observed in 
+Joint~3. Further investigation revealed that the shaft key 
+responsible for transmitting motion from the second gear stage 
+to the robotic arm link exhibited wear and improper fit. 
+This condition introduced mechanical play within the joint, 
+negatively affecting positioning accuracy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth, angle=90]{figures/AR4 modifications/Shaft_key.png}
+    \caption{Re-manufactured shaft key used in Joint~3 to eliminate mechanical backlash}
+    \label{fig:shaft_key}
+\end{figure}
+
+To resolve this issue, the shaft key was re-manufactured with 
+precise dimensions to ensure a tight and accurate fit between 
+the gear and the arm shaft using hot-wire machining. The newly manufactured key eliminated 
+relative motion between the connected components, effectively 
+removing the remaining backlash in Joint~3. As a result, 
+Joint~3 achieved backlash-free motion, significantly improving 
+the repeatability and accuracy of the robot during operation.
+
+\subsection{Encoder Signal Noise in Joints 5 and 6}
+
+During system testing and motion execution, unstable and noisy encoder readings were observed in Joints~5 and~6 of the AR4 robot. These fluctuations resulted in inaccurate joint position feedback, which significantly affected the forward and inverse kinematics calculations. Consequently, commanded joint positions did not always correspond to the expected physical motion of the robot.
+
+A systematic debugging process was conducted, including signal tracing and verification of the encoder wiring and power connections. This investigation revealed that the encoders of Joints~5 and~6 were not properly connected to the regulated $5\,\text{V}$ power supply. The improper power connection caused voltage instability, leading to fluctuating encoder signals and unreliable position measurements.
+
+After correcting the power supply connections and ensuring proper grounding, the encoder signals became stable and consistent. This correction restored accurate joint position feedback, significantly improving the reliability of the kinematic calculations and overall motion control performance of the robot.
+
+
 \section{Cartesian Calibration of the AR4 Collaborative Robot}
+
 \thispagestyle{fancy}
 \vspace*{0cm} % move text up to start near top of page
 \label{sec:ar4_calibration}
