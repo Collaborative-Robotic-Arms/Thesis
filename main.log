@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.24)  24 JAN 2026 04:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.24)  24 JAN 2026 18:56
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -356,24 +356,24 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 ) (./main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 65.
-LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
  (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count303
@@ -430,12 +430,11 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring OFF on input line 65.
-(./main.out) (./main.out)
+Package hyperref Info: Link coloring OFF on input line 63.
 \@outlinefile=\write4
 \openout4 = `main.out'.
 
- [1
+[1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2
 
@@ -443,16 +442,17 @@ Package hyperref Info: Link coloring OFF on input line 65.
 
 ] [4
 
-] (./main.toc)
+]
+No file main.toc.
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [5
+[5
 
 
 ] (./chapters/ch1_intro.tex
 Chapter 1.
-<Figures/Logos/1.jpeg, id=111, 219.82124pt x 219.82124pt>
+<Figures/Logos/1.jpeg, id=31, 219.82124pt x 219.82124pt>
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 28.
@@ -472,88 +472,162 @@ Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 80.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
  [8]) (./chapters/ch3_sys_design.tex
 Chapter 2.
-File: Figures/Logos/1.jpeg Graphic file (type jpg)
-<use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 31.
-(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+
+LaTeX Warning: File `figures/AR4 modifications/Joint3_mods.png' not found on input line 24.
+
+
+./chapters/ch3_sys_design.tex:24: Package pdftex.def Error: File `figures/AR4 modifications/Joint3_mods.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24 ...figures/AR4 modifications/Joint3_mods.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
 [9
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 98--99
+
+LaTeX Warning: File `figures/AR4 modifications/Shaft_key.png' not found on input line 46.
+
+
+./chapters/ch3_sys_design.tex:46: Package pdftex.def Error: File `figures/AR4 modifications/Shaft_key.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.46 ...]{figures/AR4 modifications/Shaft_key.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 50.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+[10]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 75.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [11]
+
+LaTeX Warning: Reference `tab:calib_comparison' on page 12 undefined on input line 97.
+
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 142.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+[12]
+Underfull \hbox (badness 10000) in paragraph at lines 165--166
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 167--168
 
  []
 
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 100.
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 169.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
+[13]
 
- []
+LaTeX Warning: Reference `fig:xy_error_before' on page 14 undefined on input line 169.
 
-<Figures/Calibration/Poly_corrections.png, id=157, 578.16pt x 433.62pt>
+<Figures/Calibration/Poly_corrections.png, id=109, 578.16pt x 433.62pt>
 File: Figures/Calibration/Poly_corrections.png Graphic file (type png)
 <use Figures/Calibration/Poly_corrections.png>
-Package pdftex.def Info: Figures/Calibration/Poly_corrections.png  used on input line 106.
+Package pdftex.def Info: Figures/Calibration/Poly_corrections.png  used on input line 173.
 (pdftex.def)             Requested size: 386.95897pt x 290.21953pt.
-<Figures/Calibration/Poly_3D.png, id=160, 920.7198pt x 342.5598pt>
+
+LaTeX Warning: Reference `fig:poly_error_surfaces' on page 14 undefined on input line 180.
+
+<Figures/Calibration/Poly_3D.png, id=111, 920.7198pt x 342.5598pt>
 File: Figures/Calibration/Poly_3D.png Graphic file (type png)
 <use Figures/Calibration/Poly_3D.png>
-Package pdftex.def Info: Figures/Calibration/Poly_3D.png  used on input line 117.
+Package pdftex.def Info: Figures/Calibration/Poly_3D.png  used on input line 184.
 (pdftex.def)             Requested size: 483.69687pt x 179.9668pt.
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 121.
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 188.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[11 <./Figures/Calibration/Poly_corrections.png>]
-<Figures/Calibration/Poly_X.png, id=169, 650.43pt x 505.89pt>
+[14 <./Figures/Calibration/Poly_corrections.png>]
+
+LaTeX Warning: Reference `fig:calibrated_vs_uncalibrated_surface' on page 15 undefined on input line 189.
+
+<Figures/Calibration/Poly_X.png, id=119, 650.43pt x 505.89pt>
 File: Figures/Calibration/Poly_X.png Graphic file (type png)
 <use Figures/Calibration/Poly_X.png>
-Package pdftex.def Info: Figures/Calibration/Poly_X.png  used on input line 126.
+Package pdftex.def Info: Figures/Calibration/Poly_X.png  used on input line 193.
 (pdftex.def)             Requested size: 227.3381pt x 176.81712pt.
-<Figures/Calibration/Poly_Y.png, id=170, 650.43pt x 505.89pt>
+<Figures/Calibration/Poly_Y.png, id=120, 650.43pt x 505.89pt>
 File: Figures/Calibration/Poly_Y.png Graphic file (type png)
 <use Figures/Calibration/Poly_Y.png>
-Package pdftex.def Info: Figures/Calibration/Poly_Y.png  used on input line 127.
+Package pdftex.def Info: Figures/Calibration/Poly_Y.png  used on input line 194.
 (pdftex.def)             Requested size: 227.3381pt x 176.81712pt.
-<Figures/Calibration/Poly_Z.png, id=171, 650.43pt x 505.89pt>
+<Figures/Calibration/Poly_Z.png, id=121, 650.43pt x 505.89pt>
 File: Figures/Calibration/Poly_Z.png Graphic file (type png)
 <use Figures/Calibration/Poly_Z.png>
-Package pdftex.def Info: Figures/Calibration/Poly_Z.png  used on input line 128.
+Package pdftex.def Info: Figures/Calibration/Poly_Z.png  used on input line 195.
 (pdftex.def)             Requested size: 227.3381pt x 176.81712pt.
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 168.
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 235.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [12 <./Figures/Calibration/Poly_3D.png> <./Figures/Calibration/Poly_X.png> <./Figures/Calibration/Poly_Y.png> <./Figures/Calibration/Poly_Z.png>])
+[15 <./Figures/Calibration/Poly_3D.png> <./Figures/Calibration/Poly_X.png> <./Figures/Calibration/Poly_Y.png> <./Figures/Calibration/Poly_Z.png>]
+
+LaTeX Warning: Reference `tab:mae_results' on page 16 undefined on input line 237.
+
+
+LaTeX Warning: Reference `fig:poly_error_surfaces' on page 16 undefined on input line 237.
+
+)
 No file main.bbl.
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 212.
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 210.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[13] (./main.aux)
+[16] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 62EB6360C4E0E84E03A08658BD9DAB1B;2839.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `main.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `main.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  3038BB85558B569E8D2289AEC12DD1BC;3920.
  ) 
 Here is how much of TeX's memory you used:
- 12696 strings out of 476182
- 200146 string characters out of 5795595
+ 12745 strings out of 476182
+ 202997 string characters out of 5795595
  1936975 words of memory out of 5000000
- 34496 multiletter control sequences out of 15000+600000
- 564900 words of font info for 59 fonts, out of 8000000 for 9000
+ 34541 multiletter control sequences out of 15000+600000
+ 565068 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,21n,79p,1202b,533s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/ingy/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on main.pdf (13 pages, 828273 bytes).
+ </home/ingy/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on main.pdf (16 pages, 852775 bytes).
 PDF statistics:
- 242 PDF objects out of 1000 (max. 8388607)
- 197 compressed objects within 2 object streams
- 52 named destinations out of 1000 (max. 500000)
- 159 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 201 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
+ 61 named destinations out of 1000 (max. 500000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

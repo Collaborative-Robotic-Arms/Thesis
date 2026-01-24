@@ -6,11 +6,15 @@
 \contentsline {section}{\numberline {1.5}Key Contributions}{8}{section.1.5}%
 \contentsline {section}{\numberline {1.6}Thesis Organization}{8}{section.1.6}%
 \contentsline {chapter}{\numberline {2}System Design and Methodology}{9}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Cartesian Calibration of the AR4 Collaborative Robot}{9}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}Experimental Setup}{9}{subsection.2.1.1}%
-\contentsline {subsection}{\numberline {2.1.2}Cartesian Error Characterization}{9}{subsection.2.1.2}%
-\contentsline {subsection}{\numberline {2.1.3}Calibration Method Selection}{10}{subsection.2.1.3}%
-\contentsline {subsection}{\numberline {2.1.4}Polynomial Calibration Model}{10}{subsection.2.1.4}%
-\contentsline {subsection}{\numberline {2.1.5}Calibration Results}{10}{subsection.2.1.5}%
-\contentsline {subsection}{\numberline {2.1.6}Error Surface Analysis}{11}{subsection.2.1.6}%
-\contentsline {subsection}{\numberline {2.1.7}Quantitative Evaluation}{13}{subsection.2.1.7}%
+\contentsline {section}{\numberline {2.1}AR4 Restoration and Hardware Modifications}{9}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Joint 3 Mechanical Transmission Upgrade}{9}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Shaft Key Re-Manufacturing in Joint 3}{10}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Encoder Signal Noise in Joints 5 and 6}{11}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}Cartesian Calibration of the AR4 Collaborative Robot}{12}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Experimental Setup}{12}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Cartesian Error Characterization}{12}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Calibration Method Selection}{12}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Polynomial Calibration Model}{13}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Calibration Results}{13}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}Error Surface Analysis}{14}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.7}Quantitative Evaluation}{16}{subsection.2.2.7}%
