@@ -1,139 +1,173 @@
 \babel@toc {english}{}\relax 
-\contentsline {chapter}{\numberline {1}Introduction}{7}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Background and Motivation}{7}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Problem Statement}{7}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Project Objectives}{8}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Project Scope}{8}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Key Contributions}{9}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Thesis Organization}{9}{section.1.6}%
-\contentsline {chapter}{\numberline {2}System Design and Methodology}{10}{chapter.2}%
-\contentsline {section}{\numberline {2.1}AR4 Restoration and Hardware Modifications}{10}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}Joint 3 Mechanical Transmission Upgrade}{10}{subsection.2.1.1}%
-\contentsline {subsection}{\numberline {2.1.2}Shaft Key Re-Manufacturing in Joint 3}{10}{subsection.2.1.2}%
-\contentsline {subsection}{\numberline {2.1.3}Encoder Signal Noise in Joints 5 and 6}{11}{subsection.2.1.3}%
-\contentsline {section}{\numberline {2.2}Cartesian Calibration of the AR4 Collaborative Robot}{12}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Experimental Setup}{12}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Cartesian Error Characterization}{12}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Calibration Method Selection}{12}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Polynomial Calibration Model}{13}{subsection.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.5}Calibration Results}{13}{subsection.2.2.5}%
-\contentsline {subsection}{\numberline {2.2.6}Error Surface Analysis}{14}{subsection.2.2.6}%
-\contentsline {subsection}{\numberline {2.2.7}Quantitative Evaluation}{16}{subsection.2.2.7}%
-\contentsline {section}{\numberline {2.3}Assembly Supervisor and State Machine Control}{17}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Overview}{17}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Supervisor Architecture and Responsibilities}{17}{subsection.2.3.2}%
-\contentsline {subsubsection}{High-Level Architecture}{17}{subsubsection*.10}%
-\contentsline {subsubsection}{Execution Model and Threading}{17}{subsubsection*.11}%
-\contentsline {subsection}{\numberline {2.3.3}ROS 2 Communication: Services and Actions}{18}{subsection.2.3.3}%
-\contentsline {subsubsection}{Service Clients}{18}{subsubsection*.13}%
-\contentsline {subsubsection}{Action Clients}{18}{subsubsection*.14}%
-\contentsline {subsubsection}{Communication Flow Diagram}{19}{subsubsection*.15}%
-\contentsline {subsection}{\numberline {2.3.4}Transform (TF2) Management and Coordinate Frames}{19}{subsection.2.3.4}%
-\contentsline {subsubsection}{Coordinate Frame Hierarchy}{19}{subsubsection*.17}%
-\contentsline {subsubsection}{Transform Pipeline}{20}{subsubsection*.18}%
-\contentsline {subsubsection}{Transform Implementation Details}{20}{subsubsection*.19}%
-\contentsline {subsection}{\numberline {2.3.5}Detailed State Machine Analysis}{21}{subsection.2.3.5}%
-\contentsline {subsubsection}{State Machine Overview}{21}{subsubsection*.21}%
-\contentsline {subsubsection}{State 1: INIT (Initialization)}{21}{subsubsection*.23}%
-\contentsline {paragraph}{Purpose}{21}{paragraph*.24}%
-\contentsline {paragraph}{Execution Logic}{21}{paragraph*.25}%
-\contentsline {paragraph}{Error Handling}{22}{paragraph*.26}%
-\contentsline {paragraph}{Transition}{22}{paragraph*.27}%
-\contentsline {subsubsection}{State 2: DETECT (Global Perception)}{22}{subsubsection*.28}%
-\contentsline {paragraph}{Purpose}{22}{paragraph*.29}%
-\contentsline {paragraph}{Execution Logic}{22}{paragraph*.30}%
-\contentsline {paragraph}{Pose Validation}{22}{paragraph*.31}%
-\contentsline {paragraph}{Transition}{23}{paragraph*.32}%
-\contentsline {subsubsection}{State 3: PROCESS\_NEXT (Task Dequeue)}{23}{subsubsection*.33}%
-\contentsline {paragraph}{Purpose}{23}{paragraph*.34}%
-\contentsline {paragraph}{Execution Logic}{23}{paragraph*.35}%
-\contentsline {paragraph}{Transition}{23}{paragraph*.36}%
-\contentsline {subsubsection}{State 4: GRASP\_PIPELINE (Grasp Inference)}{23}{subsubsection*.37}%
-\contentsline {paragraph}{Purpose}{23}{paragraph*.38}%
-\contentsline {paragraph}{Execution Logic}{23}{paragraph*.39}%
-\contentsline {paragraph}{Grasp Point Structure}{24}{paragraph*.40}%
-\contentsline {paragraph}{Arm Allocation Logic}{24}{paragraph*.41}%
-\contentsline {paragraph}{Transition}{24}{paragraph*.42}%
-\contentsline {subsubsection}{State 5: EXECUTE\_AR4\_DIRECT (AR4 Pick and Place)}{24}{subsubsection*.43}%
-\contentsline {paragraph}{Purpose}{24}{paragraph*.44}%
-\contentsline {paragraph}{Sub-Step A: Approach with Offset}{24}{paragraph*.45}%
-\contentsline {paragraph}{Sub-Step B: Visual Servoing (IBVS)}{25}{paragraph*.46}%
-\contentsline {paragraph}{Sub-Step C: Grasp and Retract}{25}{paragraph*.47}%
-\contentsline {paragraph}{Transition}{25}{paragraph*.48}%
-\contentsline {subsubsection}{State 6: AR4\_PLACE\_ON\_GRID (AR4 Placement)}{25}{subsubsection*.49}%
-\contentsline {paragraph}{Purpose}{25}{paragraph*.50}%
-\contentsline {paragraph}{Execution Logic}{25}{paragraph*.51}%
-\contentsline {paragraph}{Transition}{25}{paragraph*.52}%
-\contentsline {subsubsection}{State 7: EXECUTE\_ABB\_PICK (ABB Grasping)}{26}{subsubsection*.53}%
-\contentsline {paragraph}{Purpose}{26}{paragraph*.54}%
-\contentsline {paragraph}{Execution Logic}{26}{paragraph*.55}%
-\contentsline {paragraph}{Transition}{26}{paragraph*.56}%
-\contentsline {subsubsection}{State 8: EXECUTE\_ABB\_PLACE (ABB Placement)}{26}{subsubsection*.57}%
-\contentsline {paragraph}{Purpose}{26}{paragraph*.58}%
-\contentsline {paragraph}{Execution Logic}{26}{paragraph*.59}%
-\contentsline {paragraph}{Transition}{26}{paragraph*.60}%
-\contentsline {subsubsection}{State 9: HANDOVER\_SEQUENCE (Handover Initiation)}{26}{subsubsection*.61}%
-\contentsline {paragraph}{Purpose}{26}{paragraph*.62}%
-\contentsline {paragraph}{Execution Logic}{27}{paragraph*.63}%
-\contentsline {paragraph}{Transition}{27}{paragraph*.64}%
-\contentsline {subsubsection}{State 10: AR4\_PICK\_FOR\_HANDOVER (AR4 Grasping for Transfer)}{27}{subsubsection*.65}%
-\contentsline {paragraph}{Purpose}{27}{paragraph*.66}%
-\contentsline {paragraph}{Execution Logic}{27}{paragraph*.67}%
-\contentsline {paragraph}{Transition}{27}{paragraph*.68}%
-\contentsline {subsubsection}{State 11: HANDOVER\_EXECUTION (Coordinated Transfer)}{27}{subsubsection*.69}%
-\contentsline {paragraph}{Purpose}{27}{paragraph*.70}%
-\contentsline {paragraph}{Step 1: AR4 Move to Handover Zone}{27}{paragraph*.71}%
-\contentsline {paragraph}{Step 2: ABB Approach and Grasp}{27}{paragraph*.72}%
-\contentsline {paragraph}{Step 3: AR4 Release}{28}{paragraph*.73}%
-\contentsline {paragraph}{Transition}{28}{paragraph*.74}%
-\contentsline {paragraph}{Handover Synchronization Considerations}{28}{paragraph*.75}%
-\contentsline {subsubsection}{State 12: DONE (Completion)}{28}{subsubsection*.76}%
-\contentsline {paragraph}{Purpose}{28}{paragraph*.77}%
-\contentsline {paragraph}{Execution Logic}{28}{paragraph*.78}%
-\contentsline {paragraph}{Transition}{28}{paragraph*.79}%
-\contentsline {subsection}{\numberline {2.3.6}Error Handling and Recovery}{29}{subsection.2.3.6}%
-\contentsline {subsubsection}{Service Availability Checking}{29}{subsubsection*.80}%
-\contentsline {subsubsection}{Action Goal Failure}{29}{subsubsection*.81}%
-\contentsline {subsubsection}{Transform Lookup Failures}{29}{subsubsection*.82}%
-\contentsline {subsubsection}{Grasp Pipeline Failures}{29}{subsubsection*.83}%
-\contentsline {subsubsection}{Robot Timeout}{30}{subsubsection*.84}%
-\contentsline {subsection}{\numberline {2.3.7}Concurrency and Threading Model}{30}{subsection.2.3.7}%
-\contentsline {subsubsection}{ReentrantCallbackGroup}{30}{subsubsection*.85}%
-\contentsline {subsubsection}{MultiThreadedExecutor}{30}{subsubsection*.86}%
-\contentsline {subsubsection}{Potential Race Conditions}{30}{subsubsection*.87}%
-\contentsline {subsection}{\numberline {2.3.8}State Machine Timing and Scheduling}{30}{subsection.2.3.8}%
-\contentsline {subsubsection}{Timer Management}{30}{subsubsection*.88}%
-\contentsline {subsubsection}{Async/Await Pattern}{31}{subsubsection*.89}%
-\contentsline {subsection}{\numberline {2.3.9}Hardware and Sensor Integration}{31}{subsection.2.3.9}%
-\contentsline {subsubsection}{Robotic Arms}{31}{subsubsection*.90}%
-\contentsline {paragraph}{ABB Robot}{31}{paragraph*.91}%
-\contentsline {paragraph}{AR4 Robot}{31}{paragraph*.92}%
-\contentsline {subsubsection}{Cameras and Perception}{32}{subsubsection*.93}%
-\contentsline {paragraph}{Intel RealSense D435i (Global Perception)}{32}{paragraph*.94}%
-\contentsline {paragraph}{ESP32-CAM (Eye-in-Hand Perception)}{32}{paragraph*.95}%
-\contentsline {subsection}{\numberline {2.3.10}Data Flow and Message Passing}{32}{subsection.2.3.10}%
-\contentsline {subsubsection}{Brick Representation}{32}{subsubsection*.96}%
-\contentsline {subsubsection}{Grasp Point Representation}{32}{subsubsection*.97}%
-\contentsline {subsection}{\numberline {2.3.11}Debugging and Logging}{33}{subsection.2.3.11}%
-\contentsline {subsubsection}{Log Levels}{33}{subsubsection*.98}%
-\contentsline {subsubsection}{State Machine Monitoring}{33}{subsubsection*.99}%
-\contentsline {subsection}{\numberline {2.3.12}Summary}{33}{subsection.2.3.12}%
-\contentsline {section}{\numberline {2.4}Introduction}{34}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Literature Review}{34}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Visual Servo Control Foundations}{34}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}The Pinhole Camera Model}{34}{subsection.2.5.2}%
-\contentsline {subsection}{\numberline {2.5.3}The Pinhole Camera Model}{35}{subsection.2.5.3}%
-\contentsline {subsection}{\numberline {2.5.4}Position-Based Visual Servo (PBVS)}{35}{subsection.2.5.4}%
-\contentsline {subsubsection}{Kinematic Error Function and Control Law}{36}{subsubsection*.101}%
-\contentsline {subsection}{\numberline {2.5.5}Image-Based Visual Servo (IBVS)}{36}{subsection.2.5.5}%
-\contentsline {subsubsection}{The Image Jacobian (Interaction Matrix)}{36}{subsubsection*.102}%
-\contentsline {subsubsection}{Advanced IBVS and Refined Frameworks}{36}{subsubsection*.103}%
-\contentsline {subsection}{\numberline {2.5.6}Comparative Analysis: IBVS vs. PBVS}{37}{subsection.2.5.6}%
-\contentsline {subsection}{\numberline {2.5.7}Homography-Based Euclidean Reconstruction}{37}{subsection.2.5.7}%
-\contentsline {section}{\numberline {2.6}General Concept and Control Flow}{38}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Implementation Details}{39}{section.2.7}%
-\contentsline {subsection}{\numberline {2.7.1}Local Perception and Depth Estimation}{39}{subsection.2.7.1}%
-\contentsline {subsection}{\numberline {2.7.2}Global Perception and Homography Matrix Calculation}{40}{subsection.2.7.2}%
-\contentsline {subsection}{\numberline {2.7.3}Transformation Logic}{40}{subsection.2.7.3}%
-\contentsline {subsection}{\numberline {2.7.4}Control Logic and Feature Generation}{40}{subsection.2.7.4}%
-\contentsline {section}{\numberline {2.8}Results and Evaluation}{41}{section.2.8}%
+\contentsline {chapter}{\numberline {1}Introduction}{8}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Background and Motivation}{8}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Problem Statement}{8}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Project Objectives}{9}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Project Scope}{9}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Key Contributions}{10}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Thesis Organization}{10}{section.1.6}%
+\contentsline {chapter}{\numberline {2}System Design and Methodology}{11}{chapter.2}%
+\contentsline {section}{\numberline {2.1}System Overview}{11}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}System Architecture Overview}{11}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Layer 1: High-Level User Interface (GUI) Layer}{11}{subsection.2.1.2}%
+\contentsline {subsubsection}{Overview and Purpose}{11}{subsubsection*.3}%
+\contentsline {subsubsection}{Key Components}{12}{subsubsection*.4}%
+\contentsline {subsubsection}{Implementation Details}{12}{subsubsection*.5}%
+\contentsline {subsection}{\numberline {2.1.3}Layer 2: Supervisor Layer}{13}{subsection.2.1.3}%
+\contentsline {subsubsection}{Overview and Purpose}{13}{subsubsection*.6}%
+\contentsline {subsubsection}{Key Responsibilities}{14}{subsubsection*.7}%
+\contentsline {subsubsection}{Implementation Details}{15}{subsubsection*.8}%
+\contentsline {subsection}{\numberline {2.1.4}Layer 3: Mid-Level Execution Layer (ROS Modules)}{16}{subsection.2.1.4}%
+\contentsline {subsubsection}{3.1 Control Module}{16}{subsubsection*.9}%
+\contentsline {subsubsection}{3.2 Planning Module}{17}{subsubsection*.10}%
+\contentsline {subsubsection}{3.3 Perception Module}{19}{subsubsection*.11}%
+\contentsline {subsection}{\numberline {2.1.5}Layer 4: Low-Level Hardware Abstraction Layer}{20}{subsection.2.1.5}%
+\contentsline {subsubsection}{Overview and Purpose}{20}{subsubsection*.12}%
+\contentsline {subsubsection}{Key Components}{20}{subsubsection*.13}%
+\contentsline {subsubsection}{Implementation Details}{21}{subsubsection*.14}%
+\contentsline {subsection}{\numberline {2.1.6}Layer 5: Physical Hardware Layer}{22}{subsection.2.1.6}%
+\contentsline {subsubsection}{Overview}{22}{subsubsection*.15}%
+\contentsline {subsubsection}{Key Hardware Components}{22}{subsubsection*.16}%
+\contentsline {subsection}{\numberline {2.1.7}Cross-Layer Communication and Data Flow}{23}{subsection.2.1.7}%
+\contentsline {subsubsection}{Top-Down Command Flow}{23}{subsubsection*.17}%
+\contentsline {subsubsection}{Bottom-Up Feedback Flow}{23}{subsubsection*.18}%
+\contentsline {subsubsection}{Lateral Communication}{23}{subsubsection*.19}%
+\contentsline {subsection}{\numberline {2.1.8}Synchronization and Timing}{24}{subsection.2.1.8}%
+\contentsline {subsection}{\numberline {2.1.9}Simulation Environment}{24}{subsection.2.1.9}%
+\contentsline {subsection}{\numberline {2.1.10}System Properties and Design Considerations}{24}{subsection.2.1.10}%
+\contentsline {subsubsection}{Modularity and Extensibility}{24}{subsubsection*.20}%
+\contentsline {subsubsection}{Robustness and Fault Tolerance}{24}{subsubsection*.21}%
+\contentsline {subsubsection}{Safety}{25}{subsubsection*.22}%
+\contentsline {subsubsection}{Scalability}{25}{subsubsection*.23}%
+\contentsline {section}{\numberline {2.2}AR4 Restoration and Hardware Modifications}{25}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Joint 3 Mechanical Transmission Upgrade}{25}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Shaft Key Re-Manufacturing in Joint 3}{26}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Encoder Signal Noise in 5th and 6th joint}{26}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Joint 1 Backlash Due to Missing Fasteners}{26}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Summary}{27}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Cartesian Calibration of the AR4 Collaborative Robot}{28}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Experimental Setup}{28}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Cartesian Error Characterization}{28}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Calibration Method Selection}{28}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Polynomial Calibration Model}{29}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Calibration Results}{29}{subsection.2.3.5}%
+\contentsline {subsection}{\numberline {2.3.6}Error Surface Analysis}{30}{subsection.2.3.6}%
+\contentsline {subsection}{\numberline {2.3.7}Quantitative Evaluation}{32}{subsection.2.3.7}%
+\contentsline {section}{\numberline {2.4}Assembly Supervisor and State Machine Control}{33}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Overview}{33}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Supervisor Architecture and Responsibilities}{33}{subsection.2.4.2}%
+\contentsline {subsubsection}{High-Level Architecture}{33}{subsubsection*.31}%
+\contentsline {subsubsection}{Execution Model and Threading}{33}{subsubsection*.32}%
+\contentsline {subsection}{\numberline {2.4.3}ROS 2 Communication: Services and Actions}{34}{subsection.2.4.3}%
+\contentsline {subsubsection}{Service Clients}{34}{subsubsection*.34}%
+\contentsline {subsubsection}{Action Clients}{34}{subsubsection*.35}%
+\contentsline {subsubsection}{Communication Flow Diagram}{35}{subsubsection*.36}%
+\contentsline {subsection}{\numberline {2.4.4}Transform (TF2) Management and Coordinate Frames}{35}{subsection.2.4.4}%
+\contentsline {subsubsection}{Coordinate Frame Hierarchy}{35}{subsubsection*.38}%
+\contentsline {subsubsection}{Transform Pipeline}{36}{subsubsection*.39}%
+\contentsline {subsubsection}{Transform Implementation Details}{36}{subsubsection*.40}%
+\contentsline {subsection}{\numberline {2.4.5}Detailed State Machine Analysis}{37}{subsection.2.4.5}%
+\contentsline {subsubsection}{State Machine Overview}{37}{subsubsection*.42}%
+\contentsline {subsubsection}{State 1: INIT (Initialization)}{37}{subsubsection*.44}%
+\contentsline {paragraph}{Purpose}{37}{paragraph*.45}%
+\contentsline {paragraph}{Execution Logic}{37}{paragraph*.46}%
+\contentsline {paragraph}{Error Handling}{38}{paragraph*.47}%
+\contentsline {paragraph}{Transition}{38}{paragraph*.48}%
+\contentsline {subsubsection}{State 2: DETECT (Global Perception)}{38}{subsubsection*.49}%
+\contentsline {paragraph}{Purpose}{38}{paragraph*.50}%
+\contentsline {paragraph}{Execution Logic}{38}{paragraph*.51}%
+\contentsline {paragraph}{Pose Validation}{38}{paragraph*.52}%
+\contentsline {paragraph}{Transition}{39}{paragraph*.53}%
+\contentsline {subsubsection}{State 3: PROCESS\_NEXT (Task Dequeue)}{39}{subsubsection*.54}%
+\contentsline {paragraph}{Purpose}{39}{paragraph*.55}%
+\contentsline {paragraph}{Execution Logic}{39}{paragraph*.56}%
+\contentsline {paragraph}{Transition}{39}{paragraph*.57}%
+\contentsline {subsubsection}{State 4: GRASP\_PIPELINE (Grasp Inference)}{39}{subsubsection*.58}%
+\contentsline {paragraph}{Purpose}{39}{paragraph*.59}%
+\contentsline {paragraph}{Execution Logic}{39}{paragraph*.60}%
+\contentsline {paragraph}{Grasp Point Structure}{40}{paragraph*.61}%
+\contentsline {paragraph}{Arm Allocation Logic}{40}{paragraph*.62}%
+\contentsline {paragraph}{Transition}{40}{paragraph*.63}%
+\contentsline {subsubsection}{State 5: EXECUTE\_AR4\_DIRECT (AR4 Pick and Place)}{40}{subsubsection*.64}%
+\contentsline {paragraph}{Purpose}{40}{paragraph*.65}%
+\contentsline {paragraph}{Sub-Step A: Approach with Offset}{40}{paragraph*.66}%
+\contentsline {paragraph}{Sub-Step B: Visual Servoing (IBVS)}{41}{paragraph*.67}%
+\contentsline {paragraph}{Sub-Step C: Grasp and Retract}{41}{paragraph*.68}%
+\contentsline {paragraph}{Transition}{41}{paragraph*.69}%
+\contentsline {subsubsection}{State 6: AR4\_PLACE\_ON\_GRID (AR4 Placement)}{41}{subsubsection*.70}%
+\contentsline {paragraph}{Purpose}{41}{paragraph*.71}%
+\contentsline {paragraph}{Execution Logic}{41}{paragraph*.72}%
+\contentsline {paragraph}{Transition}{41}{paragraph*.73}%
+\contentsline {subsubsection}{State 7: EXECUTE\_ABB\_PICK (ABB Grasping)}{42}{subsubsection*.74}%
+\contentsline {paragraph}{Purpose}{42}{paragraph*.75}%
+\contentsline {paragraph}{Execution Logic}{42}{paragraph*.76}%
+\contentsline {paragraph}{Transition}{42}{paragraph*.77}%
+\contentsline {subsubsection}{State 8: EXECUTE\_ABB\_PLACE (ABB Placement)}{42}{subsubsection*.78}%
+\contentsline {paragraph}{Purpose}{42}{paragraph*.79}%
+\contentsline {paragraph}{Execution Logic}{42}{paragraph*.80}%
+\contentsline {paragraph}{Transition}{42}{paragraph*.81}%
+\contentsline {subsubsection}{State 9: HANDOVER\_SEQUENCE (Handover Initiation)}{42}{subsubsection*.82}%
+\contentsline {paragraph}{Purpose}{42}{paragraph*.83}%
+\contentsline {paragraph}{Execution Logic}{43}{paragraph*.84}%
+\contentsline {paragraph}{Transition}{43}{paragraph*.85}%
+\contentsline {subsubsection}{State 10: AR4\_PICK\_FOR\_HANDOVER (AR4 Grasping for Transfer)}{43}{subsubsection*.86}%
+\contentsline {paragraph}{Purpose}{43}{paragraph*.87}%
+\contentsline {paragraph}{Execution Logic}{43}{paragraph*.88}%
+\contentsline {paragraph}{Transition}{43}{paragraph*.89}%
+\contentsline {subsubsection}{State 11: HANDOVER\_EXECUTION (Coordinated Transfer)}{43}{subsubsection*.90}%
+\contentsline {paragraph}{Purpose}{43}{paragraph*.91}%
+\contentsline {paragraph}{Step 1: AR4 Move to Handover Zone}{43}{paragraph*.92}%
+\contentsline {paragraph}{Step 2: ABB Approach and Grasp}{43}{paragraph*.93}%
+\contentsline {paragraph}{Step 3: AR4 Release}{44}{paragraph*.94}%
+\contentsline {paragraph}{Transition}{44}{paragraph*.95}%
+\contentsline {paragraph}{Handover Synchronization Considerations}{44}{paragraph*.96}%
+\contentsline {subsubsection}{State 12: DONE (Completion)}{44}{subsubsection*.97}%
+\contentsline {paragraph}{Purpose}{44}{paragraph*.98}%
+\contentsline {paragraph}{Execution Logic}{44}{paragraph*.99}%
+\contentsline {paragraph}{Transition}{44}{paragraph*.100}%
+\contentsline {subsection}{\numberline {2.4.6}Error Handling and Recovery}{45}{subsection.2.4.6}%
+\contentsline {subsubsection}{Service Availability Checking}{45}{subsubsection*.101}%
+\contentsline {subsubsection}{Action Goal Failure}{45}{subsubsection*.102}%
+\contentsline {subsubsection}{Transform Lookup Failures}{45}{subsubsection*.103}%
+\contentsline {subsubsection}{Grasp Pipeline Failures}{45}{subsubsection*.104}%
+\contentsline {subsubsection}{Robot Timeout}{46}{subsubsection*.105}%
+\contentsline {subsection}{\numberline {2.4.7}Concurrency and Threading Model}{46}{subsection.2.4.7}%
+\contentsline {subsubsection}{ReentrantCallbackGroup}{46}{subsubsection*.106}%
+\contentsline {subsubsection}{MultiThreadedExecutor}{46}{subsubsection*.107}%
+\contentsline {subsubsection}{Potential Race Conditions}{46}{subsubsection*.108}%
+\contentsline {subsection}{\numberline {2.4.8}State Machine Timing and Scheduling}{46}{subsection.2.4.8}%
+\contentsline {subsubsection}{Timer Management}{46}{subsubsection*.109}%
+\contentsline {subsubsection}{Async/Await Pattern}{47}{subsubsection*.110}%
+\contentsline {subsection}{\numberline {2.4.9}Hardware and Sensor Integration}{47}{subsection.2.4.9}%
+\contentsline {subsubsection}{Robotic Arms}{47}{subsubsection*.111}%
+\contentsline {paragraph}{ABB Robot}{47}{paragraph*.112}%
+\contentsline {paragraph}{AR4 Robot}{47}{paragraph*.113}%
+\contentsline {subsubsection}{Cameras and Perception}{48}{subsubsection*.114}%
+\contentsline {paragraph}{Intel RealSense D435i (Global Perception)}{48}{paragraph*.115}%
+\contentsline {paragraph}{ESP32-CAM (Eye-in-Hand Perception)}{48}{paragraph*.116}%
+\contentsline {subsection}{\numberline {2.4.10}Data Flow and Message Passing}{48}{subsection.2.4.10}%
+\contentsline {subsubsection}{Brick Representation}{48}{subsubsection*.117}%
+\contentsline {subsubsection}{Grasp Point Representation}{48}{subsubsection*.118}%
+\contentsline {subsection}{\numberline {2.4.11}Debugging and Logging}{49}{subsection.2.4.11}%
+\contentsline {subsubsection}{Log Levels}{49}{subsubsection*.119}%
+\contentsline {subsubsection}{State Machine Monitoring}{49}{subsubsection*.120}%
+\contentsline {subsection}{\numberline {2.4.12}Summary}{49}{subsection.2.4.12}%
+\contentsline {section}{\numberline {2.5}Introduction}{50}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Literature Review}{50}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}Visual Servo Control Foundations}{50}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.2}The Pinhole Camera Model}{50}{subsection.2.6.2}%
+\contentsline {subsection}{\numberline {2.6.3}The Pinhole Camera Model}{51}{subsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.6.4}Position-Based Visual Servo (PBVS)}{51}{subsection.2.6.4}%
+\contentsline {subsubsection}{Kinematic Error Function and Control Law}{52}{subsubsection*.122}%
+\contentsline {subsection}{\numberline {2.6.5}Image-Based Visual Servo (IBVS)}{52}{subsection.2.6.5}%
+\contentsline {subsubsection}{The Image Jacobian (Interaction Matrix)}{52}{subsubsection*.123}%
+\contentsline {subsubsection}{Advanced IBVS and Refined Frameworks}{52}{subsubsection*.124}%
+\contentsline {subsection}{\numberline {2.6.6}Comparative Analysis: IBVS vs. PBVS}{53}{subsection.2.6.6}%
+\contentsline {subsection}{\numberline {2.6.7}Homography-Based Euclidean Reconstruction}{53}{subsection.2.6.7}%
+\contentsline {section}{\numberline {2.7}General Concept and Control Flow}{54}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Implementation Details}{55}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}Local Perception and Depth Estimation}{55}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.2}Global Perception and Homography Matrix Calculation}{56}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.3}Transformation Logic}{56}{subsection.2.8.3}%
+\contentsline {subsection}{\numberline {2.8.4}Control Logic and Feature Generation}{56}{subsection.2.8.4}%
+\contentsline {section}{\numberline {2.9}Results and Evaluation}{57}{section.2.9}%
