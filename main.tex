@@ -19,6 +19,9 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb} 
 \usepackage{cite}
+\usepackage{wrapfig}
+
+\captionsetup{justification=centering}
 
 \titleformat{\chapter}[display] % "display" puts number and title on separate lines
   {\normalfont\huge\bfseries}   % formatting for both lines
@@ -196,7 +199,7 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 
 % ---------- CHAPTERS ----------
 \input{chapters/ch1_intro}
-% \input{chapters/ch2_literature}
+\input{chapters/chapter2/ch2_all.tex}
 \input{chapters/chapter3/ch3_all.tex}
 % \input{chapters/ch4_methodology}
 % \input{chapters/ch5_results}
@@ -209,5 +212,6 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 % ---------- APPENDICES ----------
 \appendix
 % \input{appendices/appA_calibration}
+\input{references}
 
 \end{document}

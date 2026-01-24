@@ -1,0 +1,29 @@
+\section{Multi-Robot Collaborative Assembly Systems}
+
+Multi-robot collaborative assembly systems aim to distribute manipulation tasks across multiple robotic agents operating within a shared workspace. Unlike single-robot systems, collaborative assembly requires explicit handling of task sequencing, workspace overlap, and inter-robot dependencies, particularly when objects are transferred between robots during execution.
+
+From a system architecture perspective, collaborative assembly systems are commonly categorized into centralized and hierarchical control structures. Centralized architectures maintain a global world model and task scheduler, enabling consistent decision-making and simplified synchronization at the cost of scalability and fault tolerance. Hierarchical architectures mitigate these limitations by separating high-level task coordination from low-level robot control, allowing individual robots to execute assigned subtasks autonomously while remaining synchronized through a supervisory layer \cite{gerkey2004formal}.
+
+In assembly scenarios, collaboration often follows a sequential manipulation paradigm, where robots perform complementary subtasks such as grasping, transporting, aligning, and placing components. This requires explicit modeling of intermediate object states to ensure that downstream actions are executed on well-defined object poses. Failure to manage these intermediate states can result in accumulated pose uncertainty, leading to misalignment during assembly operations \cite{siciliano2016handbook}.
+
+Recent systems increasingly rely on vision-based perception to reduce dependency on precise mechanical fixturing. Global perception modules are typically used for task allocation and coarse motion planning, while local perception refines object pose estimation during grasping and placement. This layered perception approach improves robustness in semi-structured environments and is particularly suitable for flexible table-top assembly setups.
+
+\section{Task Allocation and Coordination in Multi-Robot Systems}
+
+Task allocation in multi-robot systems is commonly formulated as the Multi-Robot Task Allocation (MRTA) problem, where tasks must be assigned to robots while optimizing performance metrics such as execution time or resource utilization. In collaborative manipulation and assembly, MRTA is further constrained by spatial reachability, task ordering, and object dependencies, rendering static allocation strategies insufficient \cite{gerkey2004formal}.
+
+Optimization-based task allocation methods, including mixed-integer linear programming, can yield globally optimal solutions but are computationally expensive and unsuitable for online execution in dynamic environments. Consequently, many practical systems adopt rule-based or hybrid allocation approaches, where tasks are assigned based on robot capabilities, workspace partitioning, and current system state. These methods prioritize real-time responsiveness and robustness over strict optimality.
+
+Coordination mechanisms ensure safe and consistent execution of allocated tasks. Common approaches include event-driven control, supervisory state machines, and behavior-based coordination. State-machine-based coordination is particularly effective in assembly systems, as it provides deterministic transitions, explicit synchronization points, and well-defined recovery behaviors. These properties simplify debugging and validation, which are critical in experimental and industrial robotic systems \cite{kruger2010learning}.
+
+In systems involving shared object manipulation, coordination must also enforce exclusive control over objects during execution. Grasp and release actions are often treated as synchronization events that trigger state transitions, preventing simultaneous conflicting actions by multiple robots.
+
+\section{Robot-to-Robot Handover in Collaborative Manipulation}
+
+Robot-to-robot handover is a critical operation in collaborative manipulation systems, enabling the transfer of objects between robots without external support. Technically, handover requires precise coordination of object pose estimation, timing, and control authority, as both robots may simultaneously influence the object during the transfer phase \cite{desantis2008atlas}.
+
+Handover strategies are commonly classified into predefined and adaptive approaches. Predefined handover strategies utilize fixed handover poses within the overlapping workspace of the robots, simplifying motion planning but requiring accurate calibration and repeatability. Adaptive handover strategies incorporate real-time perception feedback to adjust the handover pose dynamically, improving robustness under uncertainty at the cost of increased system complexity.
+
+Vision-based perception is central to modern handover systems, particularly in setups where force or tactile sensing is unavailable. Vision-only handover typically follows a structured execution sequence consisting of approach, alignment, grasp synchronization, transfer, and disengagement states. These states are naturally represented within a state-machine framework, allowing explicit synchronization between robots and clear handling of failure conditions \cite{siciliano2016handbook}.
+
+From a system integration perspective, handover operations are often implemented as extensions of standard pick-and-place pipelines. Treating handover as a conditional placement followed by a secondary pick enables reuse of perception and control modules, simplifying system design and verification.

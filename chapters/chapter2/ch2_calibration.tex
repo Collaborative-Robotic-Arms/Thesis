@@ -1,0 +1,34 @@
+\section{Calibration in Robotic Systems}
+
+Calibration in robotic systems is essential to link sensed coordinates to accurate robot motion. Without proper calibration, even precise robots can accumulate errors in end-effector positioning, leading to reduced task performance and unreliable manipulation. Calibration can address both the robot's position correction through data-driven mappings and the estimation of camera-to-world transformations for accurate pose estimation. The section below discusses kinematic calibration, data-driven approaches, camera calibration, hand–eye calibration, and error evaluation metrics.
+
+\subsection{Kinematic Calibration vs. Data-Driven Correction}
+
+Kinematic calibration involves correcting the robot’s geometric model to reduce errors in predicted end-effector positions. Traditional methods use the robot’s nominal Denavit–Hartenberg (DH) parameters and adjust them based on measured deviations across the workspace \cite{Hutchinson1996}. These adjustments compensate for systematic errors such as joint offsets, link length deviations, or misalignments.  
+
+In contrast, data-driven approaches do not rely solely on an analytical kinematic model. Instead, they map observed sensor readings to corrected positions using statistical or machine learning techniques, such as:
+\begin{itemize}
+    \item \textbf{Lookup tables:} Direct mapping between measured and actual positions at discrete points.
+    \item \textbf{Regression models:} Polynomial or linear regression to approximate the error function across the workspace.
+    \item \textbf{Radial Basis Function (RBF) networks:} Interpolative models that capture nonlinear deviations with high accuracy.
+\end{itemize}
+
+Data-driven methods are particularly effective when the robot exhibits complex, nonlinear errors that are difficult to model analytically \cite{kruger2010learning}.
+
+\subsection{Camera Calibration and Hand–Eye Calibration}
+
+Camera calibration determines both the intrinsic parameters (focal length, principal point, lens distortion) and extrinsic parameters (pose relative to the robot or world frame). Accurate calibration is critical for vision-based tasks, ensuring that detected objects’ positions are correctly mapped to the robot’s coordinate system.  
+
+Hand–eye calibration further defines the rigid transformation between a camera mounted on the robot’s end-effector and the robot base frame. This transformation is fundamental for visual servoing and precision pick-and-place tasks, allowing the robot to align its manipulator with the sensed target. Classical formulations involve solving the $AX = XB$ problem to estimate the unknown transformation $X$ \cite{Fang2002, Parisa2016}.
+
+\subsection{Workspace Mapping and Error Metrics}
+
+Once kinematic and camera calibrations are established, mapping the entire workspace ensures that positional accuracy is maintained across all reachable locations. Key metrics for evaluating calibration performance include:
+\begin{itemize}
+    \item \textbf{Root Mean Square Error (RMSE):} Measures the average deviation between expected and actual end-effector positions.
+    \item \textbf{Repeatability:} Quantifies how consistently the robot can reach the same position under repeated commands.
+    \item \textbf{Systematic bias:} Identifies persistent offsets across the workspace.
+    \item \textbf{Generalization:} Evaluates how well calibration models perform at unmeasured positions.
+\end{itemize}
+
+Effective calibration combines both kinematic and data-driven corrections with vision-based transformations to achieve high-precision and repeatable robotic manipulation \cite{Bai2023, MDPI2023}.

@@ -95,18 +95,43 @@ This correction strategy enables feedforward compensation of systematic position
 
 \subsection{Calibration Results}
 
-Based on the experimental results, all evaluated calibration approaches significantly reduced the Cartesian positioning error when compared to the uncalibrated model. Among the tested methods, the linear model exhibited the highest residual error due to its inability to capture nonlinear kinematic and geometric effects. Radial Basis Function (RBF) networks achieved the lowest mean positioning error, demonstrating superior interpolation accuracy within the calibrated workspace. However, their locally adaptive nature resulted in less predictable behavior near the workspace boundaries and outside the training region. \\
+Based on the experimental results, all evaluated calibration approaches significantly reduced the Cartesian positioning error compared to the uncalibrated model. Among the tested methods, the linear (affine) model exhibited the highest residual error due to its inability to capture nonlinear kinematic and geometric effects. Radial Basis Function (RBF) networks achieved the lowest mean positioning error, demonstrating superior interpolation accuracy within the calibrated workspace. However, their locally adaptive nature resulted in less predictable behavior near the workspace boundaries and outside the training region. The second-degree polynomial model produced slightly higher errors than the RBF-based approach, yet these errors remained within acceptable limits for the intended application. In contrast to RBF and spline-based methods, the polynomial model exhibited smoother and more stable behavior near workspace boundaries, while maintaining low computational cost and consistent real-time performance.
 
-The second-degree polynomial model produced slightly higher errors than the RBF-based approach, yet these errors remained within acceptable limits for the intended application. In contrast to RBF and spline-based methods, the polynomial model exhibited smoother and more stable behavior near workspace boundaries, while maintaining low computational cost and consistent real-time performance. \\
-
-Figure~\ref{fig:xy_error_before} illustrates a comparison between the commanded, measured, and polynomial-corrected end-effector positions in the XY plane. The deviation between the commanded and measured positions highlights the presence of systematic Cartesian positioning errors in the AR4 robot, while the corrected positions demonstrate the effectiveness of the polynomial calibration in compensating for these errors.
+Figures~\ref{fig:affine_correction}, \ref{fig:polynomial_correction}, and \ref{fig:rbf_correction} illustrate comparisons between the commanded, measured, and corrected end-effector positions in the XY plane for the affine, polynomial, and RBF calibration methods, respectively. The deviation between the commanded and measured positions highlights the presence of systematic Cartesian positioning errors in the AR4 robot, while the corrected positions demonstrate the effectiveness of each calibration method in compensating for these errors.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Figures/chapter3/Calibration/Poly_corrections.png}
-    \caption{XY-plane commanded, measured, and corrected positions.}
-    \label{fig:xy_error_before}
+    \includegraphics[width=0.7\textwidth]{Figures/chapter3/Calibration/Affine_corrections.png} 
+    \caption{End-effector positions in XY plane after affine (linear) correction.}
+    \label{fig:affine_correction}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figures/chapter3/Calibration/Poly_corrections.png}
+    \caption{End-effector positions in XY plane after polynomial correction.}
+    \label{fig:polynomial_correction}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figures/chapter3/Calibration/RBF_correction.png}
+    \caption{End-effector positions in XY plane after RBF correction.}
+    \label{fig:rbf_correction}
+\end{figure}
+
+% Based on the experimental results, all evaluated calibration approaches significantly reduced the Cartesian positioning error when compared to the uncalibrated model. Among the tested methods, the linear model exhibited the highest residual error due to its inability to capture nonlinear kinematic and geometric effects. Radial Basis Function (RBF) networks achieved the lowest mean positioning error, demonstrating superior interpolation accuracy within the calibrated workspace. However, their locally adaptive nature resulted in less predictable behavior near the workspace boundaries and outside the training region. \\
+
+% The second-degree polynomial model produced slightly higher errors than the RBF-based approach, yet these errors remained within acceptable limits for the intended application. In contrast to RBF and spline-based methods, the polynomial model exhibited smoother and more stable behavior near workspace boundaries, while maintaining low computational cost and consistent real-time performance. \\
+
+% Figure~\ref{fig:xy_error_before} illustrates a comparison between the commanded, measured, and polynomial-corrected end-effector positions in the XY plane. The deviation between the commanded and measured positions highlights the presence of systematic Cartesian positioning errors in the AR4 robot, while the corrected positions demonstrate the effectiveness of the polynomial calibration in compensating for these errors.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{Figures/chapter3/Calibration/Poly_corrections.png}
+%     \caption{XY-plane commanded, measured, and corrected positions.}
+%     \label{fig:xy_error_before}
+% \end{figure}
 
 \subsection{Error Surface Analysis}
 
