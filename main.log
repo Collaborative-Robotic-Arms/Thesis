@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.24)  24 JAN 2026 19:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.3)  24 JAN 2026 23:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/home/ingy/Thesis/Thesis/main.tex
-(/home/ingy/Thesis/Thesis/main.tex
+**/home/mariamelsebaey/full_system/Thesis/main.tex
+(/home/mariamelsebaey/full_system/Thesis/main.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
 (/usr/share/texlive/texmf-dist/tex/latex/base/report.cls
@@ -353,22 +353,18 @@ Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
 Package: babel 2024/01/07 v24.1 The Babel package
 \babel@savecnt=\count302
 \U@D=\dimen197
-\l@unhyphenated=\language5
+\l@unhyphenated=\language89
  (/usr/share/texlive/texmf-dist/tex/generic/babel/txtbabel.def)
 \bbl@readstream=\read3
 \bbl@dirlevel=\count303
  (/usr/share/texlive/texmf-dist/tex/generic/babel-english/english.ldf
 Language: english 2017/06/06 v3.3r English support from the babel system
-Package babel Info: Hyphen rules for 'british' set to \l@english
-(babel)             (\language0). Reported on input line 82.
-Package babel Info: Hyphen rules for 'UKenglish' set to \l@english
-(babel)             (\language0). Reported on input line 83.
 Package babel Info: Hyphen rules for 'canadian' set to \l@english
 (babel)             (\language0). Reported on input line 102.
-Package babel Info: Hyphen rules for 'australian' set to \l@english
-(babel)             (\language0). Reported on input line 105.
-Package babel Info: Hyphen rules for 'newzealand' set to \l@english
-(babel)             (\language0). Reported on input line 108.
+Package babel Info: Hyphen rules for 'australian' set to \l@ukenglish
+(babel)             (\language78). Reported on input line 105.
+Package babel Info: Hyphen rules for 'newzealand' set to \l@ukenglish
+(babel)             (\language78). Reported on input line 108.
 )) (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
 Package babel Info: Importing font and identification data for english
 (babel)             from babel-en.ini. Reported on input line 11.
@@ -489,50 +485,141 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ] (./main.toc [5
 
 
-])
+]
+<Figures/Logos/1.jpeg, id=330, 219.82124pt x 219.82124pt>
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 159.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [6 <./Figures/Logos/1.jpeg>])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
-<Figures/Logos/1.jpeg, id=277, 219.82124pt x 219.82124pt>
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 195.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [6 <./Figures/Logos/1.jpeg>] (./chapters/ch1_intro.tex
+ [7] (./chapters/ch1_intro.tex
 Chapter 1.
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 27.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[7
+[8
 
 
-]
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 55.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [8]
+ [9]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 79.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [9]) (./chapters/chapter3/ch3_all.tex
+ [10]) (./chapters/chapter3/ch3_all.tex
 Chapter 2.
-(./chapters/chapter3/ch3_hardware_modifications.tex
+(./chapters/chapter3/ch3_system_ovreview.tex
+
+LaTeX Warning: Reference `fig:system_architecture' on page 11 undefined on input line 4.
+
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
-Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 57.
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 31.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [10
+[11
 
 
-])
+]
+Overfull \hbox (4.69453pt too wide) in paragraph at lines 33--34
+[]\OT1/cmr/bx/n/10.95 Spatial Place-ment\OT1/cmr/m/n/10.95 : Drag-and-drop place-ment on a 2D grid rep-re-sent-ing the as-sem-bly workspace 
+ []
+
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 68.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+[12]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 105.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [13]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 137.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [14]
+Overfull \hbox (36.25232pt too wide) in paragraph at lines 140--141
+[]\OT1/cmr/m/n/10.95 Execution States: EX-E-CUTE[]AR4[]DIRECT, AR4[]PICK[]FOR[]HANDOVER, EX-E-CUTE[]ABB[]PICK,
+ []
+
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 171.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+[15]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 213.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [16]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 250.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [17]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 293.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [18]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 335.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [19]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 388.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [20]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 437.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [21]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 474.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [22]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 513.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [23]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 553.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [24]) (./chapters/chapter3/ch3_hardware_modifications.tex
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 43.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [25]
+File: Figures/Logos/1.jpeg Graphic file (type jpg)
+<use Figures/Logos/1.jpeg>
+Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 98.
+(pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
+ [26])
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 6.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [11]
+ [27]
 \openout2 = `chapters/chapter3/ch3_ar4_calibration.aux'.
 
  (./chapters/chapter3/ch3_ar4_calibration.tex
@@ -540,7 +627,7 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 75.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [12
+ [28
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 98--99
@@ -556,13 +643,13 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 102.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[13]
-<Figures/chapter3/Calibration/Poly_corrections.png, id=339, 578.16pt x 433.62pt>
+[29]
+<Figures/chapter3/Calibration/Poly_corrections.png, id=516, 578.16pt x 433.62pt>
 File: Figures/chapter3/Calibration/Poly_corrections.png Graphic file (type png)
 <use Figures/chapter3/Calibration/Poly_corrections.png>
 Package pdftex.def Info: Figures/chapter3/Calibration/Poly_corrections.png  used on input line 106.
 (pdftex.def)             Requested size: 386.95897pt x 290.21953pt.
-<Figures/chapter3/Calibration/Poly_3D.png, id=342, 920.7198pt x 342.5598pt>
+<Figures/chapter3/Calibration/Poly_3D.png, id=519, 920.7198pt x 342.5598pt>
 File: Figures/chapter3/Calibration/Poly_3D.png Graphic file (type png)
 <use Figures/chapter3/Calibration/Poly_3D.png>
 Package pdftex.def Info: Figures/chapter3/Calibration/Poly_3D.png  used on input line 117.
@@ -571,18 +658,18 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 121.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [14 <./Figures/chapter3/Calibration/Poly_corrections.png>]
-<Figures/chapter3/Calibration/Poly_X.png, id=351, 650.43pt x 505.89pt>
+ [30 <./Figures/chapter3/Calibration/Poly_corrections.png>]
+<Figures/chapter3/Calibration/Poly_X.png, id=528, 650.43pt x 505.89pt>
 File: Figures/chapter3/Calibration/Poly_X.png Graphic file (type png)
 <use Figures/chapter3/Calibration/Poly_X.png>
 Package pdftex.def Info: Figures/chapter3/Calibration/Poly_X.png  used on input line 126.
 (pdftex.def)             Requested size: 227.3381pt x 176.81712pt.
-<Figures/chapter3/Calibration/Poly_Y.png, id=352, 650.43pt x 505.89pt>
+<Figures/chapter3/Calibration/Poly_Y.png, id=529, 650.43pt x 505.89pt>
 File: Figures/chapter3/Calibration/Poly_Y.png Graphic file (type png)
 <use Figures/chapter3/Calibration/Poly_Y.png>
 Package pdftex.def Info: Figures/chapter3/Calibration/Poly_Y.png  used on input line 127.
 (pdftex.def)             Requested size: 227.3381pt x 176.81712pt.
-<Figures/chapter3/Calibration/Poly_Z.png, id=353, 650.43pt x 505.89pt>
+<Figures/chapter3/Calibration/Poly_Z.png, id=530, 650.43pt x 505.89pt>
 File: Figures/chapter3/Calibration/Poly_Z.png Graphic file (type png)
 <use Figures/chapter3/Calibration/Poly_Z.png>
 Package pdftex.def Info: Figures/chapter3/Calibration/Poly_Z.png  used on input line 128.
@@ -591,12 +678,12 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 168.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [15 <./Figures/chapter3/Calibration/Poly_3D.png> <./Figures/chapter3/Calibration/Poly_X.png> <./Figures/chapter3/Calibration/Poly_Y.png> <./Figures/chapter3/Calibration/Poly_Z.png>])
+ [31 <./Figures/chapter3/Calibration/Poly_3D.png> <./Figures/chapter3/Calibration/Poly_X.png> <./Figures/chapter3/Calibration/Poly_Y.png> <./Figures/chapter3/Calibration/Poly_Z.png>])
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 6.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [16]
+ [32]
 \openout2 = `chapters/chapter3/ch3_supervisor.aux'.
 
  (./chapters/chapter3/ch3_supervisor.tex
@@ -604,7 +691,7 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 40.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [17
+ [33
 
 
 
@@ -613,7 +700,7 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 82.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [18]
+ [34]
 Overfull \hbox (51.01306pt too wide) in paragraph at lines 83--84
 []\OT1/cmr/bx/n/10.95 Goal Fields: \OT1/cmr/m/n/10.95 Tar-get pose, strat-egy (AP-PROACH[]OFFSET, GRASP, PLACE, GOTO[]HANDOVER,
  []
@@ -632,17 +719,17 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 128.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[19]
+[35]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 179.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [20]
+ [36]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 231.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [21]
+ [37]
 Overfull \hbox (106.45552pt too wide) in paragraph at lines 262--263
 []\OT1/cmr/m/n/10.95 Similarly, trans-form han-dover pose: \OT1/cmtt/m/n/10.95 self.handover[]pose = self.transform[]pose[]to[]abb(result.handover[]pose)\OT1/cmr/m/n/10.95 . 
  []
@@ -651,7 +738,7 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 279.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[22]
+[38]
 Overfull \hbox (9.30519pt too wide) in paragraph at lines 315--316
 []\OT1/cmr/m/n/10.95 Check ser-vice avail-abil-ity: \OT1/cmtt/m/n/10.95 self.grasp[]pipeline[]client.wait[]for[]service(timeout[]sec=2.0)\OT1/cmr/m/n/10.95 . 
  []
@@ -660,61 +747,61 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 327.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
-[23]
+[39]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 377.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [24]
+ [40]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 431.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [25]
+ [41]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 481.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [26]
+ [42]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 535.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [27]
+ [43]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 582.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [28]
+ [44]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 618.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [29]
+ [45]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 656.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [30]
+ [46]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 696.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [31]
+ [47]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 741.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [32])
+ [48])
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 7.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [33]
+ [49]
 \openout2 = `chapters/chapter3/ch3_visual_servo.aux'.
 
  (./chapters/chapter3/ch3_visual_servo.tex
-<Figures/chapter3/VISP/pinhole_model.png, id=626, 335.00156pt x 173.14688pt>
+<Figures/chapter3/VISP/pinhole_model.png, id=804, 335.00156pt x 173.14688pt>
 File: Figures/chapter3/VISP/pinhole_model.png Graphic file (type png)
 <use Figures/chapter3/VISP/pinhole_model.png>
 Package pdftex.def Info: Figures/chapter3/VISP/pinhole_model.png  used on input line 16.
@@ -723,7 +810,7 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 20.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [34
+ [50
 
 
 
@@ -732,13 +819,13 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 42.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [35 <./Figures/chapter3/VISP/pinhole_model.png>]
-<Figures/chapter3/VISP/pbvs_diagram.png, id=655, 482.55281pt x 179.16937pt>
+ [51 <./Figures/chapter3/VISP/pinhole_model.png>]
+<Figures/chapter3/VISP/pbvs_diagram.png, id=832, 482.55281pt x 179.16937pt>
 File: Figures/chapter3/VISP/pbvs_diagram.png Graphic file (type png)
 <use Figures/chapter3/VISP/pbvs_diagram.png>
 Package pdftex.def Info: Figures/chapter3/VISP/pbvs_diagram.png  used on input line 82.
 (pdftex.def)             Requested size: 232.17242pt x 86.20262pt.
-<Figures/chapter3/VISP/ibvs_diagram.png, id=658, 456.95718pt x 171.64125pt>
+<Figures/chapter3/VISP/ibvs_diagram.png, id=835, 456.95718pt x 171.64125pt>
 File: Figures/chapter3/VISP/ibvs_diagram.png Graphic file (type png)
 <use Figures/chapter3/VISP/ibvs_diagram.png>
 Package pdftex.def Info: Figures/chapter3/VISP/ibvs_diagram.png  used on input line 88.
@@ -747,8 +834,8 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 93.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [36]
-<Figures/chapter3/VISP/homography_geometry.png, id=684, 552.0625pt x 489.83pt>
+ [52]
+<Figures/chapter3/VISP/homography_geometry.png, id=861, 552.0625pt x 489.83pt>
 File: Figures/chapter3/VISP/homography_geometry.png Graphic file (type png)
 <use Figures/chapter3/VISP/homography_geometry.png>
 Package pdftex.def Info: Figures/chapter3/VISP/homography_geometry.png  used on input line 113.
@@ -757,8 +844,8 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 117.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [37 <./Figures/chapter3/VISP/pbvs_diagram.png> <./Figures/chapter3/VISP/ibvs_diagram.png>]
-<Figures/chapter3/VISP/VisualServoDiagram.png, id=700, 1057.9525pt x 1411.2725pt>
+ [53 <./Figures/chapter3/VISP/pbvs_diagram.png> <./Figures/chapter3/VISP/ibvs_diagram.png>]
+<Figures/chapter3/VISP/VisualServoDiagram.png, id=876, 1057.9525pt x 1411.2725pt>
 File: Figures/chapter3/VISP/VisualServoDiagram.png Graphic file (type png)
 <use Figures/chapter3/VISP/VisualServoDiagram.png>
 Package pdftex.def Info: Figures/chapter3/VISP/VisualServoDiagram.png  used on input line 134.
@@ -767,22 +854,22 @@ File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 138.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [38 <./Figures/chapter3/VISP/homography_geometry.png>]
+ [54 <./Figures/chapter3/VISP/homography_geometry.png>]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 148.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [39 <./Figures/chapter3/VISP/VisualServoDiagram.png>]
+ [55 <./Figures/chapter3/VISP/VisualServoDiagram.png>]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 173.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [40]
+ [56]
 File: Figures/Logos/1.jpeg Graphic file (type jpg)
 <use Figures/Logos/1.jpeg>
 Package pdftex.def Info: Figures/Logos/1.jpeg  used on input line 177.
 (pdftex.def)             Requested size: 65.44038pt x 65.44142pt.
- [41]) [42
+ [57]) [58
 
 ])
 No file main.bbl.
@@ -791,22 +878,26 @@ No file main.bbl.
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: CCF5E08240ED0A2157492A0A55F10678;10286.
+(rerunfilecheck)             Checksum: 4190EFE3AF4A93F343BD5F3773E85AD3;13330.
  ) 
 Here is how much of TeX's memory you used:
- 14810 strings out of 476182
- 237200 string characters out of 5795595
+ 14919 strings out of 474222
+ 239064 string characters out of 5748734
  1939975 words of memory out of 5000000
- 36284 multiletter control sequences out of 15000+600000
+ 36569 multiletter control sequences out of 15000+600000
  566649 words of font info for 67 fonts, out of 8000000 for 9000
- 14 hyphenation exceptions out of 8191
- 75i,21n,79p,1202b,612s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/ingy/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (42 pages, 1306591 bytes).
+ 1141 hyphenation exceptions out of 8191
+ 75i,21n,79p,1217b,676s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on main.pdf (58 pages, 1354498 bytes).
 PDF statistics:
- 864 PDF objects out of 1000 (max. 8388607)
- 757 compressed objects within 8 object streams
- 315 named destinations out of 1000 (max. 500000)
- 448 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1057 PDF objects out of 1200 (max. 8388607)
+ 931 compressed objects within 10 object streams
+ 388 named destinations out of 1000 (max. 500000)
+ 552 words of extra memory for PDF output out of 10000 (max. 10000000)
 
