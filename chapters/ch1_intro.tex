@@ -1,0 +1,80 @@
+
+\chapter{Introduction}
+\thispagestyle{fancy}
+\vspace*{0cm} % move text up to start near top of page
+
+\section{Background and Motivation}
+Collaborative robotic systems are increasingly adopted in modern automation to improve throughput, flexibility, and safety in assembly workflows. While a single industrial robot can achieve high repeatability, multi-robot collaboration enables task decomposition, parallelism, and improved workspace coverage.
+
+Despite these advantages, multi-robot collaboration introduces substantial technical challenges. These include:
+\begin{itemize}
+    \item Accurate calibration between sensing systems and robotic manipulators.
+    \item Reliable perception under dynamic and uncertain real-world conditions.
+    \item Robust grasp planning to avoid object slippage or collision.
+    \item Stable closed-loop control for fine alignment during assembly.
+    \item Coordination of system-level logic to manage roles, task handovers, and execution uncertainties.
+\end{itemize}
+
+This project addresses these challenges by implementing a two-robot collaborative assembly system, integrating an ABB industrial robot and an AR4 research robot to perform brick assembly tasks. The system leverages Digital Twin technology to provide visualization, monitoring, and structured integration of perception, planning, and execution modules.
+
+\section{Problem Statement}
+The primary problem addressed in this project is the design and implementation of a robust, two-robot collaborative assembly system capable of:
+\begin{enumerate}
+    \item Detecting and localizing bricks within a shared workspace using global perception.
+    \item Selecting stable grasps and avoiding unstable configurations via learned models.
+    \item Executing safe and accurate grasping using hybrid control strategies (point control combined with image-based visual servoing).
+    \item Performing reliable handovers from the AR4 to the ABB robot when bricks need to cross workspace sides.
+    \item Maintaining a consistent world coordinate system across the workspace through calibration of cameras and robots.
+    \item Coordinating the full workflow via a state machine with well-defined transitions and recovery logic.
+\end{enumerate}
+
+\section{Project Objectives}
+The objectives of this thesis are summarized as follows:
+\begin{itemize}
+    \item Develop a Digital Twin-enabled architecture integrating perception, decision logic, and robot execution.
+    \item Achieve accurate AR4 position correction using data-driven calibration techniques (tested: radial basis function, linear, polynomial; best performance: polynomial regression).
+    \item Calibrate the global camera-to-world mapping for reliable brick pose estimation across the entire workspace.
+    \item Implement robust object detection using YOLOv8 segmentation for bricks and workspace features.
+    \item Implement grasp detection using a transformer-based encoder-decoder trained with stable and unstable grasps to improve reliability.
+    \item Implement fine alignment for AR4 grasping using image-based visual servoing aided by homography mapping between global and local camera views.
+    \item Develop a state machine to govern setup, task allocation, grasping, handover, and assembly operations reliably.
+\end{itemize}
+
+\section{Project Scope}
+This thesis focuses on the perception-to-action integration for collaborative assembly using two robotic arms and two camera systems (global and eye-in-hand). The scope includes:
+\begin{itemize}
+    \item System calibration and camera-to-robot alignment.
+    \item Object detection and grasp pose estimation.
+    \item Visual servoing and hybrid control for precise manipulation.
+    \item Handover logic between robots.
+    \item Digital Twin integration for monitoring and validation.
+\end{itemize}
+
+The thesis does \textbf{not} include:
+\begin{itemize}
+    \item Detailed mechanical design of the robots.
+    \item Proprietary low-level controller programming of the ABB robot.
+    \item Safety certification processes beyond safe experimental operation.
+\end{itemize}
+
+\section{Key Contributions}
+The main contributions of this project are:
+\begin{enumerate}
+    \item Implementation of a Digital Twin-enabled multi-robot assembly system for visualization, validation, and monitoring.
+    \item Development of a polynomial-based calibration method for precise AR4 positioning and global workspace mapping.
+    \item Integration of YOLOv8-based object detection for brick and feature localization.
+    \item Implementation of a transformer-based grasp detection network for improved grasp stability.
+    \item Hybrid control strategy combining point control and image-based visual servoing for fine alignment.
+    \item Reliable handover and task coordination using a state machine with recovery mechanisms.
+\end{enumerate}
+
+\section{Thesis Organization}
+This thesis is organized as follows:
+\begin{itemize}
+    \item \textbf{Chapter 2} reviews literature on collaborative robotics, multi-robot handover, visual servoing, grasp detection, and Digital Twin integration.
+    \item \textbf{Chapter 3} describes the system architecture, including calibration, perception, grasping, control, and workflow management.
+    \item \textbf{Chapter 4} presents the experimental implementation, evaluation of calibration accuracy, perception performance, grasp prediction quality, and workflow reliability.
+    \item \textbf{Chapter 5} concludes the thesis, summarizes key findings, and discusses potential future enhancements.
+\end{itemize}
+
+\clearpage
