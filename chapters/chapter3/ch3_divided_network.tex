@@ -1,0 +1,30 @@
+\section{Distributed Network Topology and Hardware Interface}
+
+To optimize computational load and ensure modular system performance, we implemented a distributed computing architecture leveraging the Data Distribution Service (DDS) inherent to ROS 2. As illustrated in Figure~\ref{fig:dist_arch}, rather than relying on a single processing unit, the system workload is partitioned across two separate laptops, designated as \textbf{Laptop 1} and \textbf{Laptop 2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/chapter3/Divided_network/Divided_Computation.png} 
+    \caption{End-effector positions in XY plane after affine (linear) correction.}
+    \label{fig:dist_arch}
+\end{figure}
+\subsection{Physical Network Layer}
+The core communication backbone is established via a dedicated local area network (LAN). Both laptops and the ABB robot controller are connected to a central D-Link Fast Ethernet switch. This star topology ensures low-latency, high-bandwidth communication between the processing units and the industrial manipulators.
+
+\begin{itemize}
+    \item \textbf{ABB Robot Integration:} The ABB arm is networked directly to the Ethernet switch. It communicates via \textbf{UDP}, ensuring fast data transmission for real-time feedback and control loops required by the ROS 2 bridge.
+    
+    \item \textbf{AR4 Robot Integration:} Unlike the networked ABB, the AR4 robot is interfaced directly to \textbf{Laptop 2} via a USB-C connection, utilizing serial communication for direct motor control instructions.
+\end{itemize}
+
+
+\subsection{Distributed ROS 2 Environment}
+By configuring both laptops to operate on the same \texttt{ROS\_DOMAIN\_ID}, the ROS 2 nodes running on separate machines function as a unified computation graph. This allows topics published by the driver on the AR4-connected laptop to be immediately subscribed to by the planning or perception nodes on the second laptop without complex routing protocols.
+
+This separation allows for significant resource isolation based on task requirements:
+
+\begin{itemize}
+    \item \textbf{Laptop 1 (High-Level Computation):} This machine acts as the system supervisor. It handles computationally intensive tasks including the GUI, Object Detection, and Grasping Strategy. It is physically connected to the \textbf{Intel RealSense} camera via USB/Serial to process high-fidelity depth data.
+    
+    \item \textbf{Laptop 2 (Real-Time Control):} This machine is dedicated to hardware interfacing. It runs the AR4 Drivers, Controllers, and IBVS (Image-Based Visual Servoing) algorithms. Additionally, it handles telemetry from the \textbf{ESP32 Camera}, which connects wirelessly via WiFi to this specific node.
+\end{itemize}
