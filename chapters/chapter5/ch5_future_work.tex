@@ -1,0 +1,21 @@
+\subsection{Future Work: Semester 2 Implementation Plan}
+
+While the current system successfully demonstrates the perception, grasping, and independent assembly capabilities of the collaborative cell, the second phase of this project (Semester 2) will focus on advanced multi-robot coordination and cyber-physical system integration. The following core features are scheduled for implementation and validation:
+
+\subsubsection{Collaborative Hand-Over Sequence Validation}
+A critical functionality for complex assembly tasks is the direct transfer of objects between the ABB IRB120 and the AR4 manipulators. While the high-level logic for this ``Hand-Over'' sequence has been implemented within the system Supervisor node, it remains experimentally unverified on the physical hardware.
+
+\begin{itemize}
+    \item \textbf{The ``Z-Block'' Benchmark:} To validate this sequence, we will introduce a new standardized test object, designated as the \textit{Z-Block}. This object will feature complex geometry requiring re-grasping maneuvers that a single robot cannot perform alone.
+    
+    \item \textbf{Validation Protocol:} The goal is to verify the synchronization of the \texttt{release} action of the donor robot with the \texttt{grasp} action of the receiver robot. This tests the latency and reliability of the UDP-based communication pipeline and the precision of the shared coordinate calibration. Successful execution will be defined by the system's ability to pass the Z-Block without dropping it or triggering collision safety stops.
+\end{itemize}
+
+\subsubsection{Development of a High-Fidelity Digital Twin}
+To transition towards an Industry 4.0 compliant system, we will develop a comprehensive Digital Twin of the collaborative cell. This will serve not just as a simulation, but as a real-time virtual mirror of the physical setup.
+
+\begin{itemize}
+    \item \textbf{Real-Time Synchronization:} Using the ROS 2 middleware, the Digital Twin will subscribe to the \texttt{joint\_states} topics of both the real ABB and AR4 robots, visualizing their movements in real-time within the simulation environment (e.g., Gazebo or Isaac Sim).
+    
+    \item \textbf{Virtual Commissioning:} The Digital Twin will allow us to test complex assembly algorithms and collision avoidance strategies for the Z-Block hand-over in a safe, virtual environment before deploying them to the physical robots. This minimizes the risk of hardware damage during the testing of experimental collaborative trajectories.
+\end{itemize}
