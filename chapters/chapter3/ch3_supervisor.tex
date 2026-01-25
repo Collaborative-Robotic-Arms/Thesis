@@ -4,7 +4,14 @@
 
 \subsection{Overview}
 
-The Assembly Supervisor is the central orchestrator of the collaborative robotic assembly system. It implements a robust state machine that governs the complete workflow from task initialization through brick detection, grasp planning, robot coordination, and final assembly placement. This section provides a comprehensive analysis of the supervisor's architecture, state transitions, service and action interactions, and error handling mechanisms that ensure reliable system operation in a collaborative multi-robot environment.
+The Assembly Supervisor is the central orchestrator of the collaborative robotic assembly system. It implements a robust state machine that governs the complete workflow from task initialization through brick detection, grasp planning, robot coordination, and final assembly placement. This section provides a comprehensive analysis of the supervisor's architecture, state transitions, service and action interactions, and error handling mechanisms that ensure reliable system operation in a collaborative multi-robot environment. An overview of the system-level information flow and control hierarchy is illustrated in Fig.~\ref{fig:assembly_supervisor_architecture}, which shows the interaction between the user interface, perception modules, the Assembly Supervisor, and the two robotic manipulators (AR4 and ABB).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{Figures/chapter3/System_architecture/System.png}
+    \caption{High-level architecture of the collaborative assembly system.}
+    \label{fig:assembly_supervisor_architecture}
+\end{figure}
 
 \subsection{Supervisor Architecture and Responsibilities}
 
@@ -202,7 +209,7 @@ The Assembly Supervisor implements a 12-state finite state machine that governs 
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=1.0\textwidth]{Figures/placeholder_state_machine_diagram}
+    \includegraphics[width=0.75\textwidth]{Figures/chapter3/Supervisor/States.png}
     \caption{Complete State Machine Diagram with Transitions}
     \label{fig:state_machine_diagram}
 \end{figure}
