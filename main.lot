@@ -2,12 +2,12 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Comparison of Cartesian calibration methods for robotic manipulators}}{57}{table.caption.65}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Mean Absolute Cartesian Errors Before and After Calibration}}{61}{table.caption.71}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces LEGO brick physical dimensions used for target feature generation.}}{87}{table.caption.177}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces Training Hyperparameters}}{102}{table.caption.211}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces Training configuration used in the comparison experiments.}}{104}{table.caption.214}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Comparison of Cartesian calibration methods for robotic manipulators}}{59}{table.caption.65}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Mean Absolute Cartesian Errors Before and After Calibration}}{63}{table.caption.71}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces LEGO brick physical dimensions used for target feature generation.}}{89}{table.caption.177}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces Training Hyperparameters}}{104}{table.caption.211}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Training configuration used in the comparison experiments.}}{106}{table.caption.214}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Summary of best validation results for ResNet-UNet and Swin-T models.}}{105}{table.caption.215}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Qualitative comparison between labeled grasps (Ground Truth) and predicted grasps (Top-1) for three brick categories.}}{106}{table.caption.216}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Summary of best validation results for ResNet-UNet and Swin-T models.}}{112}{table.caption.220}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Qualitative comparison between labeled grasps (Ground Truth) and predicted grasps (Top-1) for three brick categories.}}{112}{table.caption.221}%
 \addvspace {10\p@ }
