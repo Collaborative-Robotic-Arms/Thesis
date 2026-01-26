@@ -1,39 +1,39 @@
 \babel@toc {english}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Pinhole camera projection model illustrating the mapping of a 3D point $P$ onto the image plane at point $p$ through focal length $\lambda $}}{15}{figure.caption.6}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Comparison of fisheye equidistance projection (red) and pinhole projection (blue). The fisheye model maintains a linear relationship between incident angle $\theta $ and radial distance $\rho = f\theta $, while the pinhole model uses $\rho = f\tan \theta $, which diverges as $\theta \to 90^{\circ }$.}}{16}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces HSV color space representation showing hue ($H$), saturation ($S$), and value ($V$) components...}}{18}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Position-Based Visual Servo (PBVS) architecture showing the transformation from 3D Cartesian task space to camera frame control.}}{19}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Image-Based Visual Servo (IBVS) architecture showing error minimization directly in 2D image feature space.}}{19}{figure.caption.16}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Planar homography transformation relationship between two camera perspectives, showing the projection of a planar target through homography matrix $H$.}}{21}{figure.caption.19}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces U-Net encoder–decoder architecture (adapted from Ronneberger et al., 2015).}}{22}{figure.caption.20}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Residual learning building block and identity shortcut concept (from He et al., 2016).}}{23}{figure.caption.21}%
-\contentsline {figure}{\numberline {2.9}{\ignorespaces (left) Scaled Dot-Product Attention. (right) Multi-Head Attention.}}{23}{figure.caption.22}%
-\contentsline {figure}{\numberline {2.10}{\ignorespaces Vision Transformer (ViT) overview and patch-based tokenization (from Dosovitskiy et al., 2021).}}{24}{figure.caption.23}%
-\contentsline {figure}{\numberline {2.11}{\ignorespaces Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}}{25}{figure.caption.24}%
-\contentsline {figure}{\numberline {2.12}{\ignorespaces Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}}{26}{figure.caption.27}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Pinhole camera projection model illustrating the mapping of a 3D point $P$ onto the image plane at point $p$ through focal length $\lambda $}}{20}{figure.caption.6}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Comparison of fisheye equidistance projection (red) and pinhole projection (blue). The fisheye model maintains a linear relationship between incident angle $\theta $ and radial distance $\rho = f\theta $, while the pinhole model uses $\rho = f\tan \theta $, which diverges as $\theta \to 90^{\circ }$.}}{21}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces HSV color space representation showing hue ($H$), saturation ($S$), and value ($V$) components...}}{23}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Position-Based Visual Servo (PBVS) architecture showing the transformation from 3D Cartesian task space to camera frame control.}}{24}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Image-Based Visual Servo (IBVS) architecture showing error minimization directly in 2D image feature space.}}{24}{figure.caption.16}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Planar homography transformation relationship between two camera perspectives, showing the projection of a planar target through homography matrix $H$.}}{26}{figure.caption.19}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces U-Net encoder–decoder architecture (adapted from Ronneberger et al., 2015).}}{27}{figure.caption.20}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Residual learning building block and identity shortcut concept (from He et al., 2016).}}{28}{figure.caption.21}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces (left) Scaled Dot-Product Attention. (right) Multi-Head Attention.}}{28}{figure.caption.22}%
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Vision Transformer (ViT) overview and patch-based tokenization (from Dosovitskiy et al., 2021).}}{30}{figure.caption.25}%
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}}{30}{figure.caption.26}%
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}}{32}{figure.caption.27}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces ABB IRB 120 joint axes and DOF layout~\cite {abb_irb120}.}}{28}{figure.caption.30}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces AR4 MK3 joint axes and DOF layout~\cite {ar4_mk3}.}}{29}{figure.caption.32}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces RealSense D435i~\cite {realsense_d435i}.}}{30}{figure.caption.36}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces ESP32-CAM OV2640~\cite {OV2640Datasheet}.}}{30}{figure.caption.38}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces System Main Layers.}}{31}{figure.caption.39}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Hardware and Network Communication Architecture for the Collaborative System.}}{45}{figure.caption.61}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Upgraded mechanical transmission of Joint~3 }}{47}{figure.caption.62}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Re-manufactured shaft key used in Joint~3 to eliminate mechanical backlash}}{48}{figure.caption.63}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces End-effector positions in XY plane after affine (linear) correction.}}{51}{figure.caption.65}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces End-effector positions in XY plane after polynomial correction.}}{52}{figure.caption.66}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces End-effector positions in XY plane after RBF correction.}}{52}{figure.caption.67}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Calibration surfaces for the X, Y, and Z axes with error magnitude.}}{53}{figure.caption.68}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Comparison of uncalibrated and calibrated surfaces.}}{54}{figure.caption.69}%
-\contentsline {figure}{\numberline {3.14}{\ignorespaces High-level architecture of the collaborative assembly system.}}{55}{figure.caption.71}%
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Assembly Supervisor Architecture: Clients, Callbacks, and State Machine}}{56}{figure.caption.74}%
-\contentsline {figure}{\numberline {3.16}{\ignorespaces Supervisor Service and Action Communication Flow}}{58}{figure.caption.78}%
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Coordinate Frame Hierarchy and Transform Chain}}{59}{figure.caption.82}%
-\contentsline {figure}{\numberline {3.18}{\ignorespaces Complete State Machine Diagram with Transitions}}{60}{figure.caption.84}%
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}}{74}{figure.caption.162}%
-\contentsline {figure}{\numberline {3.20}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{84}{figure.caption.186}%
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Swin Transformer Grasp Network Architecture}}{86}{figure.caption.191}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces ABB IRB 120 joint axes and DOF layout~\cite {abb_irb120}.}}{34}{figure.caption.30}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces AR4 MK3 joint axes and DOF layout~\cite {ar4_mk3}.}}{35}{figure.caption.32}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces RealSense D435i~\cite {realsense_d435i}.}}{36}{figure.caption.36}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces ESP32-CAM OV2640~\cite {OV2640Datasheet}.}}{36}{figure.caption.38}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces System Main Layers.}}{37}{figure.caption.39}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Hardware and Network Communication Architecture for the Collaborative System.}}{51}{figure.caption.61}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Upgraded mechanical transmission of Joint~3 }}{53}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Re-manufactured shaft key used in Joint~3 to eliminate mechanical backlash}}{54}{figure.caption.63}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces End-effector positions in XY plane after affine (linear) correction.}}{57}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces End-effector positions in XY plane after polynomial correction.}}{58}{figure.caption.66}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces End-effector positions in XY plane after RBF correction.}}{58}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Calibration surfaces for the X, Y, and Z axes with error magnitude.}}{59}{figure.caption.68}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Comparison of uncalibrated and calibrated surfaces.}}{60}{figure.caption.69}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces High-level architecture of the collaborative assembly system.}}{61}{figure.caption.71}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Assembly Supervisor Architecture: Clients, Callbacks, and State Machine}}{62}{figure.caption.74}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Supervisor Service and Action Communication Flow}}{64}{figure.caption.78}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Coordinate Frame Hierarchy and Transform Chain}}{65}{figure.caption.82}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Complete State Machine Diagram with Transitions}}{66}{figure.caption.84}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}}{80}{figure.caption.162}%
+\contentsline {figure}{\numberline {3.20}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{90}{figure.caption.186}%
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Swin Transformer Grasp Network Architecture}}{93}{figure.caption.194}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
