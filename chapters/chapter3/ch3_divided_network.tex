@@ -5,7 +5,7 @@ To optimize computational load and ensure modular system performance, we impleme
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{Figures/chapter3/Divided_network/Divided_Computation.png} 
-    \caption{End-effector positions in XY plane after affine (linear) correction.}
+    \caption{Hardware and Network Communication Architecture for the Collaborative System.}
     \label{fig:dist_arch}
 \end{figure}
 \subsection{Physical Network Layer}
@@ -19,7 +19,7 @@ The core communication backbone is established via a dedicated local area networ
 
 
 \subsection{Distributed ROS 2 Environment}
-By configuring both laptops to operate on the same \texttt{ROS\_DOMAIN\_ID}, the ROS 2 nodes running on separate machines function as a unified computation graph. This allows topics published by the driver on the AR4-connected laptop to be immediately subscribed to by the planning or perception nodes on the second laptop without complex routing protocols.
+By configuring both laptops to operate on the same \texttt{ROS\_DOMAIN\_ID}, the ROS2 nodes running on separate machines function as a unified computation graph. This allows topics published by the driver on the AR4-connected laptop to be immediately subscribed to by the planning or perception nodes on the second laptop without complex routing protocols.
 
 This separation allows for significant resource isolation based on task requirements:
 
