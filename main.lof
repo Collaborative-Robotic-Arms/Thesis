@@ -34,7 +34,10 @@
 \contentsline {figure}{\numberline {3.17}{\ignorespaces Coordinate Frame Hierarchy and Transform Chain}}{66}{figure.caption.83}%
 \contentsline {figure}{\numberline {3.18}{\ignorespaces Complete State Machine Diagram with Transitions}}{67}{figure.caption.85}%
 \contentsline {figure}{\numberline {3.19}{\ignorespaces Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}}{81}{figure.caption.163}%
-\contentsline {figure}{\numberline {3.20}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{91}{figure.caption.187}%
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Swin Transformer Grasp Network Architecture}}{94}{figure.caption.195}%
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Representative annotation samples for brick classes.}}{91}{figure.caption.186}%
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Examples of data augmentation applied to the brick dataset.}}{92}{figure.caption.187}%
+\contentsline {figure}{\numberline {3.22}{\ignorespaces PCA principal axes overlaid on brick contours.}}{94}{figure.caption.188}%
+\contentsline {figure}{\numberline {3.23}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{97}{figure.caption.194}%
+\contentsline {figure}{\numberline {3.24}{\ignorespaces Swin Transformer Grasp Network Architecture}}{99}{figure.caption.202}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
