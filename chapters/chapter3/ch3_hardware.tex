@@ -104,7 +104,7 @@ An ESP32-CAM module equipped with an OV2640 image sensor is mounted on the AR4 M
     \item \textbf{Resolution:} 640 $\times$ 480 pixels (VGA).
     \item \textbf{Lens:} Wide-angle fisheye lens with approximately $160^{\circ}$ field of view.
     \item \textbf{Mounting:} Rigidly attached to the AR4 end-effector, aligned with the gripper frame.
-    \item \textbf{Frame Rate:} 5--10 Hz, limited by onboard processing and wireless transmission.
+    \item \textbf{Frame Rate:} 20--25 Hz, limited by onboard processing and wireless transmission.
 \end{itemize}
 
 Due to the wide-angle fisheye lens, the camera exhibits significant radial distortion. Therefore, a fisheye camera model was adopted during calibration. The intrinsic parameters were obtained offline and include the camera matrix and distortion coefficients, enabling accurate image rectification and metric interpretation of image features. The calibrated intrinsic parameters are used within the visual servoing pipeline to reduce systematic projection errors during closed-loop control.
