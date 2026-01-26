@@ -1,175 +1,386 @@
-\section{Introduction}
-In collaborative robotic tasks, achieving high-precision alignment for grasping objects is a significant challenge, particularly when the environment and arm cameras have different perspectives. This chapter details the development of a "Fine Control" layer for the AR4 robotic arm using Image-Based Visual Servoing (IBVS) and Homography-based mapping. Our approach utilizes a dual-camera system: a fixed global RealSense camera for initial brick detection and a local ESP32-CAM mounted on the end-effector for precise alignment. By bridging these two views with homography, we enable the robot to perform complex "Pick and Place" operations with high reliability and reduced computational overhead.
+\section{Fine Control Strategy: Visual Servoing}
+\label{sec:fine_control}
+While the global perception system (RealSense) provides coarse brick localization, it suffers from perspective occlusion and calibration inaccuracies at the millimeter scale. To achieve precise grasping, a "Fine Control" layer was developed for the AR4 robotic arm. This layer utilizes an \textbf{Eye-in-Hand} configuration with an ESP32-CAM and implements an Image-Based Visual Servoing (IBVS) controller.
 
-\section{Literature Review}
-The development of this module was informed by several key research areas in robotic vision and control, focusing on robustness, multi-camera coordination, and non-conventional optics.
+The control strategy follows a \textbf{Global-to-Local Handoff} approach:
+\begin{enumerate}
+    \item \textbf{Coarse Alignment:} The global camera provides the brick pose, guiding the AR4 to an "Approach Point" ($\approx 15$ cm above the target).
+    \item \textbf{Feature Handoff:} A Homography transformation maps the detected grasp point from the global view to the local eye-in-hand view, providing an initial search region.
+    \item \textbf{Fine Servoing:} The IBVS controller takes over, using local camera feedback to minimize pixel error and achieve precise gripper alignment.
+\end{enumerate}
 
-\subsection{Visual Servo Control Foundations}
-Visual servoing is a robotic control technique that utilizes information from a vision sensor to regulate the pose (position and orientation) of a robot's end-effector relative to a target or environmental features \cite{Hutchinson1996}. It represents the fusion of results from multiple disciplines, including high-speed image processing, kinematics, dynamics, control theory, and real-time computing \cite{Hutchinson1996}. The fundamental objective is to create a closed-loop control system where visual information is used to minimize a vision-based error signal.
+\subsection{System Architecture Overview}
 
-\subsection{The Pinhole Camera Model}
-The foundation of visual servoing rests on the geometric mapping of 3D points in the environment onto a 2D image plane. As illustrated in Figure~\ref{fig:pinhole_model}, this process is modeled using the pinhole camera projection \cite{Hutchinson1996}.
-
-\begin{figure}[H]
-    \centering
-    % Ensure you have uploaded the image as pinhole_model.jpg
-    \includegraphics[width=0.6\textwidth]{Figures/chapter3/VISP/pinhole_model.png}
-    \caption{Perspective projection geometry showing the relationship between a 3D point $P$ and its 2D image projection $p$ \cite{Hutchinson1996}.}
-    \label{fig:pinhole_model}
-\end{figure}
-
-For a 3D point $P = [X, Y, Z]^T$ in the camera frame $\{C\}$, its projection onto the image plane at coordinates $p = [x, y]^T$ is determined by the focal length $\lambda$ through similar triangles \cite{Hutchinson1996}:
-\begin{equation}
-    x = \lambda \frac{X}{Z}, \quad y = \lambda \frac{Y}{Z}
-\end{equation}
-
-This relationship is critical because it forms the starting point for the derivation of the \textbf{Interaction Matrix} (Image Jacobian). By differentiating these coordinates with respect to time, we can relate the velocity of image features $\dot{s}$ to the spatial velocity of the camera $v_c$ \cite{Hutchinson1996}.
-
-\subsection{The Pinhole Camera Model}
-The foundation of visual servoing rests on the geometric mapping of 3D points onto a 2D image plane. This process is modeled using the pinhole camera projection, where a 3D point $P = [X, Y, Z]^T$ in the camera frame $\{C\}$ is projected onto the image plane at coordinates $p = [x, y]^T$ via the focal length $\lambda$ \cite{Hutchinson1996}:
-\begin{equation}
-    x = \lambda \frac{X}{Z}, \quad y = \lambda \frac{Y}{Z}
-\end{equation}
-This projection is critical as it provides the geometric basis for the \textbf{Interaction Matrix} (Image Jacobian) used in the control law \cite{Hutchinson1996}.
-
-\subsection{Position-Based Visual Servo (PBVS)}
-In PBVS architectures, features extracted from image data are used in conjunction with a known geometric model of the target and camera parameters to estimate the target's pose relative to the camera frame \cite{Hutchinson1996}.
-
-
-
-\subsubsection{Kinematic Error Function and Control Law}
-A positioning task in PBVS is represented by a kinematic error function $E: \mathcal{T} \rightarrow \mathbb{R}^m$, where $\mathcal{T}$ is the task space of the robot \cite{Hutchinson1996}. The task is fulfilled when the end-effector is in a pose $x_e$ such that $E(x_e) = 0$. The regulator typically computes a desired end-effector velocity screw $u$ via:
-\begin{equation}
-    u = -k \hat{E}(x_e)
-\end{equation}
-where $k > 0$ is a proportional feedback gain and $\hat{E}$ is the estimated error based on reconstructed 3D geometry. The primary challenge remains the visual reconstruction problem, which is highly sensitive to camera calibration and robot kinematics.
-
-\subsection{Image-Based Visual Servo (IBVS)}
-IBVS defines the control task directly in the image feature space $\mathcal{F}$, avoiding the need for a full 3D interpretation of the scene \cite{Hutchinson1996}. The error signal is defined as $e(t) = f(t) - f_d$, where $f$ represents the current vector of image feature parameters and $f_d$ represents the desired feature configuration \cite{Hutchinson1996, Parisa2016}.
-
-
-
-\subsubsection{The Image Jacobian (Interaction Matrix)}
-The Image Jacobian $J_v$ is a linear transformation relating the rate of change in image feature parameters $\dot{f}$ to the camera's spatial velocity screw $\dot{r}$:
-\begin{equation}
-    \dot{f} = J_v(r)\dot{r}
-\end{equation}
-
-
-
-[Image of an Image Jacobian matrix equation]
-
-
-For a 3D point $P = [x, y, z]^T$ under perspective projection with focal length $\lambda$, the velocity of its image plane coordinates $[u, v]^T$ relative to camera translational velocity $T$ and angular velocity $\Omega$ is:
-\begin{equation}
-    \begin{bmatrix} \dot{u} \\ \dot{v} \end{bmatrix} = \begin{bmatrix} \frac{\lambda}{z} & 0 & -\frac{u}{z} & -\frac{uv}{\lambda} & \frac{\lambda^2 + u^2}{\lambda} & -v \\ 0 & \frac{\lambda}{z} & -\frac{v}{z} & \frac{-\lambda^2 - v^2}{\lambda} & \frac{uv}{\lambda} & u \end{bmatrix} \begin{bmatrix} T_x \\ T_y \\ T_z \\ \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}
-\end{equation}
-The manipulator velocity $u$ is then computed using the Moore-Penrose pseudoinverse $J_v^{+}$:
-\begin{equation}
-    u = -K J_v^{+}(r) e(f)
-\end{equation}
-
-\subsubsection{Advanced IBVS and Refined Frameworks}
-Modern implementations utilize image moments $m_{ij}$ to describe complex shapes effectively, often combined with a \textbf{Coarse-to-Fine} framework for sub-millimeter accuracy \cite{Parisa2016, Bai2023}. This involves removing large initial alignment errors (15--30 cm) before using fine controllers to refine the pose within a 0.6 mm tolerance.
-
-\subsection{Comparative Analysis: IBVS vs. PBVS}
-The two primary paradigms in visual servoing differ in how they define the error signal and the space in which control is executed \cite{Hutchinson1996}.
+The complete visual servoing pipeline integrates perception, transformation logic, and control as illustrated in Figure~\ref{fig:vs_architecture}. The system operates in three primary stages:
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Figures/chapter3/VISP/pbvs_diagram.png}
-        \caption{Position-Based (PBVS) \cite{Hutchinson1996}}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Figures/chapter3/VISP/ibvs_diagram.png}
-        \caption{Image-Based (IBVS) \cite{Hutchinson1996}}
-    \end{subfigure}
-    \caption{Control loop architectures. PBVS (left) relies on a 3D pose estimation block, while IBVS (right) regulates error directly in the image plane \cite{Hutchinson1996}.}
-    \label{fig:vs_architectures}
+    \includegraphics[width=1.0\textwidth]{Figures/chapter3/VISP/VisualServoDiagram.png}
+    \caption{Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}
+    \label{fig:vs_architecture}
 \end{figure}
 
-As illustrated in Figure~\ref{fig:vs_architectures}, PBVS is highly dependent on accurate 3D reconstruction, which introduces sensitivity to camera calibration errors \cite{Hutchinson1996}. In contrast, the IBVS approach regulates features directly in the image plane, making it inherently more robust to kinematic uncertainties and calibration biases \cite{Hutchinson1996}.
-
-The selection of a visual servoing architecture involves critical trade-offs:
+\subsubsection{Global Perception Stage}
+The global perception module executes on the RealSense camera, providing:
 \begin{itemize}
-    \item \textbf{Calibration Sensitivity:} IBVS is inherently less sensitive to camera calibration and robot kinematic errors compared to PBVS \cite{Hutchinson1996}.
-    \item \textbf{Computational Complexity:} IBVS avoids nonlinear optimizations for 3D pose estimation but requires online computation of the depth-dependent Jacobian.
-    \item \textbf{Stability:} IBVS can encounter singularities in the feature mapping function, while PBVS remains more intuitive for global stability in the Cartesian task space.
+    \item \textbf{Brick Detection Model:} Extracts the object type (I-brick, L-brick, T-brick) and computes oriented bounding boxes of all visible bricks.
+    \item \textbf{Grasping Model:} Predicts the optimal grasp point (center of the graspable face) for each detected brick.
+    \item \textbf{Homography Initialization:} Uses the detected brick corners and estimated grasp point as reference data for the global-to-local transformation.
 \end{itemize}
 
-\subsection{Homography-Based Euclidean Reconstruction}
-A significant advancement in bridging the gap between 2D features and 3D control is the use of Homography-based visual servoing. As established by Fang et al., a homography matrix $H$ relates the image coordinates of a target in a current view ($m_i$) to a desired reference view ($m_i^*$) through the relationship \cite{Fang2002}:
-\begin{equation}
-    m_i = H m_i^*
-\end{equation}
-
-\begin{figure}[H]
-    \centering
-    % Ensure the physical file is named exactly: homography_schematic.jpg
-    \includegraphics[width=0.4\textwidth]{Figures/chapter3/VISP/homography_geometry.png}
-    \caption{Schematic diagram of the planar homography transformation relationship between current and desired camera frames.\cite{MDPI2023}}
-    \label{fig:homography_geometry}
-\end{figure}
-
-
-
-The homography matrix can be decomposed to achieve a Euclidean reconstruction of the scene. Specifically, $H$ is composed of the rotation $R$ and the translation $t$ between the two camera views, the normal vector $n^*$ of the object plane, and the distance $d^*$ from the reference camera to the plane \cite{Fang2002}:
-\begin{equation}
-    H = R + \frac{t}{d^*}n^{*T}
-\end{equation}
-This approach allows the system to recover the position and orientation of the robot relative to the target without requiring an explicit 3D model. In multi-camera systems, this enables the automation paradigm to shift from point-centric to scene-centric, effectively mapping coordinates observed in a global view (e.g., RealSense) into a local view (e.g., ESP32-CAM) to maintain asymptotic regulation of the end-effector \cite{Fang2002, Bai2023}.
-
-
-\section{General Concept and Control Flow}
-Visual servoing (VS) is a sensor-based control technique that utilizes real-time vision data as feedback to control the motion of a robot manipulator. In this project, visual servoing acts as the "Fine Control" layer, taking over after coarse global detection to ensure high-precision alignment.
-
-The objective is to minimize an error vector $e(t) = s - s^*$, representing the difference between current visual features ($s$) and desired features ($s^*$). The system follows a structured flow: perception of local corners via the eye-in-hand camera, target feature generation, error calculation, and the transformation of image-plane errors into Cartesian velocity commands.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{Figures/chapter3/VISP/VisualServoDiagram.png}
-    \caption{System Architecture Flowchart: Integration of Global Perception and Local IBVS Control.}
-    \label{fig:flow_diagram}
-\end{figure}
-
-\section{Implementation Details}
-
-The implementation of the fine-control layer is structured into modular functional blocks that facilitate the transition from global environmental perception to high-precision local manipulation.
-
-\subsection{Local Perception and Depth Estimation}
-The local perception block provides high-frequency feedback for the closed-loop controller.
+\subsubsection{Transformation Logic Stage}
+This stage bridges the two camera views through projective geometry:
 \begin{itemize}
-    \item \textbf{Feature Detection:} A Region of Interest (ROI) tracker is employed to minimize computational load. It utilizes HSV color-space thresholding to isolate the brick and applies a fisheye distortion model to undistort coordinates . The tracker is initialized by the ``seed'' point provided by the transformation logic to ensure it locks onto the correct target .
-    \item \textbf{Depth Estimation:} Real-time depth ($Z_{curr}$) is estimated by comparing the pixel area of the current features ($Area_{curr}$) to the dynamically calculated target area ($Area_{target}$). The system applies a smoothed area projection law :
+    \item \textbf{Perspective Transformation:} Computes the homography matrix $H$ relating global and local image coordinates.
+    \item \textbf{Grasp Point Projection:} Transfers the global grasp prediction into the local camera frame.
+    \item \textbf{Grasp Shifting Planning:} Adjusts feature reference points to account for grasp offset from the brick centroid.
+\end{itemize}
+
+\subsubsection{Local Control Stage}
+The local perception and control modules execute on the host PC:
+\begin{itemize}
+    \item \textbf{Feature Detection:} Extracts the brick's corner features in real-time using color-based ROI tracking.
+    \item \textbf{Depth Estimation:} Maintains an online estimate of the brick's distance from the camera.
+    \item \textbf{Target Generation:} Creates desired feature references based on the brick type and grasp offset.
+    \item \textbf{IBVS Control:} Computes velocity commands to minimize pixel error and achieve alignment.
+\end{itemize}
+
+\subsection{Local Perception Implementation}
+
+\subsubsection{Fisheye Undistortion and Linear Space Projection}
+The ESP32-CAM employs a $160^\circ$ wide-angle fisheye lens to maintain visibility of the brick during approach. However, the standard IBVS control law (Section~\ref{sec:ibvs_theory}) assumes linear (pinhole) projection. To maintain theoretical validity while exploiting the wide field of view, we employ a \textbf{rectification strategy}:
+
+All raw images from the ESP32-CAM are mathematically undistorted using the camera intrinsic matrix $K$ and distortion coefficients $D$, obtained via checkerboard calibration:
+\begin{equation}
+    p_{linear} = \text{undistort}(p_{fisheye}, K, D)
+\end{equation}
+
+This transformation linearizes the projection in the central workspace region where grasping occurs, allowing standard Interaction Matrices to remain valid. The undistorted coordinates serve as inputs to all downstream modules.
+
+\subsubsection{Corner-Based Feature Extraction}
+Rather than relying on single-point features, we extract the \textbf{four corner points} of the brick's bounding rectangle. This representation provides:
+\begin{itemize}
+    \item Redundancy and robustness to partial occlusions or tracking failures
+    \item Sufficient constraints for pose estimation and shape analysis
+    \item Reliable depth cues via area-based approximations
+\end{itemize}
+
+The feature extraction pipeline proceeds as follows:
+
+
+\begin{enumerate}
+    \item \textbf{HSV Color Segmentation:} The undistorted image is converted to HSV color space and thresholded to isolate pixels matching the target brick color. HSV is chosen for its robustness to illumination variations compared to RGB space.
+    
+    \item \textbf{Morphological Processing:} Connected-component analysis identifies distinct blobs. Opening (erosion followed by dilation) removes noise and spurious small regions.
+    
+    \item \textbf{Geometric Analysis:} For each valid blob, we compute the bounding box orientation and corner points via minimum area rectangle fitting. The corner points are sorted in counter-clockwise order relative to their centroid, ensuring consistent feature correspondence.
+    
+    \item \textbf{ROI-Based Tracking:} To maintain tracking stability and reduce computational load, the system maintains a Region of Interest (ROI) around the predicted brick location. Tracking searches within this adaptive ROI first; if no valid target is found, a full-image search is performed.
+    
+    \item \textbf{Stability Filtering:} Detected features are validated against previous detections using two criteria:
+    \begin{itemize}
+        \item \textbf{Position Continuity:} The centroid displacement from the previous frame must be less than a maximum jump distance (default: 30 pixels).
+        \item \textbf{Area Consistency:} The relative area change from the previous frame must be less than a maximum ratio (default: 40\%).
+    \end{itemize}
+    
+    If validation fails, the detection is rejected and the previous feature state is retained, preventing sudden spurious jumps. After a configurable number of rejections (default: 10), the system re-initializes tracking on a new object.
+\end{enumerate}
+
+All corner features are published in \textbf{linear (undistorted) space} to ensure consistency across the pipeline. This is critical for accurate homography computation and Jacobian matrix evaluation.
+
+\subsection{Depth Estimation via Area-Based Scaling}
+
+\subsubsection{Monocular Depth Challenge}
+The Interaction Matrix (Image Jacobian) derived in Section~\ref{sec:ibvs_theory} depends explicitly on the depth $Z$ of feature points relative to the camera frame. With a monocular camera, $Z$ is inherently unobservable from image data alone. However, for planar objects like bricks at a known working height, we can exploit geometric relationships to estimate depth online.
+
+\subsubsection{Area-Based Depth Approximation}
+For a planar rectangular object observed under perspective projection, the projected area $A$ is inversely proportional to the squared distance $Z$:
+\begin{equation}
+    A \propto \frac{1}{Z^2}
+\end{equation}
+
+By establishing a calibration at a known reference depth $Z^*$ with corresponding reference area $A^*$, we can estimate the current depth using the area ratio:
+\begin{equation}
+    \hat{Z} = Z^* \sqrt{\frac{A^*}{A_{current}}}
+    \label{eq:area_depth}
+\end{equation}
+
+This approximation holds well for objects remaining approximately parallel to the image plane (which is enforced by the visual servoing control law).
+
+\subsubsection{Implementation Details}
+The depth estimator node maintains the following state:
+
+\begin{itemize}
+    \item \textbf{Target Depth $Z^*$:} The desired grasping distance, typically 0.2 m. This parameter is constant across a mission.
+    
+    \item \textbf{Desired Feature Area $A^*$:} Updated dynamically whenever a new desired feature set is generated by the target generator. This allows seamless transitions between brick types and grasp offsets.
+    
+    \item \textbf{Current Area $A_{current}$:} Computed from the four corner features using the shoelace formula:
     \begin{equation}
-        Z_{curr} = Z_{target} \cdot \sqrt{\frac{Area_{target}}{Area_{curr}}}
+        A = \frac{1}{2} \left| \sum_{i=0}^{3} (x_i y_{i+1} - x_{i+1} y_i) \right|
     \end{equation}
+    where indices wrap around modulo 4.
 \end{itemize}
 
-\subsection{Global Perception and Homography Matrix Calculation}
-The system initiates coordination by bridging the heterogeneous perspectives of the Realsense environment and ESP32 arm cameras. 
+The raw depth estimate from Equation~\ref{eq:area_depth} is smoothed with a first-order low-pass filter to reduce jitter:
+\begin{equation}
+    Z_{filtered}(t) = \alpha \hat{Z}(t) + (1 - \alpha) Z_{filtered}(t-1)
+\end{equation}
+
+where $\alpha$ is the smoothing factor (default: 0.2). The filtered depth is published at 10 Hz and consumed by the IBVS controller.
+
+\subsection{Global-to-Local Handoff via Homography}
+
+The global perception system detects bricks and estimates grasp points in the RealSense camera frame. To initialize visual servoing in the ESP32-CAM frame, we must establish a geometric correspondence between these two views.
+
+\subsubsection{Homography Matrix Computation}
+A homography matrix $H$ represents the projective transformation between two planes. In our setup, $H$ maps pixel coordinates from the global (RealSense) view to the local (ESP32-CAM) view, assuming both cameras observe the same planar brick surface.
+
+To compute $H$ robustly:
+
+\begin{enumerate}
+    \item \textbf{Feature Detection in Both Views:} Extract the four corner points of detected bricks in both camera frames. Importantly, these corners must be in linear (undistorted) space for the homography to remain valid.
+    
+    \item \textbf{Geometric Matching:} Match bricks detected in the global view with those in the local view using aspect ratio constraints. The ratio of short-to-long edges is computed for each detection:
+    \begin{equation}
+        r = \frac{\text{short edge}}{\text{long edge}}
+    \end{equation}
+    Two detections are matched if $|r_{global} - r_{local}| < \epsilon$, where $\epsilon = 0.2$ is the tolerance threshold. This constraint ensures robust correspondence despite viewpoint differences and small perspective changes.
+    
+    \item \textbf{RANSAC Homography Estimation:} The matched corner pairs are fed into the RANSAC algorithm to compute a robust homography matrix:
+    \begin{equation}
+        \text{corners}_{local} = H \text{corners}_{global}
+    \end{equation}
+    RANSAC iteratively:
+    \begin{itemize}
+        \item Selects random subsets of 4 point correspondences
+        \item Computes a candidate homography matrix from each subset
+        \item Projects all global points using the candidate $H$ and counts inliers (points with reprojection error $< 5$ pixels)
+        \item Retains the homography with the best inlier support
+    \end{itemize}
+    
+    This robustness is critical for handling detection noise and occlusions.
+    
+    \item \textbf{Grasp Point Projection:} Once $H$ is computed and validated, the grasp point detected in the global view is projected to the local view:
+    \begin{equation}
+        p_{local} = H \cdot p_{global}
+    \end{equation}
+    This projected point serves as the initial target location for the grasp shifting planning module.
+\end{enumerate}
+
+\subsubsection{Sticky Tracking Strategy}
+Once a homography is established, it remains valid as long as the same brick is tracked. The system employs a \textbf{sticky tracking} mechanism:
+
 \begin{itemize}
-    \item \textbf{Brick Detection and Grasping Model:} The environment camera identifies candidate targets and computes a candidate grasp point $(u, v , z) $where $u$ , $v$  represents the grasp points pixel coordinates and $z$ represents the orientation angle .
-    \item \textbf{Geometric Feature Matching:} To ensure cross-camera consistency, the system extracts rotated bounding box corners and calculates the length-to-width ratio of the detected brick. A candidate is only validated if its aspect ratio matches the local view within a 20\% tolerance .
-    \item \textbf{Homography Estimation:} Once a match is confirmed, a Homography matrix $H$ is computed using the RANSAC algorithm. This matrix serves as the mathematical bridge to relate current image coordinates $m_i$ to reference coordinates $m_i^*$ via $m_i = H m_i^*$ .
+    \item \textbf{Initialization Phase:} When a new mission begins (brick type changes), the homography is reset. The system enters search mode, scanning incoming detections from both cameras until a geometric match is found.
+    
+    \item \textbf{Tracking Phase:} Once a match is found and $H$ is computed, the system "sticks" to that correspondence. Subsequent detections are matched to the previous brick by minimizing centroid distance, even if geometric ratios vary slightly due to perspective changes.
+    
+    \item \textbf{Re-initialization:} If tracking is lost (no detections in the local view for an extended period), the homography is cleared and the system returns to search mode.
 \end{itemize}
 
-\subsection{Transformation Logic}
-This block translates global strategic goals into local tactical coordinates for the end-effector.
+\subsection{Grasp Point Adaptation via Shifting Planning}
+
+The grasp point detected by the grasping model is not necessarily the brick's centroid. Instead, it represents the optimal location on the brick's face for the gripper to approach. However, visual servoing with corner-based features naturally drives the brick's centroid to the image center.
+
+To resolve this mismatch, we employ a \textbf{grasp shifting} strategy that adjusts the feature reference set based on the offset between the centroid and grasp point.
+
+\subsubsection{Grasp Offset Computation}
+At the moment a new grasp point is selected:
+
+\begin{enumerate}
+    \item \textbf{Reference Latch:} Store the current brick's corner features and the projected grasp point as reference data.
+    
+    \item \textbf{Shift Vector Calculation:} As the brick moves in the image, compute the transformation of the brick's shape using homography:
+    \begin{equation}
+        H_{local} = \text{findHomography}(\text{ref\_corners}, \text{curr\_corners}, \text{RANSAC})
+    \end{equation}
+    
+    Apply this transformation to the reference grasp point to track how it moves as the brick deforms/rotates:
+    \begin{equation}
+        p_{grasp,current} = H_{local} \cdot p_{grasp,reference}
+    \end{equation}
+    
+    \item \textbf{Adaptive Feature Offset:} Compute the shift vector from the current centroid to the grasp point:
+    \begin{equation}
+        \Delta p = p_{grasp,current} - \text{centroid}_{current}
+    \end{equation}
+    
+    Apply this offset to all corner features:
+    \begin{equation}
+        s_{shifted} = s_{current} + \Delta p
+    \end{equation}
+    
+    The shifted features are fed to the IBVS controller instead of the raw features. This tricks the controller into aligning the brick's centroid with the grasp point.
+\end{enumerate}
+
+\subsubsection{Benefits of Shifting Strategy}
 \begin{itemize}
-    \item \textbf{Perspective Transformation:} The candidate grasp point is projected into the local camera's image plane using the calculated matrix $H$. While the $U$ and $V$ pixel coordinates are transformed to account for the perspective shift, the orientation angle ($Z$) is passed directly to stabilize the goal state .
-    \item \textbf{Grasp Shifting Planning:} The system ``latches'' onto the initial transformed point to set a local reference. It calculates a shift vector between the current brick centroid and the desired grasp pixel, effectively shifting the target features so the controller aligns the gripper with the specific grasp point rather than the brick center .
+    \item Allows visual servoing to guide the gripper to a precise offset on the brick, not just the centroid.
+    \item Compensates for changes in brick pose and shape as it is manipulated.
+    \item Maintains control stability by working with the same robust corner features.
 \end{itemize}
 
-\subsection{Control Logic and Feature Generation}
-The final stage generates the desired goal state and executes the motion command.
+\subsection{Target Feature Generation}
+
+Before visual servoing can begin, desired feature locations $s^*$ must be computed based on the brick's physical dimensions and the desired grasping geometry.
+
+\subsubsection{Brick Model and Dimensions}
+The system supports three brick types, each with known physical dimensions:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Brick Type} & \textbf{Length (m)} & \textbf{Width (m)} \\
+        \hline
+        I-Brick & 0.058 & 0.030 \\
+        L-Brick & 0.060 & 0.060 \\
+        T-Brick & 0.090 & 0.030 \\
+        \hline
+    \end{tabular}
+    \caption{LEGO brick physical dimensions used for target feature generation.}
+\end{table}
+
+\subsubsection{Desired Feature Projection}
+Given a brick type with dimensions $(L, W)$ and a target depth $Z^*$:
+
+\begin{enumerate}
+    \item \textbf{3D Corner Generation:} Generate the brick's four corner points in 3D (world frame):
+    \begin{equation}
+        \text{corners}_{3D} = \begin{bmatrix}
+            -L/2 & -W/2 & 0 \\
+            L/2 & -W/2 & 0 \\
+            L/2 & W/2 & 0 \\
+            -L/2 & W/2 & 0
+        \end{bmatrix} + \begin{bmatrix} 0 & 0 & Z^* \end{bmatrix}
+    \end{equation}
+    
+    \item \textbf{Rotation Offset:} The brick's orientation in the gripper varies depending on the grasp configuration. The system computes an adaptive \textbf{rotation offset} based on the shift vector from the grasp shifting module:
+    \begin{equation}
+        \text{offset}_{\text{rot}} = \begin{cases}
+            \pi/2 & \text{if } |\Delta x| > |\Delta y| \text{ and } \Delta x > 0 \\
+            -\pi/2 & \text{if } |\Delta x| > |\Delta y| \text{ and } \Delta x < 0 \\
+            \pi & \text{if } |\Delta y| > |\Delta x| \text{ and } \Delta y > 0 \\
+            0 & \text{if } |\Delta y| > |\Delta x| \text{ and } \Delta y < 0
+        \end{cases}
+    \end{equation}
+    
+    This ensures the brick's "graspable face" is always perpendicular to the camera's optical axis.
+    
+    \item \textbf{3D Rotation:} Apply the computed rotation to align the brick correctly:
+    \begin{equation}
+        \text{corners}_{rotated} = R(\text{offset}_{\text{rot}}) \cdot \text{corners}_{3D}^T
+    \end{equation}
+    
+    \item \textbf{Perspective Projection:} Project the rotated 3D corners onto the image plane using the camera intrinsic matrix $K$:
+    \begin{equation}
+        p_{pixel} = K \cdot \frac{\text{corners}_{rotated}}{Z^*}
+    \end{equation}
+    
+    The resulting pixel coordinates form the desired feature vector $s^*$ fed to the IBVS controller.
+\end{enumerate}
+
+\subsubsection{Caching and Stability}
+The desired features are computed once per mission when the brick type is known. They are then cached and reused until a new brick type is selected. This ensures:
 \begin{itemize}
-    \item \textbf{Target Feature Generator:} The system defines the desired state $s^*$ by projecting a virtual 3D model of the brick into the image plane. It implements ``Snap-to-Grid'' logic to round the grasp angle to the nearest $90^\circ$, preventing rotational oscillations during the approach .
-    \item \textbf{IBVS Controller:} The Image-Based Visual Servoing (IBVS) controller minimizes the error $e(t) = s - s^*$. It utilizes the Image Jacobian ($L$) to translate pixel errors into 6-DOF velocity commands, enabling the robot manipulator to achieve sub-millimeter alignment for the final pick operation .
+    \item Consistent target throughout the control task
+    \item Reduced computational overhead (no re-computation during control)
+    \item Predictable control behavior
 \end{itemize}
-\section{Results and Evaluation}
-Experimental trials focused on stability and convergence. The pixel error norm successfully converged to $< 5$ pixels. The inclusion of RANSAC ensured sensor noise did not break the tracking lock, and fisheye calibration significantly reduced systematic bias.
+
+\subsection{IBVS Controller Implementation}
+
+The Image-Based Visual Servoing controller is the final module that transforms error signals into robot velocity commands.
+
+\subsubsection{Feature Error Definition}
+The controller minimizes the error between current and desired features:
+\begin{equation}
+    e(t) = s(t) - s^*(t)
+\end{equation}
+
+where $s = [u_1, v_1, u_2, v_2, u_3, v_3, u_4, v_4]^T$ represents the pixel coordinates of the four brick corner features.
+
+\subsubsection{Interaction Matrix and Control Law}
+For each feature point $(u_i, v_i)$ at depth $Z$, the Interaction Matrix (Image Jacobian) is:
+\begin{equation}
+    L_{s,i} = \begin{bmatrix}
+        -\frac{1}{Z} & 0 & \frac{u_i}{Z} & u_i v_i & -(1+u_i^2) & v_i \\
+        0 & -\frac{1}{Z} & \frac{v_i}{Z} & 1+v_i^2 & -u_i v_i & -u_i
+    \end{bmatrix}
+\end{equation}
+
+For four corner features, the stacked Interaction Matrix is $8 \times 6$, providing redundancy. The control law is:
+\begin{equation}
+    v_c = -\lambda L_s^+ e
+\end{equation}
+
+where $L_s^+$ is the Moore-Penrose pseudo-inverse and $\lambda$ is the control gain.
+
+\subsubsection{Hybrid Control Strategy}
+The controller implements a \textbf{hybrid approach} that decouples XY (image plane) and Z (depth) control:
+
+\begin{enumerate}
+    \item \textbf{XY-Plane Control (Centroid Alignment):} Uses a PID controller on the error between desired and current centroid positions:
+    \begin{equation}
+        v_x = -k_p e_u - k_i \sum e_u - k_d \frac{de_u}{dt}
+    \end{equation}
+    \begin{equation}
+        v_y = -k_p e_v - k_i \sum e_v - k_d \frac{de_v}{dt}
+    \end{equation}
+    
+    where $k_p$, $k_i$, $k_d$ are proportional, integral, and derivative gains (tuned experimentally).
+    
+    \item \textbf{Z-Axis Control (Area-Based Depth):} Uses an area-based controller to regulate the brick size:
+    \begin{equation}
+        \text{area\_error} = \frac{A^* - A_{current}}{A^*}
+    \end{equation}
+    
+    The Z-velocity follows an adaptive gain law:
+    \begin{equation}
+        v_z = \text{area\_error} \cdot \left( \lambda_{z,0} + (\lambda_{z,\infty} - \lambda_{z,0}) e^{-\beta_z |\text{area\_error}|} \right)
+    \end{equation}
+    
+    This gain scheduling ensures aggressive approach when far from target and gentle deceleration as the brick approaches the desired size.
+    
+    \item \textbf{YAW Control (Rotation):} Uses ViSP's computed rotation component from the full Interaction Matrix:
+    \begin{equation}
+        \omega_z = \text{gain}_{yaw} \cdot v_{visp,z}
+    \end{equation}
+    
+    where $v_{visp,z}$ is the rotation component of the ViSP solver.
+\end{enumerate}
+
+\subsubsection{Acceleration Ramping and Saturation}
+To ensure smooth acceleration and respect physical robot limits, velocity commands are subject to:
+
+\begin{enumerate}
+    \item \textbf{Acceleration Limiting:}
+    \begin{equation}
+        v_{out}(t) = v_{prev}(t-1) + \text{clamp}\left( v_{target} - v_{prev}(t-1), -a_{max} \Delta t, a_{max} \Delta t \right)
+    \end{equation}
+    
+    where $a_{max}$ is the maximum acceleration (default: 0.25 m/s² for linear, 1.5 rad/s² for angular).
+    
+    \item \textbf{Velocity Saturation:}
+    \begin{equation}
+        v_{final} = \text{clamp}(v_{out}, -v_{max}, v_{max})
+    \end{equation}
+    
+    where $v_{max}$ is the maximum velocity (default: 0.15 m/s for linear, 0.5 rad/s for angular).
+\end{enumerate}
+
+\subsubsection{Latency Compensation}
+The ESP32-CAM introduces WiFi transmission latency ($\approx 150$ ms). To mitigate oscillations caused by this delay, the proportional gain is set conservatively to $k_p = 0.0006$, with low integral gain to avoid aggressive responses to delayed feedback.
+
+\subsubsection{Logging and Monitoring}
+The controller logs performance metrics to a CSV file for offline analysis:
+\begin{itemize}
+    \item Timestamp and elapsed time
+    \item Feature error norm
+    \item Computed velocity commands $(v_x, v_y, v_z, \omega_z)$
+    \item Current depth estimate $Z$
+    \item Area error and other state variables
+\end{itemize}
+
+These logs enable post-hoc performance analysis and gain tuning iterations.
