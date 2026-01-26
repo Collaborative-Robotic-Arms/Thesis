@@ -6,8 +6,8 @@
 \contentsline {table}{\numberline {3.2}{\ignorespaces Mean Absolute Cartesian Errors Before and After Calibration}}{63}{table.caption.71}%
 \contentsline {table}{\numberline {3.3}{\ignorespaces LEGO brick physical dimensions used for target feature generation.}}{89}{table.caption.177}%
 \contentsline {table}{\numberline {3.4}{\ignorespaces Training Hyperparameters}}{104}{table.caption.211}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces Training configuration used in the comparison experiments.}}{106}{table.caption.214}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Training configuration used in the comparison experiments.}}{108}{table.caption.220}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Summary of best validation results for ResNet-UNet and Swin-T models.}}{112}{table.caption.220}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Qualitative comparison between labeled grasps (Ground Truth) and predicted grasps (Top-1) for three brick categories.}}{112}{table.caption.221}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Summary of best validation results for ResNet-UNet and Swin-T models.}}{115}{table.caption.227}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Qualitative comparison between labeled grasps (Ground Truth) and predicted grasps (Top-1) for three brick categories.}}{115}{table.caption.228}%
 \addvspace {10\p@ }

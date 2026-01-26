@@ -39,10 +39,13 @@
 \contentsline {figure}{\numberline {3.22}{\ignorespaces PCA principal axes overlaid on brick contours.}}{96}{figure.caption.188}%
 \contentsline {figure}{\numberline {3.23}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{99}{figure.caption.194}%
 \contentsline {figure}{\numberline {3.24}{\ignorespaces Swin Transformer Grasp Network Architecture}}{101}{figure.caption.202}%
+\contentsline {figure}{\numberline {3.25}{\ignorespaces I-shape example}}{105}{figure.caption.214}%
+\contentsline {figure}{\numberline {3.26}{\ignorespaces L-shape example}}{105}{figure.caption.214}%
+\contentsline {figure}{\numberline {3.27}{\ignorespaces T-shape example}}{105}{figure.caption.214}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Training and validation loss curves for box and segmentation heads.}}{108}{figure.caption.215}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Classification loss (train vs. val).}}{109}{figure.caption.216}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Normalized confusion matrix for brick classes.}}{110}{figure.caption.217}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Precision--Recall curves for detection and segmentation.}}{110}{figure.caption.218}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces F1 curves for detection and segmentation.}}{111}{figure.caption.219}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Training and validation loss curves for box and segmentation heads.}}{111}{figure.caption.222}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Classification loss (train vs. val).}}{112}{figure.caption.223}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Normalized confusion matrix for brick classes.}}{113}{figure.caption.224}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Precision--Recall curves for detection and segmentation.}}{113}{figure.caption.225}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces F1 curves for detection and segmentation.}}{114}{figure.caption.226}%
 \addvspace {10\p@ }

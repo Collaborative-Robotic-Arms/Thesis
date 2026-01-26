@@ -200,6 +200,46 @@ Unlike conventional pipelines that remove negative samples overlapping with posi
 \end{enumerate}
 
 This methodology allows the model to learn fine-grained orientation constraints, recognizing that specific orientations at a given location may be invalid even if other, nearby orientations are valid for a successful grasp.
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=1.0\textwidth]{Figures/chapter3/Grasping/I_shape.png}
+        \caption{I-shape example}
+    \end{minipage}\hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=1.0\textwidth]{Figures/chapter3/Grasping/L_shape.png}
+        \caption{L-shape example}
+    \end{minipage}\hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=1.0\textwidth]{Figures/chapter3/Grasping/T_shape.png}
+        \caption{T-shape example}
+    \end{minipage}
+    \label{fig:shape_examples}
+\end{figure}
+
+\subsection{Dense Target Maps}
+
+Following dense grasp prediction methods, such as GG-CNN, supervision is expressed as per-pixel maps. Representative samples of labeled data for various geometries are illustrated below:
+
+For each input crop, labels are rasterized into the following spatial representations:
+\begin{itemize}
+    \item \textbf{Quality Map ($Q$):} A positive mask $Q(x, y) \in \{0, 1\}$ indicating pixels belonging to positive grasp regions.
+    \item \textbf{Angle Maps:} Trigonometric representations $\cos(2\theta)$ and $\sin(2\theta)$ defined on positive pixels.
+    \item \textbf{Negative Mask ($N$):} A mask $N(x, y)$ representing invalid grasp rectangles, with corresponding negative angle maps $\cos(2\theta_n)$ and $\sin(2\theta_n)$.
+\end{itemize}
+
+\subsubsection{Angle Encoding and Recovery}
+The $2\theta$ encoding is utilized to remove the $180^\circ$ ambiguity inherent to parallel-jaw grippers, where $\theta$ and $\theta + \pi$ correspond to the identical jaw orientation. At inference time, the predicted angle $\theta(x, y)$ is recovered from the network outputs using the following relation:
+
+\begin{equation}
+    \theta(x, y) = 0.5 \cdot \operatorname{atan2}(\sin 2(x, y), \cos 2(x, y))
+\end{equation}
+
+
 \subsection{Training Objective (Loss Function)}
 The total loss $L$ is defined as the sum of four terms:
 $$L = L_{posQ} + L_{posAng} + \lambda_q \cdot L_{negQ} + \lambda_a \cdot L_{negAng}$$
@@ -212,31 +252,93 @@ Where:
 \end{itemize}
 
 \subsection{Training Procedure and Implementation Details}
-Both architectures are trained using the \textbf{AdamW} optimizer.
 
-\begin{table}[H]
-\centering
-\caption{Training configuration used in the comparison experiments.}
-\label{tab:train_config}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Parameter} & \textbf{ResNet-UNet} & \textbf{Swin-T + Fusion} \\
-\midrule
-Input size & $160 \times 160$ (RGB+D) & $160 \times 160$ (RGB+D) \\
-Input channels & 4 (3 RGB + 1 depth) & 4 (3 RGB + 1 depth) \\
-Optimizer & AdamW & AdamW \\
-Learning rate & $1e-4$ & $1e-4$ \\
-Batch size & 8 & 8 \\
-Max epochs & 150 & 150 \\
-\bottomrule
-\end{tabular}
+\subsubsection{Data Preparation and Label Format}
+The grasping dataset used in this work consists of 286 samples. Each sample is a single-brick crop ($160 \times 160$) extracted from the RGB stream and the aligned depth stream. For every crop, two label files are stored: (i) positive grasps and (ii) negative grasps. This separation is essential because negative grasps are not simply ``background''---they are explicit wrong grasps that may overlap the object region and even overlap positives.
+
+Label file naming follows the Cornell convention with a suffix for polarity: \texttt{<base>cpos.txt} for positives and \texttt{<base>cneg.txt} for negatives. Each line encodes one grasp rectangle in a compact center parameterization:
+
+\begin{equation*}
+    c_x \quad c_y \quad \text{ang}_{\text{deg}} \quad w \quad h
+\end{equation*}
+
+\noindent where $(c_x, c_y)$ is the rectangle center in pixel coordinates of the $160 \times 160$ crop, $\text{ang}_{\text{deg}}$ is the in-plane gripper orientation (opening direction) in degrees, and $(w, h)$ are the rectangle dimensions. Although the network does not predict width in this project (binary gripper opening), width/height are still kept in the label for completeness and for optional post-processing.
+
+Internally, angles are represented using a doubled-angle encoding $(\cos(2\theta), \sin(2\theta))$ to respect the $\pi$-symmetry of parallel-jaw grasps ($\theta$ and $\theta+\pi$ are equivalent). Negative labels are also encoded as doubled angles so the loss can apply an angular margin penalty against wrong orientations.
+\subsubsection{Input Representation and Normalization}
+Each training input is a multi-channel tensor built from RGB (3 channels) and aligned depth (1 channel), resulting in 4 channels total. RGB is converted to float in $[0, 1]$ then normalized per image by mean subtraction. Depth is loaded as float (from \texttt{.npy} or 16-bit PNG), mean-centered, and clipped to a bounded range to reduce the impact of outliers. This mirrors the exact preprocessing used at inference time to avoid train-test mismatch.
+
+To ensure deployment uses the same distribution seen during training, crops should be generated from the detector output using the same policy: enlarge the detected bounding box by a constant factor (e.g., $1.3\times$), clip to image boundaries, pad if needed, and finally resize to $160 \times 160$. The same crop window must be applied to both RGB and the aligned depth-to-color image to preserve pixel-wise correspondence.
+
+\subsubsection{Data Augmentation and Label Warping}
+Because the dataset is relatively small, strong augmentation is used to improve generalization. A single affine transform is sampled per image and applied consistently to RGB, depth, and label coordinates. The transform combines:
+
+\begin{itemize}
+    \item \textbf{Rotation:} Multiples of $90^\circ$ plus a small jitter ($\pm 15^\circ$).
+    \item \textbf{Scale (zoom):} $0.7\times$ to $1.3\times$.
+    \item \textbf{Translation:} Up to $\pm 10$ pixels in $x/y$.
+\end{itemize}
+
+In addition, appearance augmentation is applied to RGB (brightness/contrast jitter and light Gaussian blur), and Gaussian noise may be added to depth. Applying the same affine matrix to labels ensures that positive and negative grasp supervision remains geometrically correct after augmentation.
+
+\subsubsection{Optimization, Training Schedule, and Logging}
+Both architectures are trained with the same optimization settings to enable a fair comparison. We use the AdamW optimizer (decoupled weight decay) [7] implemented in PyTorch, with learning rate $1 \times 10^{-4}$ and weight decay $1 \times 10^{-4}$ (default $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=1\text{e-}8$). Mini-batch size is 8 and training runs for up to 150 epochs. Checkpoints are saved every epoch.
+
+A backbone freeze-unfreeze schedule can be used when initializing from pretrained weights: the encoder/backbone is frozen for the first 5 epochs to stabilize the decoder heads, then unfrozen for full fine-tuning. For models trained from scratch (offline or when pretrained weights are unavailable), freezing is disabled (\texttt{freeze\_epochs=0}).
+
+Early stopping is configured to monitor validation loss (or a validation accuracy proxy) with \texttt{patience=15} epochs and \texttt{min\_delta=1e-4}. Training and validation scalars (total loss, loss components, validation loss, and best (argmax-Q) center-angle accuracy) are logged via TensorBoard event files for later analysis and thesis plots.
+
+
+\subsection{Project-Specific Adaptations}
+Two key adaptations were introduced to match the brick-assembly hardware constraints:
+
+\begin{enumerate}
+    \item \textbf{No grasp width prediction.} Since the gripper is operated in a binary open/close mode and all bricks share the same thickness, the model predicts only grasp quality $Q$ and orientation $\theta$ (via $\cos(2\theta), \sin(2\theta)$). Width is not an output head and is not used in the loss.
+    
+    \item \textbf{Explicit negative supervision.} In addition to positive grasp rectangles, negative rectangles are provided to teach the network to suppress implausible grasp regions and orientations even when they overlap the object. This is implemented through a negative-quality BCE penalty and an overlap-safe negative angular margin penalty.
+\end{enumerate}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Training configuration used in the comparison experiments.}
+    \label{tab:training_config}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Parameter} & \textbf{ResNet-UNet} & \textbf{Swin-T + Fusion} \\
+        \midrule
+        Input size & $160 \times 160$ (RGB+D) & $160 \times 160$ (RGB+D) \\
+        Input channels & 4 (3 RGB + 1 depth) & 4 (3 RGB + 1 depth) \\
+        Outputs & $Q$ logits + $\cos(2\theta) + \sin(2\theta)$ & $Q$ logits + $\cos(2\theta) + \sin(2\theta)$ \\
+        Optimizer & AdamW [7] & AdamW [7] \\
+        Learning rate & 1e-4 & 1e-4 \\
+        Weight decay & 1e-4 & 1e-4 \\
+        Batch size & 8 & 8 \\
+        Max epochs & 150 & 150 \\
+        Freeze schedule & Freeze 5 epochs then unfreeze & Freeze 0--5 epochs (dep. on init) \\
+        Augmentation & Rot/zoom/shift + RGB jitter + depth noise & Rot/zoom/shift + RGB jitter + depth noise \\
+        Loss (neg) & \begin{tabular}{@{}c@{}} $w_{\text{neg\_q}}=0.5$, $w_{\text{neg\_ang}}=0.25$, \\ margin $= 10^\circ$ \end{tabular} & \begin{tabular}{@{}c@{}} $w_{\text{neg\_q}}=0.5$, $w_{\text{neg\_ang}}=0.25$, \\ margin $= 10^\circ$ \end{tabular} \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-\subsection{ROS 2 Integration}
-In deployment, the pipeline reproduces the training crop logic:
+\subsection{ROS 2 Integration Notes}
+In deployment, the vision $\to$ grasp pipeline should reproduce the \textit{exact} crop and normalization used during training. A typical ROS 2 graph is:
+
 \begin{enumerate}
-    \item \textbf{Detector}: YOLOv8-Seg publishes per-brick bounding boxes.
-    \item \textbf{Preprocess}: Expands bbox by $1.3\times$, crops RGB-D, and resizes to $160 \times 160$.
-    \item \textbf{Inference}: Runs the network and outputs the best $(cx, cy, \theta)$ grasp.
-    \item \textbf{Projection}: Maps coordinates back to the 3D world frame using camera intrinsics for motion planning.
+    \item \textbf{Detector (YOLOv8-Seg)} publishes per-brick bounding boxes and (optionally) masks [8].
+
+    \item \textbf{Crop/Preprocess node} subscribes to \texttt{/camera/color/image\_raw} and \texttt{/camera/aligned\_depth\_to\_color/image\_raw}, then:
+    \begin{itemize}
+        \item Expands each bbox by scale $s$ (e.g., $s=1.3$): $w' = s \cdot w$, $h' = s \cdot h$ around the bbox center.
+        \item Clips/pads to stay within image bounds.
+        \item Crops both RGB and aligned depth using the same ROI and resizes to $160 \times 160$.
+        \item Applies the same per-image normalization (RGB mean subtraction; depth mean-center + clipping).
+    \end{itemize}
+    It then publishes the processed crop (RGB and depth) to the grasp inference node.
+
+    \item \textbf{Grasp inference node} loads the trained weights, runs the network, and outputs a single best ($\operatorname{argmax} Q$) grasp $(c_x, c_y, \theta)$ in crop coordinates, along with a confidence score $Q$.
+
+    \item \textbf{A projection step} maps $(c_x, c_y)$ back to the original image ROI, reads depth at that pixel, and converts to 3D camera coordinates using the camera intrinsics $(f_x, f_y, c_{x0}, c_{y0})$. This 3D pose can then be sent to MoveIt 2 or a motion planner.
 \end{enumerate}
+
+\paragraph{Implementation detail:} Publish the crop as \texttt{sensor\_msgs/Image} (\texttt{RGB8} for color, \texttt{32FC1} for depth after conversion) or as a custom message that packs both. Keeping the crop size fixed ($160 \times 160$) simplifies batching and guarantees the grasp model sees the same input distribution as during training.
