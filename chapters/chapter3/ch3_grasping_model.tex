@@ -1,0 +1,282 @@
+\chapter{System Design and Implementation}
+3. Model Architectures
+
+Two grasp networks were implemented and trained under the same data pipeline and loss function: (i) a ResNet-UNet model, and (ii) a Swin Transformer model with a lightweight multi-scale fusion decoder. Both models output three full-resolution maps: a grasp-quality logit map (Q logits), and two angle maps (cos2, sin2).
+
+3.1 ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)
+
+ Architecture Overview
+
+The proposed model utilizes a fully convolutional encoder-decoder architecture designed for dense, pixel-wise grasp detection. As illustrated in Figure 7, the network adheres to a U-Net-like structure but replaces the standard contracting path with a ResNet-34 backbone. This hybrid design aims to leverage the robust feature extraction capabilities of deep residual networks while maintaining the spatial reconstruction precision inherent to U-Net through lateral skip connections. The network accepts a 4-channel RGB-D image as input and outputs pixel-wise maps corresponding to grasp quality and orientation parameters.
+
+Figure 7 ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)
+
+ Feature Extraction (Encoder)
+
+For the encoder path, we employ a ResNet-34 model to extract hierarchical features from the input data. To accommodate the depth information crucial for geometric understanding in robotic grasping, the first convolutional layer of the standard ResNet was modified to accept 4 input channels (RGB-D) instead of the typical 3 channels.
+
+The encoder consists of an initial "stem" block (convolution, batch normalization, and ReLU with stride 2), followed by a max pooling layer and four subsequent residual stages. These stages progressively downsample the input spatial resolution by a total factor of 32 through strided operations. While this downsampling reduces spatial precision, it allows the network to capture high-level abstract semantic features essential for recognizing graspable objects.
+
+ Upsampling and Feature Fusion (Decoder)
+
+The decoder path aims to recover the spatial resolution lost during encoding to enable precise localization of grasp candidates. The decoder is symmetric to the encoder and is composed of four upsampling blocks. Each block performs two primary operations:
+
+Upsampling: Bilinear interpolation is used to increase the feature map size by a factor of two at each step.
+
+Feature Fusion via Skip Connections: This is a critical component of the architecture. The upsampled features in the decoder are concatenated with the corresponding high-resolution feature maps from the encoder path (indicated by the horizontal arrows in Figure [1]). These skip connections fuse low-level spatial details from the encoder with high-level semantic features from the decoder, significantly improving the network's ability to reconstruct fine object boundaries.
+
+Following concatenation, standard convolution layers and nonlinear activations are applied to refine the fused features.
+
+Output Representations
+
+The final layer of the decoder branches into three distinct 1x1 convolutional heads to generate the specific grasping parameters for every pixel in the image:
+
+Grasp Position Head: Outputs a single-channel score map (logits) representing the predicted quality or probability of a successful grasp centered at each pixel.
+
+Grasp Orientation Heads: Two separate heads output the cosine and sine of twice the grasp angle (cos2θ and sin2θ), respectively. Tanh activation is applied to these outputs to bound them between -1 and 1. This representation is explicitly chosen to handle angular periodicity and avoid the numerical discontinuity issues associated with directly regressing a single angle value θ.
+
+3.1.1 Implementation-Level Architecture (from resnet_unet.py)
+
+The implemented ResNet-UNet model (class ResNetUNetGraspNoWidth) combines a ResNet34 encoder from torchvision with a UNet-style decoder composed of four upsampling blocks and shallow output heads. The network is fully convolutional and produces three dense output maps at the same spatial resolution as the input crop: (i) grasp quality logits (pos_logits) and (ii) the orientation field encoded by cos(2θ) and sin(2θ).
+
+A key project adaptation is support for RGB-D input (C=4). When pretrained ImageNet weights are used, the original ResNet first convolution (conv1) is replaced with a new Conv2d(in_channels→64, kernel=7×7, stride=2). The weight initialization reuses the pretrained 3-channel filters and initializes extra channels (e.g., depth) by copying the mean of the RGB filters. This preserves the pretrained low-level feature priors while allowing an additional modality.
+
+Encoder/Decoder Tensor Shapes for 160×160 Input
+
+Decoder blocks are implemented as UpBlock modules. Each UpBlock performs: (1) bilinear upsampling by a factor of 2, (2) channel-wise concatenation with the corresponding encoder skip feature map, and (3) two Conv-BN-ReLU layers (ConvBNReLU). This design restores fine spatial details that are lost during downsampling and is especially important for accurate grasp-center localization on small objects.
+
+The final feature tensor is refined by an additional ConvBNReLU(64→64) followed by a 1×1 convolution (final_conv). Three separate 1×1 heads then predict: pos_logits (no activation; sigmoid is applied in post-processing), and cos2/sin2. In the ResNet-UNet implementation, cos2 and sin2 are passed through tanh to constrain outputs to [-1, 1], which stabilizes regression and keeps the representation consistent with the trigonometric targets.
+
+Forward pass (high-level): s0=stem(x), x1=maxpool(s0), s1=e1(x1), s2=e2(s1), s3=e3(s2), s4=e4(s3); then d3=up3(s4,s3), d2=up2(d3,s2), d1=up1(d2,s1), d0=up0(d1,s0), upsample to 160×160, apply final_conv, and output heads.
+
+3.2 Swin Transformer Grasp Network (Swin-T Backbone + Multi-scale Fusion)
+
+Architecture Overview
+
+The proposed architecture integrates a hierarchical Vision Transformer backbone with a lightweight multi-scale fusion decoder .As illustrated in Figure 8 ,We utilize the Swin Transformer (Tiny variant) as the encoder to extract rich feature representations from the input RGB-D image. Unlike standard Vision Transformers (ViT) that process images as a sequence of patches with global self-attention, Swin Transformer constructs hierarchical feature maps by merging image patches in deeper layers. This hierarchical design allows the model to capture both fine-grained details and high-level semantic information, making it highly suitable for dense prediction tasks like robotic grasping.
+
+Figure 8. Swin Transformer Grasp Network
+
+The network processes an input of size . The encoder progressively downsamples the resolution to  while increasing the channel dimension. A custom decoder then projects these multi-scale features to a common embedding space, upsamples them, and fuses them to predict pixel-wise grasp quality and orientation.
+
+ Swin Transformer Encoder
+
+The backbone follows the architectural design of Swin-T, which has a model size and computational complexity comparable to ResNet-50. The processing stages are as follows:
+
+Patch Partitioning: The input image is split into non-overlapping patches of size . Each patch is treated as a "token" with a feature dimension of  (for RGB-D input). A linear embedding layer projects this to an arbitrary dimension C (where C=96 for Swin-T).
+
+Hierarchical Stages: The encoder consists of four stages. To produce a hierarchical representation, "Patch Merging" layers are used between stages to reduce the number of tokens.
+
+The first patch merging layer concatenates features of  neighboring patches and applies a linear layer, reducing the resolution by a factor of 2 (downsampling).
+
+This process repeats, producing feature maps at strides of 4, 8, 16, and 32 with channel dimensions of C, 2C, 4C, and 8C respectively.
+
+ Window-Based and Shifted Window Self-Attention
+
+A key innovation of the Swin Transformer-and the primary reason for its efficiency-is the replacement of global self-attention with Window-Based Self-Attention.
+
+1. Window-Based Self-Attention (W-MSA): Standard global attention has quadratic computational complexity with respect to the number of tokens (O()), which is computationally prohibitive for high-resolution images. To solve this, Swin Transformer partitions the image into non-overlapping local windows of size  (typically M=7). Self-attention is computed only within each local window. This reduces the complexity to be linear with respect to the image size (O(HW)), making the model much more efficient.
+
+2. The Shifted Window Mechanism (SW-MSA): While W-MSA is efficient, it lacks connections across windows; tokens in one window cannot attend to tokens in a neighboring window, which limits the modeling power. To resolve this, the Shifted Window partitioning approach is employed in consecutive blocks:
+
+Layer l (Regular Partitioning): The image is partitioned into regular windows starting from the top-left pixel.
+
+Layer l+1(Shifted Partitioning): The windowing configuration is shifted by displacing the windows by ([], [ ]) pixels.
+
+Why is this important? This shift ensures that the new windows in layer L+1 cross the boundaries of the windows in layer L. This effectively provides connections among neighboring non-overlapping windows. Consequently, the model gains the global modeling capability of standard Transformers while maintaining the linear efficiency of local windows. To compute this efficiently without padding (which would increase computation), a "cyclic shift" mechanism is used, where top-left blocks move to the bottom-right, allowing batched computation.
+
+ Multi-Scale Fusion Decoder
+
+To recover spatial resolution for pixel-wise grasp detection, we implement a lightweight fusion decoder:
+
+Projection: Feature maps from all four encoder stages (S1, S2, S3, S4) are projected via 11 convolutions to a unified embedding dimension (e.g., 256 channels).
+
+Upsampling and Concatenation: The deeper, low-resolution features (S2, S3, S4) are bilinearly upsampled to match the resolution of the first stage (H/4). All four feature maps are then concatenated, fusing high-level semantics with low-level spatial details.
+
+Grasp Prediction: The fused features pass through a convolutional block for refinement, followed by a final upsampling to the original input resolution. Three output heads predict the grasp quality, cos(2θ) and sin(2θ).
+
+3.2.1 Implementation-Level Architecture (from swin.py)
+
+The implemented Swin-based model (class SwinGraspNoWidth) uses a Swin Transformer backbone created via timm with features_only=True. The backbone exposes a pyramid of multi-scale feature maps (one per stage). A lightweight CNN fusion decoder then projects, aligns, and fuses these features to predict dense grasp maps at the input resolution.
+
+Input-size handling is essential: many Swin variants are configured for 224×224, and timm can assert the expected size at patch embedding. To train on 160×160 crops, the backbone is created with img_size=160, ensuring all internal stages are consistent with the project input.
+
+Swin Feature Pyramid and Fusion Decoder.
+
+In the code, each backbone feature map f_i is projected to a common embedding dimension using a 1×1 convolution (ModuleList self.proj). All projected maps are bilinearly upsampled to the spatial resolution of the highest-resolution level (target_hw = p[0].shape[-2:]). The upsampled maps are concatenated and passed through a small fusion network self.fuse consisting of two 3×3 convolutions with ReLU activations.
+
+The fused feature map is then upsampled to the input resolution (160×160). Three 1×1 heads output pos_logits, cos2, and sin2. In our implementation the Swin head outputs are not explicitly bounded by tanh; bounded behavior is encouraged by the target ranges and by normalization inside the negative-angle constraint in the loss. (If desired, tanh can also be applied to cos2/sin2 for consistency.)
+
+Robustness to feature layout: timm may return some intermediate features in NHWC layout. The forward pass checks channel placement and permutes NHWC→NCHW before Conv2d projection, preventing channel mismatch during training.
+
+Optimizer: AdamW was used for all experiments (torch.optim.AdamW), providing adaptive updates with decoupled weight decay. The primary hyperparameters in the reported experiments were lr=1e-4 and weight_decay=1e-4, with batch_size=8 and up to 150 epochs. Model checkpoints were saved each epoch, enabling selection of the best-performing epoch based on validation loss.
+
+Early stopping: training could be terminated if validation loss stopped improving by at least min_delta≈1e-4 for patience≈15 epochs (monitor=val_loss). This helps prevent overfitting, especially when training on a relatively small dataset.
+
+Backbone freezing (optional): when pretrained backbones were used, the backbone parameters could be frozen for the first few epochs (freeze_epochs=5) to let the decoder and heads adapt, then unfrozen for end-to-end fine-tuning. For training from scratch, freezing was disabled.
+
+2. Dataset Preparation and Label Format
+
+The training set consists of RGB and depth crops, each containing a single brick. Crops are generated by enlarging the detection bounding box by a fixed factor (e.g., 1.3×) to match the distribution used during dataset creation, then resizing to 160×160. For each crop, two label files are provided:
+
+Positive grasps (…cpos.txt): rectangles that correspond to feasible grasps.
+
+Negative grasps (…cneg.txt): rectangles that represent explicitly invalid grasps (e.g., slipping, collision, or unstable contact).
+
+Each label file uses a center-based format per line:cx  cy  angle_deg  w  hwhere (cx, cy) are pixel coordinates in the cropped image, angle_deg is the in-plane orientation of the rectangle, and (w, h) are rectangle dimensions. Although (w, h) are stored to remain compatible with standard grasp-rectangle tooling, the proposed models ignore width during training and predict only quality and orientation.
+
+Unlike pipelines that remove negatives that overlap positives, we keep positive and negative rectangles even if they overlap spatially. Instead, we enforce correctness through a loss that (i) encourages high quality inside positive rectangles and (ii) suppresses quality and nearby angles inside negative rectangles. This allows the model to learn that some orientations at a location are invalid even if nearby orientations are valid.
+
+Figure 9 I shape exampleFigure 9 I shape exampleSamples from the data (red rectangles are the negative grasps ):
+
+Figure 9 I shape example
+
+Figure 9 I shape example
+
+Figure 10 L shape exampleFigure 10 L shape exampleFigure 11 T shape exampleFigure 11 T shape example
+
+Figure 10 L shape example
+
+Figure 10 L shape example
+
+Figure 11 T shape example
+
+Figure 11 T shape example
+
+2.1 Dense Target Maps
+
+Following dense grasp prediction methods (e.g., GG-CNN [6]), supervision is expressed as per-pixel maps. For each input crop, labels are rasterized into:
+
+Q map (positive mask): Q(x, y) ∈ {0, 1} indicating pixels belonging to positive grasp regions.
+
+Angle maps: cos(2θ) and sin(2θ) defined on positive pixels.
+
+Negative mask N(x, y) for invalid grasp rectangles, with corresponding negative angle maps cos(2θ_n), sin(2θ_n).
+
+The 2θ encoding removes the 180° ambiguity inherent to parallel-jaw grippers (θ and θ+π correspond to the same jaw direction). At inference time, the predicted angle is recovered by:θ(x, y) = 0.5 · atan2(sin2(x, y), cos2(x, y)).
+
+4. Training Objective (Loss Function) and Negative Supervision
+
+Let the model predict three maps: (Q̂_logits, ĉ, ŝ), where ĉ ≈ cos(2θ) and ŝ ≈ sin(2θ). Targets are (Q, c, s, N, c_n, s_n), where N is the negative mask and (c_n, s_n) encodes the negative rectangle orientation.The total loss is the sum of four terms:
+
+1. Positive grasp quality loss (BCE): encourages high Q̂ inside positive rectangles.
+
+2. Positive angle regression (Smooth L1): regresses cos(2θ) and sin(2θ) only on positive pixels.
+
+3. Negative quality penalty (BCE): enforces low Q̂ in negative-only regions (without penalizing positive pixels).
+
+4. Negative angle margin penalty: discourages predicted angles that are too close to negative angles within negative regions, even if overlap with positives exists.
+
+A compact form is:L = L_posQ + L_posAng + λ_q·L_negQ + λ_a·L_negAngwhere L_posQ is BCEWithLogits(Q̂_logits, Q), L_posAng is SmoothL1 on (ĉ, ŝ) masked by Q, L_negQ is BCEWithLogits(Q̂_logits, 0) masked by N·(1-Q), and L_negAng penalizes similarity between predicted and negative angles when the angle difference is below a margin. In doubled-angle space, the similarity is sim = ĉ·c_n + ŝ·s_n = cos(2Δθ); we penalize sim > cos(2·margin).
+
+5. Training Procedure and Implementation Details
+
+5.1 Data Preparation and Label Format
+
+The grasping dataset used in this work consists of 286 samples. Each sample is a single-brick crop (160×160) extracted from the RGB stream and the aligned depth stream. For every crop, two label files are stored: (i) positive grasps and (ii) negative grasps. This separation is essential because negative grasps are not simply "background"-they are explicit wrong grasps that may overlap the object region and even overlap positives.
+
+Label file naming follows the Cornell convention with a suffix for polarity: <base>cpos.txt for positives and <base>cneg.txt for negatives. Each line encodes one grasp rectangle in a compact center parameterization:  cx  cy  ang_deg  w  hwhere (cx, cy) is the rectangle center in pixel coordinates of the 160×160 crop, ang_deg is the in-plane gripper orientation (opening direction) in degrees, and (w, h) are the rectangle dimensions. Although the network does not predict width in this project (binary gripper opening), width/height are still kept in the label for completeness and for optional post-processing.
+
+Internally, angles are represented using a doubled-angle encoding (cos(2θ), sin(2θ)) to respect the π-symmetry of parallel-jaw grasps (θ and θ+π are equivalent). Negative labels are also encoded as doubled angles so the loss can apply an angular margin penalty against wrong orientations.
+
+5.2 Input Representation and Normalization
+
+Each training input is a multi-channel tensor built from RGB (3 channels) and aligned depth (1 channel), resulting in 4 channels total. RGB is converted to float in [0, 1] then normalized per image by mean subtraction. Depth is loaded as float (from .npy or 16-bit PNG), mean-centered, and clipped to a bounded range to reduce the impact of outliers. This mirrors the exact preprocessing used at inference time to avoid train-test mismatch.
+
+To ensure deployment uses the same distribution seen during training, crops should be generated from the detector output using the same policy: enlarge the detected bounding box by a constant factor (e.g., 1.3×), clip to image boundaries, pad if needed, and finally resize to 160×160. The same crop window must be applied to both RGB and the aligned depth-to-color image to preserve pixel-wise correspondence.
+
+5.3 Data Augmentation and Label Warping
+
+Because the dataset is relatively small, strong augmentation is used to improve generalization. A single affine transform is sampled per image and applied consistently to RGB, depth, and label coordinates. The transform combines:• Rotation: multiples of 90° plus a small jitter (±15°)• Scale (zoom): 0.7× to 1.3×• Translation: up to ±10 pixels in x/yIn addition, appearance augmentation is applied to RGB (brightness/contrast jitter and light Gaussian blur), and Gaussian noise may be added to depth. Applying the same affine matrix to labels ensures that positive and negative grasp supervision remains geometrically correct after augmentation.
+
+5.4 Optimization, Training Schedule, and Logging
+
+Both architectures are trained with the same optimization settings to enable a fair comparison. We use the AdamW optimizer (decoupled weight decay) [7] implemented in PyTorch, with learning rate 1×10⁻⁴ and weight decay 1×10⁻⁴ (default β₁=0.9, β₂=0.999, ε=1e-8). Mini-batch size is 8 and training runs for up to 150 epochs. Checkpoints are saved every epoch.
+
+A backbone freeze-unfreeze schedule can be used when initializing from pretrained weights: the encoder/backbone is frozen for the first 5 epochs to stabilize the decoder heads, then unfrozen for full fine-tuning. For models trained from scratch (offline or when pretrained weights are unavailable), freezing is disabled (freeze_epochs=0).
+
+Early stopping is configured to monitor validation loss (or a validation accuracy proxy) with patience=15 epochs and min_delta=1e-4. Training and validation scalars (total loss, loss components, validation loss, and best (argmax-Q) center-angle accuracy) are logged via TensorBoard event files for later analysis and thesis plots.
+
+5.5 Project-Specific Adaptations
+
+Two key adaptations were introduced to match the brick-assembly hardware constraints:(1) No grasp width prediction. Since the gripper is operated in a binary open/close mode and all bricks share the same thickness, the model predicts only grasp quality Q and orientation θ (via cos(2θ), sin(2θ)). Width is not an output head and is not used in the loss.(2) Explicit negative supervision. In addition to positive grasp rectangles, negative rectangles are provided to teach the network to suppress implausible grasp regions and orientations even when they overlap the object. This is implemented through a negative-quality BCE penalty and an overlap-safe negative angular margin penalty.
+
+Table 2. Training configuration used in the comparison experiments.
+
+Parameter
+
+ResNet-UNet
+
+Swin-T + Fusion
+
+Input size
+
+160×160 (RGB+D)
+
+160×160 (RGB+D)
+
+Input channels
+
+4 (3 RGB + 1 depth)
+
+4 (3 RGB + 1 depth)
+
+Outputs
+
+Q logits + cos(2θ) + sin(2θ)
+
+Q logits + cos(2θ) + sin(2θ)
+
+Optimizer
+
+AdamW [7]
+
+AdamW [7]
+
+Learning rate
+
+1e-4
+
+1e-4
+
+Weight decay
+
+1e-4
+
+1e-4
+
+Batch size
+
+8
+
+8
+
+Max epochs
+
+150
+
+150
+
+Freeze schedule
+
+freeze 5 epochs then unfreeze
+
+freeze 0-5 epochs (depending on init)
+
+Augmentation
+
+rot/zoom/shift + RGB jitter + depth noise
+
+rot/zoom/shift + RGB jitter + depth noise
+
+Loss (neg)
+
+w_neg_q=0.5, w_neg_ang=0.25, margin=10°
+
+w_neg_q=0.5, w_neg_ang=0.25, margin=10°
+
+9. ROS 2 Integration Notes (Placeholders)
+
+In deployment, the vision→grasp pipeline should reproduce the *exact* crop and normalization used during training. A typical ROS 2 graph is:1) Detector (YOLOv8-Seg) publishes per-brick bounding boxes and (optionally) masks. [8]2) Crop/Preprocess node subscribes to /camera/color/image_raw and /camera/aligned_depth_to_color/image_raw, then:   • expands each bbox by scale s (e.g., s=1.3): w' = s·w, h' = s·h around the bbox center   • clips/pads to stay within image bounds   • crops both RGB and aligned depth using the same ROI and resizes to 160×160   • applies the same per-image normalization (RGB mean subtraction; depth mean-center + clipping)   It then publishes the processed crop (RGB and depth) to the grasp inference node.3) Grasp inference node loads the trained weights, runs the network, and outputs a single best (argmax-Q) grasp (cx, cy, θ) in crop coordinates, along with a confidence score Q.4) A projection step maps (cx, cy) back to the original image ROI, reads depth at that pixel, and converts to 3D camera coordinates using the camera intrinsics (fx, fy, cx0, cy0). This 3D pose can then be sent to MoveIt 2 or a motion planner.
+
+Implementation detail: publish the crop as sensor_msgs/Image (RGB8 for color, 32FC1 for depth after conversion) or as a custom message that packs both. Keeping the crop size fixed (160×160) simplifies batching and guarantees the grasp model sees the same input distribution as during training.
