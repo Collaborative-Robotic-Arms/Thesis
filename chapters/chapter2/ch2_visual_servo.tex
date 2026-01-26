@@ -5,7 +5,7 @@ Visual servoing is a robotic control technique that utilizes information from a 
 Understanding the geometric mapping of 3D points onto a 2D image plane is fundamental to visual control. This project utilizes two primary models: the standard pinhole model and the fisheye model.
 
 \subsubsection{The Pinhole Camera Model}
-The Pinhole model serves as the ideal geometric basis for most visual servoing control laws. As illustrated in Figure~\ref{fig:pinhole_model}, a 3D point $P = [X, Y, Z]^T$ in the camera frame $\{C\}$ is projected onto the image plane at coordinates $p = [x, y]^T$ via the focal length $\lambda$\cite{Hutchinson1996}:
+The Pinhole model serves as the ideal geometric basis for most visual servoing control laws. As illustrated in Equation~\ref{fig:pinhole_model}, a 3D point $P = [X, Y, Z]^T$ in the camera frame $\{C\}$ is projected onto the image plane at coordinates $p = [x, y]^T$ via the focal length $\lambda$\cite{Hutchinson1996}:
 \begin{equation}
     x = \lambda \frac{X}{Z}, \quad y = \lambda \frac{Y}{Z}
 \end{equation}

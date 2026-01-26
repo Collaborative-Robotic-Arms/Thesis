@@ -296,7 +296,7 @@ The Planning Module is implemented as a ROS2 C++ node with direct MoveIt2 integr
 \textbf{Key Components}:
 
 \begin{itemize}
-    \item \textbf{Object Detection (YOLOv8 Segmentation)}: Uses the state-of-the-art YOLOv8 segmentation model to:
+    \item \textbf{Object Detection (YOLOv8 Segmentation)}: Uses YOLOv8 segmentation model to:
     \begin{itemize}
         \item Detect brick instances in the scene
         \item Provide pixel-level segmentation masks
@@ -315,7 +315,7 @@ The Planning Module is implemented as a ROS2 C++ node with direct MoveIt2 integr
     \begin{itemize}
         \item \textbf{Vision Transformer (ViT) Architecture}: Encodes multi-scale image features to understand local geometric properties
         \item \textbf{Grasp Quality Estimation}: Learns to predict grasp success probability
-        \item \textbf{6-DOF Pose Prediction}: Estimates gripper orientation and position relative to the brick
+        \item \textbf{4-DOF Pose Prediction}: Estimates gripper orientation and position relative to the brick
     \end{itemize}
     
     Grasp learning is trained on:
@@ -333,12 +333,7 @@ The Planning Module is implemented as a ROS2 C++ node with direct MoveIt2 integr
         \item Camera-to-base transformation: Computed from known camera mounting geometry
         \item Coordinate transformation pipeline: RGB image → camera frame → robot base frame
     \end{itemize}
-    
-    \item \textbf{Planar Homography (Optional Disambiguation)}: For challenging scenarios (occluded bricks, cluttered scenes), planar homography estimates 3D brick locations from 2D image coordinates assuming bricks lie on a known plane (the work surface):
-    \begin{itemize}
-        \item Homography matrix $H$ is computed from known point correspondences
-        \item 2D image points are lifted to 3D using the plane constraint
-    \end{itemize}
+   
 \end{itemize}
 
 \textbf{Implementation Details}:
