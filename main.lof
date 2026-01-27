@@ -20,32 +20,36 @@
 \contentsline {figure}{\numberline {3.3}{\ignorespaces RealSense D435i~\cite {realsense_d435i}.}}{39}{figure.caption.37}%
 \contentsline {figure}{\numberline {3.4}{\ignorespaces ESP32-CAM OV2640~\cite {OV2640Datasheet}.}}{39}{figure.caption.39}%
 \contentsline {figure}{\numberline {3.5}{\ignorespaces System Main Layers.}}{40}{figure.caption.40}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Hardware and Network Communication Architecture for the Collaborative System.}}{54}{figure.caption.62}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Upgraded mechanical transmission of Joint~3 }}{56}{figure.caption.63}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Re-manufactured shaft key used in Joint~3 to eliminate mechanical backlash}}{57}{figure.caption.64}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces End-effector positions in XY plane after affine (linear) correction.}}{60}{figure.caption.66}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces End-effector positions in XY plane after polynomial correction.}}{61}{figure.caption.67}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces End-effector positions in XY plane after RBF correction.}}{61}{figure.caption.68}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Calibration surfaces for the X, Y, and Z axes with error magnitude.}}{62}{figure.caption.69}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Comparison of uncalibrated and calibrated surfaces.}}{63}{figure.caption.70}%
-\contentsline {figure}{\numberline {3.14}{\ignorespaces High-level architecture of the collaborative assembly system.}}{64}{figure.caption.72}%
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Assembly Supervisor Architecture: Clients, Callbacks, and State Machine}}{65}{figure.caption.75}%
-\contentsline {figure}{\numberline {3.16}{\ignorespaces Supervisor Service and Action Communication Flow}}{67}{figure.caption.79}%
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Coordinate Frame Hierarchy and Transform Chain}}{68}{figure.caption.83}%
-\contentsline {figure}{\numberline {3.18}{\ignorespaces Complete State Machine Diagram with Transitions}}{69}{figure.caption.85}%
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}}{83}{figure.caption.163}%
-\contentsline {figure}{\numberline {3.20}{\ignorespaces Representative annotation samples for brick classes.}}{93}{figure.caption.186}%
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Examples of data augmentation applied to the brick dataset.}}{94}{figure.caption.187}%
-\contentsline {figure}{\numberline {3.22}{\ignorespaces PCA principal axes overlaid on brick contours.}}{96}{figure.caption.188}%
-\contentsline {figure}{\numberline {3.23}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{99}{figure.caption.194}%
-\contentsline {figure}{\numberline {3.24}{\ignorespaces Swin Transformer Grasp Network Architecture}}{101}{figure.caption.202}%
-\contentsline {figure}{\numberline {3.25}{\ignorespaces I-shape example}}{105}{figure.caption.214}%
-\contentsline {figure}{\numberline {3.26}{\ignorespaces L-shape example}}{105}{figure.caption.214}%
-\contentsline {figure}{\numberline {3.27}{\ignorespaces T-shape example}}{105}{figure.caption.214}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Overview of the complete Gazebo simulation environment, featuring the dual-robot cell, camera system, and assembly workspace.}}{55}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Detailed component breakdown of the simulation environment.}}{56}{figure.caption.63}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Synthetic camera feed from the simulated RealSense sensor, demonstrating visibility of the bricks and grid.}}{57}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces ABB IRB120 performing a successful pick operation in the simulation.}}{57}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Hardware and Network Communication Architecture for the Collaborative System.}}{57}{figure.caption.68}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Upgraded mechanical transmission of Joint~3 }}{59}{figure.caption.69}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Re-manufactured shaft key used in Joint~3 to eliminate mechanical backlash}}{60}{figure.caption.70}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces End-effector positions in XY plane after affine (linear) correction.}}{63}{figure.caption.72}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces End-effector positions in XY plane after polynomial correction.}}{64}{figure.caption.73}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces End-effector positions in XY plane after RBF correction.}}{64}{figure.caption.74}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Calibration surfaces for the X, Y, and Z axes with error magnitude.}}{65}{figure.caption.75}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Comparison of uncalibrated and calibrated surfaces.}}{66}{figure.caption.76}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces High-level architecture of the collaborative assembly system.}}{67}{figure.caption.78}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Assembly Supervisor Architecture: Clients, Callbacks, and State Machine}}{68}{figure.caption.81}%
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Supervisor Service and Action Communication Flow}}{70}{figure.caption.85}%
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Coordinate Frame Hierarchy and Transform Chain}}{71}{figure.caption.89}%
+\contentsline {figure}{\numberline {3.22}{\ignorespaces Complete State Machine Diagram with Transitions}}{72}{figure.caption.91}%
+\contentsline {figure}{\numberline {3.23}{\ignorespaces Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}}{86}{figure.caption.169}%
+\contentsline {figure}{\numberline {3.24}{\ignorespaces Representative annotation samples for brick classes.}}{96}{figure.caption.192}%
+\contentsline {figure}{\numberline {3.25}{\ignorespaces Examples of data augmentation applied to the brick dataset.}}{97}{figure.caption.193}%
+\contentsline {figure}{\numberline {3.26}{\ignorespaces PCA principal axes overlaid on brick contours.}}{99}{figure.caption.194}%
+\contentsline {figure}{\numberline {3.27}{\ignorespaces ResNet-UNet Grasp Network (ResNet34 Encoder + UNet Decoder)}}{102}{figure.caption.200}%
+\contentsline {figure}{\numberline {3.28}{\ignorespaces Swin Transformer Grasp Network Architecture}}{104}{figure.caption.208}%
+\contentsline {figure}{\numberline {3.29}{\ignorespaces I-shape example}}{108}{figure.caption.220}%
+\contentsline {figure}{\numberline {3.30}{\ignorespaces L-shape example}}{108}{figure.caption.220}%
+\contentsline {figure}{\numberline {3.31}{\ignorespaces T-shape example}}{108}{figure.caption.220}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Training and validation loss curves for box and segmentation heads.}}{111}{figure.caption.222}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Classification loss (train vs. val).}}{112}{figure.caption.223}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Normalized confusion matrix for brick classes.}}{113}{figure.caption.224}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Precision--Recall curves for detection and segmentation.}}{113}{figure.caption.225}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces F1 curves for detection and segmentation.}}{114}{figure.caption.226}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Training and validation loss curves for box and segmentation heads.}}{114}{figure.caption.228}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Classification loss (train vs. val).}}{115}{figure.caption.229}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Normalized confusion matrix for brick classes.}}{116}{figure.caption.230}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Precision--Recall curves for detection and segmentation.}}{116}{figure.caption.231}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces F1 curves for detection and segmentation.}}{117}{figure.caption.232}%
 \addvspace {10\p@ }

@@ -1,7 +1,7 @@
 \section{Convolutional Neural Networks for Dense Prediction}
 
 \subsection{Encoder–Decoder Networks and U-Net}
-A common way to adapt Convolutional Neural Networks (CNNs) for dense prediction is to use an \textbf{encoder–decoder structure}. The \textbf{encoder} progressively downsamples the input to build high-level, context-rich features, while the \textbf{decoder} upsamples these features back to the original resolution to produce a per-pixel output map \cite{31}. 
+A common way to adapt Convolutional Neural Networks (CNNs) for dense prediction is to use an \textbf{encoder–decoder structure}. The \textbf{encoder} progressively downsamples the input to build high-level, context-rich features, while the \textbf{decoder} upsamples these features back to the original resolution to produce a per-pixel output map \cite{ronneberger2015unet}. 
 
 \begin{figure}[H]
     \centering
@@ -10,10 +10,10 @@ A common way to adapt Convolutional Neural Networks (CNNs) for dense prediction 
     \label{fig:unet_arch}
 \end{figure}
 
-\textbf{U-Net} is a widely adopted encoder–decoder architecture that adds \textbf{skip connections} between matching encoder and decoder stages \cite{32}. These skip connections pass fine spatial detail directly to the decoder, improving localization while preserving global context \cite{32}. Although U-Net was originally introduced for biomedical segmentation, its design is broadly applicable to robotics perception tasks that require pixel-accurate outputs, such as \textbf{grasp quality maps} \cite{32}. In this project, the same encoder–decoder principle is used to predict grasp maps from RGB-D crops, where accurate localization of the grasp center is essential \cite{31, 32}.
+\textbf{U-Net} is a widely adopted encoder–decoder architecture that adds \textbf{skip connections} between matching encoder and decoder stages \cite{ronneberger2015unet}. These skip connections pass fine spatial detail directly to the decoder, improving localization while preserving global context \cite{ronneberger2015unet}. Although U-Net was originally introduced for biomedical segmentation, its design is broadly applicable to robotics perception tasks that require pixel-accurate outputs, such as \textbf{grasp quality maps} \cite{ronneberger2015unet}. In this project, the same encoder–decoder principle is used to predict grasp maps from RGB-D crops, where accurate localization of the grasp center is essential \cite{ronneberger2015unet}.
 
 \subsection{Residual Networks (ResNet) as Feature Extractors}
-Deep residual networks (\textbf{ResNet}) introduce \textbf{identity skip connections} inside residual blocks, allowing the network to learn residual functions \cite{145}. This design improves gradient flow and enables the training of deeper backbones with better optimization stability \cite{145}.
+Deep residual networks (\textbf{ResNet}) introduce \textbf{identity skip connections} inside residual blocks, allowing the network to learn residual functions \cite{he2016resnet}. This design improves gradient flow and enables the training of deeper backbones with better optimization stability \cite{he2016resnet}.
 
 \begin{figure}[H]
     \centering
@@ -22,12 +22,12 @@ Deep residual networks (\textbf{ResNet}) introduce \textbf{identity skip connect
     \label{fig:resnet_block}
 \end{figure}
 
-In many vision pipelines, a ResNet is used as the encoder/backbone because it provides strong multi-scale features \cite{145}. When combined with a U-Net-style decoder, this produces a robust dense prediction network that can capture both global structure and local edges—useful for grasp inference on small objects such as bricks \cite{145}.
+In many vision pipelines, a ResNet is used as the encoder/backbone because it provides strong multi-scale features \cite{he2016resnet}. When combined with a U-Net-style decoder, this produces a robust dense prediction network that can capture both global structure and local edges—useful for grasp inference on small objects such as bricks \cite{he2016resnet}.
 
-Dense grasp prediction is commonly formulated as per-pixel regression/classification, where each pixel encodes the quality of a grasp and its geometric parameters. CNN encoder-decoder designs are a natural fit because they learn multi-scale spatial features and can output maps at the same resolution as the input. U-Net introduced the canonical symmetric encoder-decoder with skip connections that preserve fine spatial detail across downsampling stages \cite{1}. Residual connections (ResNet) improve optimization of deep CNN backbones by learning residual mappings, enabling stronger feature extractors for downstream dense tasks \cite{1}.
+Dense grasp prediction is commonly formulated as per-pixel regression/classification, where each pixel encodes the quality of a grasp and its geometric parameters. CNN encoder-decoder designs are a natural fit because they learn multi-scale spatial features and can output maps at the same resolution as the input. U-Net introduced the canonical symmetric encoder-decoder with skip connections that preserve fine spatial detail across downsampling stages \cite{ronneberger2015unet}. Residual connections (ResNet) improve optimization of deep CNN backbones by learning residual mappings, enabling stronger feature extractors for downstream dense tasks \cite{he2016resnet}.
 
 \subsection{Attention and Transformer Foundations}
-\textbf{Transformers} replace recurrence and convolution with \textbf{attention mechanisms} that dynamically route information between tokens \cite{144}. In vision, tokens can represent image patches (ViT) or windowed patches (Swin) \cite{10}. The key operation is \textbf{self-attention}, where every token computes a weighted combination of other tokens based on content similarity \cite{9}.
+\textbf{Transformers} replace recurrence and convolution with \textbf{attention mechanisms} that dynamically route information between tokens \cite{vaswani2017attention}. In vision, tokens can represent image patches (ViT) or windowed patches (Swin) \cite{dosovitskiy2021vit, liu2021swin}. The key operation is \textbf{self-attention}, where every token computes a weighted combination of other tokens based on content similarity \cite{vaswani2017attention}.
 
 \begin{figure}[H]
     \centering
@@ -37,7 +37,7 @@ Dense grasp prediction is commonly formulated as per-pixel regression/classifica
 \end{figure}
 
 \subsection{Scaled Dot-Product Self-Attention}
-Given an input sequence of token embeddings $X \in \mathbb{R}^{N \times D}$, self-attention first forms three projections: \textbf{queries (Q)}, \textbf{keys (K)}, and \textbf{values (V)} \cite{9}. The attention output is computed as:
+Given an input sequence of token embeddings $X \in \mathbb{R}^{N \times D}$, self-attention first forms three projections: \textbf{queries (Q)}, \textbf{keys (K)}, and \textbf{values (V)} \cite{vaswani2017attention}. The attention output is computed as:
 \begin{equation}
     \text{Attention}(Q, K, V) = \text{softmax} \left( \frac{QK^T}{\sqrt{d_k}} \right) V
 \end{equation}
@@ -51,14 +51,14 @@ The Q/K/V tensors are produced by learned linear layers:
 where $W_Q, W_K, W_V \in \mathbb{R}^{D \times d_k}$. Intuitively, keys describe what information a token offers, queries describe what information a token seeks, and values carry the content that will be aggregated. Similarity between queries and keys determines the weights applied to values.
 
 \subsection{Multi-Head Attention (MHA)}
-Instead of a single attention operation, multi-head attention splits the embedding into $h$ heads, runs attention independently in each head, and concatenates the results \cite{9}:
+Instead of a single attention operation, multi-head attention splits the embedding into $h$ heads, runs attention independently in each head, and concatenates the results \cite{vaswani2017attention}:
 \begin{equation}
     \text{head}_i = \text{Attention}(QW_Q^i, KW_K^i, VW_V^i)
 \end{equation}
 \begin{equation}
     \text{MHA}(X) = \text{Concat}(\text{head}_1, \dots, \text{head}_h)W_O
 \end{equation}
-Multiple heads allow the model to attend to different patterns, such as edges, corners, and long-range relations, simultaneously \cite{9}.
+Multiple heads allow the model to attend to different patterns, such as edges, corners, and long-range relations, simultaneously \cite{vaswani2017attention}.
 
 \subsubsection{Transformer Encoder Block}
 A standard encoder block follows a two-stage residual structure:
@@ -70,10 +70,10 @@ A standard encoder block follows a two-stage residual structure:
 \end{itemize}
 
 \subsubsection{Why Attention Helps for Grasp Prediction}
-For grasp detection on small objects, local texture cues (edges, contact regions) must be combined with global context (overall object orientation and shape). Self-attention provides an explicit mechanism to exchange information across distant regions, which can reduce ambiguity when multiple candidate grasps exist. \textbf{Transformers} replace recurrent or purely convolutional processing with self-attention, which learns content-dependent interactions between tokens. Given query ($Q$), key ($K$), and value ($V$) projections, scaled dot-product attention computes soft weights over all tokens and aggregates values accordingly. Multi-head attention runs several attention operations in parallel to capture diverse relationships. This mechanism, introduced in the original Transformer for sequence modeling \cite{9}, has since been adapted to vision by treating image patches as tokens \cite{10}.
+For grasp detection on small objects, local texture cues (edges, contact regions) must be combined with global context (overall object orientation and shape). Self-attention provides an explicit mechanism to exchange information across distant regions, which can reduce ambiguity when multiple candidate grasps exist. \textbf{Transformers} replace recurrent or purely convolutional processing with self-attention, which learns content-dependent interactions between tokens. Given query ($Q$), key ($K$), and value ($V$) projections, scaled dot-product attention computes soft weights over all tokens and aggregates values accordingly. Multi-head attention runs several attention operations in parallel to capture diverse relationships. This mechanism, introduced in the original Transformer for sequence modeling \cite{vaswani2017attention}, has since been adapted to vision by treating image patches as tokens \cite{dosovitskiy2021vit}.
 
 \subsection{Vision Transformer (ViT)}
-The \textbf{Vision Transformer (ViT)} adapts the Transformer encoder to images by representing an image as a sequence of patch tokens \cite{10}. 
+The \textbf{Vision Transformer (ViT)} adapts the Transformer encoder to images by representing an image as a sequence of patch tokens \cite{dosovitskiy2021vit}. 
 
 \begin{figure}[H]
     \centering
@@ -119,12 +119,12 @@ Because the attention mechanism is inherently permutation-invariant, ViT must ex
 While classification tasks typically prepend a [CLS] token to the sequence, dense prediction tasks (such as generating grasp quality maps) preserve all per-token features. These features are then processed by a lightweight decoder or a pyramid fusion module to reconstruct the pixel-wise grid.
 
 \subsection{Computational Considerations}
-Global self-attention has $\mathcal{O}(N^2)$ complexity in the number of tokens, which becomes expensive for high-resolution images. This motivates hierarchical or windowed Transformers (e.g., Swin) that reduce complexity by restricting attention to local windows while still enabling cross-window communication via shifting.(Key references: Dosovitskiy et al., 2021; Vaswani et al., 2017.)
+Global self-attention has $\mathcal{O}(N^2)$ complexity in the number of tokens, which becomes expensive for high-resolution images. This motivates hierarchical or windowed Transformers (e.g., Swin) that reduce complexity by restricting attention to local windows while still enabling cross-window communication via shifting \cite{liu2021swin}. (Background: \cite{dosovitskiy2021vit, vaswani2017attention}.)
 
-ViT applies a Transformer encoder directly to a sequence of fixed-size image patches. Each patch is linearly embedded and combined with positional information, then processed through stacked multi-head self-attention and feed-forward layers. ViT demonstrates that pure Transformer backbones can match or outperform CNNs when trained at scale, while providing a flexible token-based representation \cite{108}.
+ViT applies a Transformer encoder directly to a sequence of fixed-size image patches. Each patch is linearly embedded and combined with positional information, then processed through stacked multi-head self-attention and feed-forward layers. ViT demonstrates that pure Transformer backbones can match or outperform CNNs when trained at scale, while providing a flexible token-based representation \cite{dosovitskiy2021vit}.
 
 \subsection{Hierarchical Transformers: Swin}
-The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricting self-attention to \textbf{local windows}. A key challenge for vision is the quadratic cost of global attention with respect to the number of tokens. Swin Transformer addresses this by restricting attention to local windows and introducing shifted-window attention to enable cross-window interaction. The result is a hierarchical, multi-resolution feature pyramid that resembles CNN behavior while retaining attention-based modeling capacity \cite{125}.
+The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricting self-attention to \textbf{local windows}. A key challenge for vision is the quadratic cost of global attention with respect to the number of tokens. Swin Transformer addresses this by restricting attention to local windows and introducing shifted-window attention to enable cross-window interaction. The result is a hierarchical, multi-resolution feature pyramid that resembles CNN behavior while retaining attention-based modeling capacity \cite{liu2021swin}.
 
 \begin{figure}[H]
     \centering
@@ -136,8 +136,8 @@ The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricti
 
 
 \begin{itemize}
-    \item \textbf{Shifted-Window Attention}: Introduces connections between neighboring non-overlapping windows by shifting the window partitions between consecutive layers \cite{3}.
-    \item \textbf{Hierarchical Representation}: Unlike the fixed resolution of ViT, Swin produces a multi-resolution feature pyramid, similar to CNN backbones, making it a natural fit for dense prediction and multi-scale feature fusion \cite{3}.
+    \item \textbf{Shifted-Window Attention}: Introduces connections between neighboring non-overlapping windows by shifting the window partitions between consecutive layers \cite{liu2021swin}.
+    \item \textbf{Hierarchical Representation}: Unlike the fixed resolution of ViT, Swin produces a multi-resolution feature pyramid, similar to CNN backbones, making it a natural fit for dense prediction and multi-scale feature fusion \cite{liu2021swin}.
 \end{itemize}
 
 ---
@@ -146,6 +146,6 @@ The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricti
 Robotic grasp prediction is generally categorized into discrete rectangle detection and \textbf{dense map prediction}.
 \begin{itemize}
     \item \textbf{Dense Map Advantages}: Predicting grasp quality and orientation at every pixel allows for high-speed, real-time control via a simple \textbf{argmax} operation over the quality map.
-    \item \textbf{Supervision}: Standard datasets such as the \textbf{Cornell Grasping Dataset} \cite{11} and \textbf{Jacquard} \cite{12} provide the ground-truth rectangles necessary to supervise these models.
+    \item \textbf{Supervision}: Standard datasets such as the \textbf{Cornell Grasping Dataset} \cite{lenz2015cornell} and \textbf{Jacquard} \cite{depierre2018jacquard} provide the ground-truth rectangles necessary to supervise these models.
     \item \textbf{Robustness}: Recent research emphasizes the integration of depth information and segmentation masks to improve performance under partial occlusions and workspace clutter.
 \end{itemize}
