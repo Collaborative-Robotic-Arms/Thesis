@@ -91,3 +91,41 @@ F1 curves indicate the balance between precision and recall across thresholds, w
     \caption{F1 curves for detection and segmentation.}
     \label{fig:det_f1_curves}
 \end{figure}
+
+\subsection{Inference Results (Qualitative)}
+To visualize the detection model in operation, Figure~\ref{fig:det_inference_examples} shows inference outputs on representative brick images. These examples highlight the predicted instances and their confidence for the three brick classes. The numeric labels shown next to each bounding box correspond to class IDs: \textbf{0 = L}, \textbf{1 = T}, and \textbf{2 = I}.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \vspace{0pt}
+        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/inference/i.png}
+        \caption{I-shape inference result.}
+        \label{fig:det_infer_i}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \vspace{0pt}
+        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/inference/L.png}
+        \caption{L-shape inference result.}
+        \label{fig:det_infer_l}
+    \end{subfigure}
+    \vspace{0.4cm}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \vspace{0pt}
+        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/inference/T.png}
+        \caption{T-shape inference result.}
+        \label{fig:det_infer_t}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \vspace{0pt}
+        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/inference/all.png}
+        \caption{Mixed-scene inference result.}
+        \label{fig:det_infer_all}
+    \end{subfigure}
+    \caption{Qualitative inference examples for YOLOv8s-seg detection.}
+    \label{fig:det_inference_examples}
+\end{figure}
