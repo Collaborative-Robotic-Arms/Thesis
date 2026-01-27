@@ -61,19 +61,33 @@ To evaluate the stability and precision of the model, error bars and boxplots we
 \end{figure}
 
 \subsubsection{Quantitative Performance Metrics}
-The quantitative improvement is summarized in Table~\ref{tab:final_results}. These values were extracted from the training log during model validation.
+The quantitative improvement is summarized in Tables~\ref{tab:final_results_train} and~\ref{tab:final_results_test}. These values were extracted from the training and testing logs during model validation.
 
 \begin{table}[H]
 \centering
-\caption{Quantitative Depth Accuracy Results}
-\label{tab:final_results}
+\caption{Quantitative Depth Accuracy Training Results}
+\label{tab:final_results_train}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{|l|c|c|c|}
 \hline
 \textbf{Metric} & \textbf{Raw Sensor (mm)} & \textbf{Polynomial Model (mm)} & \textbf{Improvement} \\ \hline
-MAE             & 0.13        & 0.13          & 0.4\%                \\ \hline
-RMSE            & 0.25       & 0.17            & -                \\ \hline
-Max Error       & 0.51       & 0.35             & -               \\ \hline
+MAE             & 4.7857        & 1.1724          & 75.50\%                \\ \hline
+RMSE            & 5.5742       & 1.5176            & 72.77\%                \\ \hline
+Max Error       & 12.000       & 3.7240             & 68.97\%               \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Quantitative Depth Accuracy Testing Results}
+\label{tab:final_results_test}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Metric} & \textbf{Raw Sensor (mm)} & \textbf{Polynomial Model (mm)} & \textbf{Improvement} \\ \hline
+MAE             & 3.0345        & 1.2407          & 59.11\%                \\ \hline
+RMSE            & 3.9741       & 1.4520            & 63.46\%                \\ \hline
+Max Error       & 8.0000       & 3.4396             & 57.00\%               \\ \hline
 \end{tabular}
 \end{table}
 
