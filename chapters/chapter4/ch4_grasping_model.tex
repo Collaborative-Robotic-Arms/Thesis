@@ -1,16 +1,46 @@
-\section{Evaluation Protocol}
+\section{Grasping Model Results}
 
 \subsection{Top-1 Grasp Selection (Inference Indicator)}
-During inference, the model produces dense per-pixel maps for grasp quality $Q$ and grasp orientation $\theta$ (via $\cos(2\theta)$ and $\sin(2\theta)$). A practical single-grasp prediction is obtained by selecting the pixel with the maximum predicted quality (Top-1), then reading the corresponding angle and constructing a grasp rectangle centered at that pixel. This Top-1 rule is not used as a loss term during training; training optimizes the full dense maps, while Top-1 is a convenient post-processing step for visualization and for evaluating whether the highest-confidence proposal aligns with a feasible grasp.
+\begin{itemize}
+    \item \textbf{Dense Prediction to Single Grasp:} During inference, the model produces dense per-pixel maps for grasp quality $Q$ and grasp orientation $\theta$ (via $\cos(2\theta)$ and $\sin(2\theta)$). A practical single-grasp prediction is obtained by selecting the pixel with the maximum predicted quality (Top-1), reading the corresponding angle, and constructing a grasp rectangle centered at that pixel.
+    
+    \item \textbf{Post-Processing Role:} This Top-1 rule is not used as a loss term during training. Training optimizes the full dense maps, while Top-1 serves as a convenient post-processing step for visualization and for evaluating whether the highest-confidence proposal aligns with a feasible grasp.
+    
+    \item \textbf{Validation Metrics:} During validation, we report:
+    \begin{enumerate}
+        \item The validation loss.
+        \item A center-angle accuracy proxy.
+    \end{enumerate}    
+    \item \textbf{Accuracy Proxy Definition:} The accuracy proxy selects the pixel with maximum predicted grasp quality ($\operatorname{argmax} Q$), reads the predicted angle at that pixel, and counts a sample as correct if it matches at least one positive label within a specific distance and angle threshold. This provides an intuitive indicator of whether the network's single best prediction is close to a ground-truth grasp.
+\end{itemize}
 
-During validation, we report (i) the validation loss, and (ii) a center-angle accuracy proxy. The accuracy proxy selects the pixel with maximum predicted grasp quality (argmax of $Q$), reads the predicted angle at that pixel, and counts a sample as correct if it matches at least one positive label within a distance threshold and an angle threshold. This provides a simple, intuitive indicator of whether the network's single best grasp prediction is close to a ground-truth grasp.
-
+\clearpage
 \subsection{Results and Comparison (ResNet-UNet vs Swin)}
 
 Training and validation curves are used to diagnose convergence and generalization. A summary of best validation performance is presented below.
 
 In these plots, a steadily decreasing training loss indicates successful optimization of the objective, while the validation loss reflects generalization to unseen samples. A growing gap between training and validation loss is a typical sign of overfitting; augmentation, weight decay (AdamW), and early stopping were used to mitigate this effect on the small brick dataset.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figures/chapter4/Grasping/valacc_vs_epoch.png}
+    \caption{Validation loss over epochs (ResNet-UNet vs Swin).}
+    \label{fig:val_loss}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Figures/chapter4/Grasping/valacc_vs_epoch.png}
+    \caption{Validation best ($\operatorname{argmax}$-$Q$) center-angle accuracy over epochs (ResNet-UNet vs Swin).}
+    \label{fig:val_acc}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Figures/chapter4/Grasping/trainloss_vs_epoch.png}
+    \caption{Training loss over epochs (ResNet-UNet vs Swin).}
+    \label{fig:train_loss}
+\end{figure}
 \begin{table}[H]
 \centering
 \caption{Summary of best validation results for ResNet-UNet and Swin-T models.}
@@ -48,11 +78,12 @@ T-shape & \includegraphics[width=0.2\textwidth]{Figures/chapter4/Grasping/t_gt.p
 \end{table}
 
 \paragraph{Model Selection (ResNet-UNet vs Swin Transformer)}
+ResNet-UNet was selected as the final deployment model for the following reasons:
 
-Based on both quantitative and qualitative evaluation, ResNet-UNet was selected as the final grasp prediction model for deployment. Quantitatively, ResNet-UNet achieved a lower best validation loss compared to the Swin Transformer model, which indicates better overall agreement with the supervision signals (grasp quality and grasp orientation, including the negative-grasp penalties). In addition, ResNet-UNet reached a higher Top-1 validation performance and converged more stably under the same training settings.
-
-Qualitatively, ResNet-UNet produced more localized and sharper high-confidence grasp regions, leading to more consistent grasp center placement on the object body. In contrast, Swin Transformer predictions were often more diffuse (smoother confidence maps) and sometimes exhibited multiple competing peaks. While this behavior can reflect modeling uncertainty and the existence of multiple feasible grasps, it may also increase the chance that the Top-1 selected grasp lies closer to object edges, which is undesirable for reliable execution.
-
-A plausible explanation for the observed performance gap is that CNN encoder-decoder architectures provide a strong inductive bias for pixel-level localization, which is particularly beneficial in dense prediction tasks with limited training data. In our setting, the dataset size is relatively small (cropped brick images), and the task requires precise spatial alignment between image features and grasp targets. Transformers, including Swin, typically excel when sufficient data is available to learn robust attention patterns and higher-level representations. Therefore, it is likely that the Swin Transformer model would benefit from larger-scale training data, stronger pretraining aligned with the input modality (RGB-D), and/or more extensive hyperparameter tuning.
-
-For these reasons, ResNet-UNet was chosen as the primary model for the project due to its better generalization, more reliable localization, and more stable qualitative behavior on the grasping task.
+\begin{itemize}
+    \item \textbf{Quantitative Superiority:} It achieved lower validation loss and higher Top-1 accuracy compared to the Swin Transformer, demonstrating better agreement with supervision signals and more stable convergence.
+    
+    \item \textbf{Qualitative Reliability:} The model produced sharper, well-centered grasp confidence maps. in contrast, Swin Transformer outputs were often diffuse with competing peaks, increasing the risk of unreliable edge grasps.
+    
+    \item \textbf{Architectural Suitability:} The CNN's strong inductive bias for pixel-level localization proved advantageous for this small dataset. Transformers like Swin typically require larger datasets to learn robust attention patterns and perform effectively.
+\end{itemize}

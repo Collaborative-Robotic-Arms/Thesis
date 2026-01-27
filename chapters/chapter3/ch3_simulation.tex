@@ -5,9 +5,9 @@ To ensure the safety of physical hardware and validate the multi-robot coordinat
 \subsection{Environment Composition}
 The complete simulated workspace is illustrated in Figure~\ref{fig:full_gazebo_setup}. The environment was assembled by integrating distinct Unified Robot Description Format (URDF) and Xacro models into a unified Gazebo world.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{Figures/chapter3/simulation/full_setup.png} % Replace with your full setup image file
+    \includegraphics[width=0.7\textwidth]{Figures/chapter3/simulation/full_setup.png} % Replace with your full setup image file
     \caption{Overview of the complete Gazebo simulation environment, featuring the dual-robot cell, camera system, and assembly workspace.}
     \label{fig:full_gazebo_setup}
 \end{figure}
@@ -21,7 +21,7 @@ Detailed breakdowns of the simulated components are presented in Figure~\ref{fig
 \end{itemize}
 
 % This block creates a 2x2 grid of your component pictures
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{Figures/chapter3/simulation/abb_robot_simulation.png}
@@ -48,11 +48,13 @@ Detailed breakdowns of the simulated components are presented in Figure~\ref{fig
     \label{fig:sim_components}
 \end{figure}
 
+\clearpage
+
 \subsection{Perception and Manipulation Verification}
 \subsubsection{Synthetic Vision Feed}
 To validate the computer vision pipeline, we utilized the \texttt{gazebo\_ros\_camera} plugin. Figure~\ref{fig:sim_camera_feed} displays the raw camera feed from the simulated sensor. The object colors in Gazebo were tuned to verify that the YOLO detection model function correctly before deployment.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/chapter3/simulation/camera_feed_simulation.png} % Replace with your camera feed image
     \caption{Synthetic camera feed from the simulated RealSense sensor, demonstrating visibility of the bricks and grid.}
@@ -63,7 +65,7 @@ To validate the computer vision pipeline, we utilized the \texttt{gazebo\_ros\_c
 The kinematic reach and grasping logic were validated using the ABB IRB120. As shown in Figure~\ref{fig:abb_grasp_seq}, the robot successfully executes the pick sequence: approaching the detected brick, actuating the virtual gripper (via the Gazebo grasp plugin), and lifting the object without slippage.
 
 % This block creates a strip of 3 images for the grasping sequence
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{Figures/chapter3/simulation/grasp_1.png}
