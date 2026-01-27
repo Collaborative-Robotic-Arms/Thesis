@@ -11,12 +11,12 @@ The control strategy follows a \textbf{Global-to-Local Handoff} approach:
 
 \subsection{System Architecture Overview}
 
-The complete visual servoing pipeline integrates perception, transformation logic, and control as illustrated in Figure~\ref{fig:vs_architecture}. The system operates in three primary stages:
+The complete visual servoing pipeline integrates perception, transformation logic, and control as illustrated in Figure~\ref{fig:vs_architecture}, showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline. The system operates in three primary stages:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{Figures/chapter3/VISP/VisualServoDiagram.png}
-    \caption{Complete visual servoing system architecture showing data flow from global perception through local feedback control. Two deep learning models extract object type and grasp point; these feed the homography calculation and target feature generation pipeline.}
+    \includegraphics[width=0.98\textwidth]{Figures/chapter3/VISP/VisualServoDiagram.png}
+    \caption{Complete visual servoing system architecture.}
     \label{fig:vs_architecture}
 \end{figure}
 

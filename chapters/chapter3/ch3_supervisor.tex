@@ -87,9 +87,11 @@ Actions provide asynchronous, feedback-capable communication for long-running op
     \begin{itemize}
         \item \textbf{Purpose:} Send point-to-point motion commands to the AR4 arm (approach, grasp, release, placement).
         \item \textbf{Interface:} \texttt{supervisor\_package/action/MoveToPose}
-        \item \textbf{Goal Fields:} Target pose, strategy (APPROACH\_OFFSET, GRASP, PLACE, GOTO\_HANDOVER, RELEASE).
-        \item \textbf{Used in States:} EXECUTE\_AR4\_DIRECT, AR4\_PICK\_FOR\_HANDOVER, AR4\_PLACE\_ON\_GRID, HANDOVER\_EXECUTION.
+        \item \textbf{Goal Fields:} Target pose, strategy (APPROACH\_OFFSET, GRASP, PLACE, \\GOTO\_HANDOVER, RELEASE).
+        \item \textbf{Used in States:} EXECUTE\_AR4\_DIRECT, AR4\_PICK\_FOR\_HANDOVER, \\AR4\_PLACE\_ON\_GRID, HANDOVER\_EXECUTION.
     \end{itemize}
+
+    \clearpage
 
     \item \textbf{ar4\_visual\_servo (Action)}
     \begin{itemize}
@@ -110,14 +112,14 @@ Actions provide asynchronous, feedback-capable communication for long-running op
     \end{itemize}
 \end{enumerate}
 
-\subsubsection{Communication Flow Diagram}
+% \subsubsection{Communication Flow Diagram}
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=1.0\textwidth]{Figures/placeholder_communication_flow}
-    \caption{Supervisor Service and Action Communication Flow}
-    \label{fig:comm_flow}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     % \includegraphics[width=1.0\textwidth]{Figures/placeholder_communication_flow}
+%     \caption{Supervisor Service and Action Communication Flow}
+%     \label{fig:comm_flow}
+% \end{figure}
 
 \subsection{Transform (TF2) Management and Coordinate Frames}
 
@@ -186,12 +188,12 @@ This implementation:
     \item Logs transformation errors for debugging.
 \end{itemize}
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.9\textwidth]{Figures/placeholder_tf_hierarchy}
-    \caption{Coordinate Frame Hierarchy and Transform Chain}
-    \label{fig:tf_hierarchy}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     % \includegraphics[width=0.9\textwidth]{Figures/placeholder_tf_hierarchy}
+%     \caption{Coordinate Frame Hierarchy and Transform Chain}
+%     \label{fig:tf_hierarchy}
+% \end{figure}
 
 \subsection{Detailed State Machine Analysis}
 
