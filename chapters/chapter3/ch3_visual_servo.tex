@@ -71,7 +71,7 @@ The feature extraction pipeline proceeds as follows:
 \begin{enumerate}
     \item \textbf{HSV Color Segmentation:} The undistorted image is converted to HSV color space and thresholded to isolate pixels matching the target brick color. HSV is chosen for its robustness to illumination variations compared to RGB space.
     
-    \item \textbf{Morphological Processing:} Connected-component analysis identifies distinct blobs. Opening (erosion followed by dilation) removes noise and spurious small regions.
+    \item \textbf{Morphological Processing:} To address the challenge of detecting L-shaped bricks whose two perpendicular edges may appear as disconnected components in the binary mask, we employ morphological \textbf{closing} (dilation followed by erosion). This operation bridges small gaps between the L-shaped legs without growing the overall contour, enabling robust detection of the complete brick boundary as a single connected component.
     
     \item \textbf{Geometric Analysis:} For each valid blob, we compute the bounding box orientation and corner points via minimum area rectangle fitting. The corner points are sorted in counter-clockwise order relative to their centroid, ensuring consistent feature correspondence.
     
@@ -256,26 +256,34 @@ Given a brick type with dimensions $(L, W)$ and a target depth $Z^*$:
         \end{bmatrix} + \begin{bmatrix} 0 & 0 & Z^* \end{bmatrix}
     \end{equation}
     
-    \item \textbf{Rotation Offset:} The brick's orientation in the gripper varies depending on the grasp configuration. The system computes an adaptive \textbf{rotation offset} based on the shift vector from the grasp shifting module:
+    \item \textbf{Rotation and Offset Strategy:} Rather than using four discrete rotation angles (0°, 90°, 180°, 270°), the system employs an efficient two-rotation strategy combined with adaptive offset application to avoid expensive 180° rotations. The brick's orientation is determined by the shift vector $\Delta p$ from the grasp shifting module:
     \begin{equation}
         \text{offset}_{\text{rot}} = \begin{cases}
-            \pi/2 & \text{if } |\Delta x| > |\Delta y| \text{ and } \Delta x > 0 \\
-            -\pi/2 & \text{if } |\Delta x| > |\Delta y| \text{ and } \Delta x < 0 \\
-            \pi & \text{if } |\Delta y| > |\Delta x| \text{ and } \Delta y > 0 \\
-            0 & \text{if } |\Delta y| > |\Delta x| \text{ and } \Delta y < 0
+            \pi/2 & \text{if } |\Delta x| > |\Delta y| \text{ (horizontal grasp)} \\
+            0 & \text{if } |\Delta y| > |\Delta x| \text{ (vertical grasp)}
         \end{cases}
     \end{equation}
     
-    This ensures the brick's "graspable face" is always perpendicular to the camera's optical axis.
-    
-    \item \textbf{3D Rotation:} Apply the computed rotation to align the brick correctly:
+    The direction of the grasp (left/right for horizontal, up/down for vertical) is encoded as an \textbf{offset sign} that determines whether the hand-eye offset is \textit{added} or \textit{subtracted}:
     \begin{equation}
-        \text{corners}_{rotated} = R(\text{offset}_{\text{rot}}) \cdot \text{corners}_{3D}^T
+        \text{offset}_{\text{sign}} = \begin{cases}
+            -1 & \text{if grasp points left or up} \\
+            +1 & \text{if grasp points right or down}
+        \end{cases}
     \end{equation}
     
-    \item \textbf{Perspective Projection:} Project the rotated 3D corners onto the image plane using the camera intrinsic matrix $K$:
+    This approach eliminates 180° rotations while maintaining correct target placement through offset adjustment.
+    
+    \item \textbf{3D Rotation and Offset Application:} Apply the computed rotation and offset to the corner positions:
     \begin{equation}
-        p_{pixel} = K \cdot \frac{\text{corners}_{rotated}}{Z^*}
+        \text{corners}_{offset} = R(\text{offset}_{\text{rot}}) \cdot \text{corners}_{3D}^T + \begin{bmatrix} 0 \\ \text{offset}_{\text{sign}} \cdot d_{hand-eye} \\ 0 \end{bmatrix}
+    \end{equation}
+    
+    where $d_{hand-eye}$ is the physical offset between the camera and gripper center.
+    
+    \item \textbf{Perspective Projection:} Project the offset 3D corners onto the image plane using the camera intrinsic matrix $K$:
+    \begin{equation}
+        p_{pixel} = K \cdot \frac{\text{corners}_{offset}}{Z^*}
     \end{equation}
     
     The resulting pixel coordinates form the desired feature vector $s^*$ fed to the IBVS controller.
