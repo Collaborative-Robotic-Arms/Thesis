@@ -302,7 +302,7 @@ Two key adaptations were introduced to match the brick-assembly hardware constra
     \centering
     \caption{Training configuration used in the comparison experiments.}
     \label{tab:training_config}
-    \begin{tabular}{lcc}
+    \begin{tabular}{l p{6cm} p{6cm}}
         \toprule
         \textbf{Parameter} & \textbf{ResNet-UNet} & \textbf{Swin-T + Fusion} \\
         \midrule
@@ -327,7 +327,7 @@ In deployment, the vision $\to$ grasp pipeline should reproduce the \textit{exac
 \begin{enumerate}
     \item \textbf{Detector (YOLOv8-Seg)} publishes per-brick bounding boxes and (optionally) masks [8].
 
-    \item \textbf{Crop/Preprocess node} subscribes to \texttt{/camera/color/image\_raw} and \texttt{/camera/aligned\_depth\_to\_color/image\_raw}, then:
+    \item \textbf{Crop/Preprocess node} subscribes to \texttt{/camera/color/image\_raw} and \texttt{/camera/aligned\_-\\depth\_to\_color/image\_raw}, then:
     \begin{itemize}
         \item Expands each bbox by scale $s$ (e.g., $s=1.3$): $w' = s \cdot w$, $h' = s \cdot h$ around the bbox center.
         \item Clips/pads to stay within image bounds.

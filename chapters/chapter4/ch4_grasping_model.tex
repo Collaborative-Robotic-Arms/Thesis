@@ -14,7 +14,7 @@
     \item \textbf{Accuracy Proxy Definition:} The accuracy proxy selects the pixel with maximum predicted grasp quality ($\operatorname{argmax} Q$), reads the predicted angle at that pixel, and counts a sample as correct if it matches at least one positive label within a specific distance and angle threshold. This provides an intuitive indicator of whether the network's single best prediction is close to a ground-truth grasp.
 \end{itemize}
 
-\clearpage
+% \clearpage
 \subsection{Results and Comparison (ResNet-UNet vs Swin)}
 
 Training and validation curves are used to diagnose convergence and generalization. A summary of best validation performance is presented below.
@@ -41,11 +41,12 @@ In these plots, a steadily decreasing training loss indicates successful optimiz
     \caption{Training loss over epochs (ResNet-UNet vs Swin).}
     \label{fig:train_loss}
 \end{figure}
+
 \begin{table}[H]
 \centering
 \caption{Summary of best validation results for ResNet-UNet and Swin-T models.}
 \label{tab:best_val_results}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|p{3cm}|p{2.5cm}|p{3cm}|p{3cm}|p{3cm}|}
 \hline
 \textbf{Model} & \textbf{Best Val Loss} & \textbf{Epoch (Best Loss)} & \textbf{Best Val Top-1 Acc} & \textbf{Epoch (Best Acc)} \\
 \hline

@@ -4,30 +4,31 @@
 This section summarizes the training behavior and evaluation of the YOLOv8s-seg detection model. We report training/validation loss curves, a confusion matrix, and precision--recall and F1 performance for both bounding boxes and masks.
 
 \subsection{Training and Validation Loss Curves}
-Figure~\ref{fig:det_loss_curves} presents the training and validation loss curves for the three primary heads in YOLOv8s-seg: bounding-box regression, segmentation, and classification. These curves provide a clear view of convergence behavior and help detect overfitting or underfitting.
+Figure~\ref{fig:det_loss_curves_box_seg} presents the training and validation loss curves for the three primary heads in YOLOv8s-seg: bounding-box regression, segmentation, and classification. These curves provide a clear view of convergence behavior and help detect overfitting or underfitting.
 
 After approximately epoch 52, the validation segmentation loss starts to increase relative to the training loss, which indicates the onset of overfitting in the segmentation head. In contrast, both the validation box loss and the validation classification loss become roughly constant after epoch 52, suggesting stable convergence for these two heads.
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[t]{0.92\textwidth}
-        \centering
-        \vspace{0pt}
-        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/curves/thesis_box_loss_train_val.png}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=0.92\textwidth]{Figures/chapter4/Detection/curves/thesis_box_loss_train_val.png}
         \caption{Box loss (train vs. val).}
-        \label{fig:box_loss_train_val}
     \end{subfigure}
-    \vspace{0.4cm}
-    \begin{subfigure}[t]{0.92\textwidth}
-        \centering
-        \vspace{0pt}
-        \includegraphics[width=\textwidth]{Figures/chapter4/Detection/curves/thesis_seg_loss_train_val.png}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=0.92\textwidth]{Figures/chapter4/Detection/curves/thesis_seg_loss_train_val.png}
         \caption{Segmentation loss (train vs. val).}
-        \label{fig:seg_loss_train_val}
     \end{subfigure}
     \caption{Training and validation loss curves for box and segmentation heads.}
     \label{fig:det_loss_curves_box_seg}
 \end{figure}
+
 
 \begin{figure}[H]
     \centering
