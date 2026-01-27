@@ -1,0 +1,16 @@
+\section{Conclusion}
+
+This thesis successfully demonstrated the design, implementation, and validation of a robust, collaborative dual-arm robotic system for precision brick assembly. By integrating an industrial ABB IRB 120 manipulator with a research-oriented AR4 MK3 arm, the project established a functional pipeline that bridges global perception with local, fine-grained control.
+
+Key findings and achievements from this research include:
+
+\begin{itemize}
+    \item \textbf{Precision through Calibration:} The implementation of a second-order polynomial regression model for AR4 Cartesian calibration significantly improved absolute positioning accuracy, reducing Mean Absolute Error (MAE) from $5.13$~mm to $1.32$~mm in the Y-axis. Similarly, depth calibration for the Intel RealSense D435i homogenized the depth field, effectively mitigating systematic ``bowl effect'' distortions.
+    
+    \item \textbf{Robust Perception and Grasping:} The use of YOLOv8-seg provided reliable, real-time pixel-level segmentation for brick detection. Furthermore, the ResNet-UNet grasp detection network outperformed the Swin Transformer variant on this specific dataset, achieving a validation Top-1 accuracy of $1.000$. The inclusion of explicit negative supervision was critical in reducing unstable grasp predictions.
+    
+    \item \textbf{Hybrid Control Strategy:} The ``Global-to-Local Handoff'' strategy proved effective. Coarse positioning from global perception, combined with fine alignment using Image-Based Visual Servoing (IBVS) via an eye-in-hand ESP32-CAM, ensured that the system could compensate for residual kinematic uncertainties.
+    
+    \item \textbf{Orchestration and Reliability:} A 12-state finite state machine implemented within a ROS2 Supervisor node successfully coordinated complex workflows, including task allocation, grasp planning, and synchronized handover logic.
+\end{itemize}
+\clearpage
