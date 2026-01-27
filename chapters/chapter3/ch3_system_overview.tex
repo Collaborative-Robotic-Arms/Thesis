@@ -107,7 +107,7 @@ The Supervisor layer represents the core orchestration component of the system. 
 
 \subsubsection{Key Responsibilities}
 
-\textbf{Assembly Plan Retrieval and Task Dequeuing}: The Supervisor retrieves the assembly plan from the ROS 2 Database Bridge node (via service call). This plan contains the ordered sequence of bricks to assemble, with both current and desired positions. The Supervisor maintains an assembly queue and sequentially dequeues bricks for processing.
+\textbf{Assembly Plan Retrieval and Task Dequeuing}: The Supervisor retrieves the assembly plan from the ROS 2 Database Bridge node (via service call). This plan contains the ordered sequence of bricks to assemble, with both current and desired positions. The Supervisor maintains an assembly queue and dequeues bricks for processing.
 
 \textbf{Perception Integration and Transform Management}: The Supervisor coordinates global brick detection from the RealSense camera:
 \begin{itemize}
@@ -159,9 +159,7 @@ The Supervisor is implemented as a ROS2 Python node that maintains continuous co
 
 \begin{itemize}
     \item \textbf{Namespaced Robot Control}: Uses ROS 2 namespace hierarchies (\texttt{/abb/}, \texttt{/ar4/}) to maintain separate action clients and service clients for each robot, enabling independent command submission
-    
-    \item \textbf{Sequential Execution Model}: The current implementation operates sequentially—while one arm (ABB or AR4) executes a motion, the other arm remains idle.
-    
+        
     \item \textbf{Action-Based Synchronization}: Uses ROS 2 action servers for non-blocking, feedback-capable task execution. The Supervisor submits action goals and blocks until completion, ensuring tasks execute serially
     
     \item \textbf{Timing and Synchronization}: Implements timeout mechanisms and heartbeat monitoring to detect stalled or crashed components.
@@ -204,7 +202,6 @@ The mid-level execution layer consists of three independent but interconnected R
     \item \textbf{Gripper Controllers}: Manage pneumatic (ABB) and servo-based (AR4) grippers with:
     \begin{itemize}
         \item Open/close state management
-        \item Brick hold verification
     \end{itemize}
 \end{itemize}
 
@@ -232,14 +229,7 @@ The Control Module runs as separate ROS 2 action servers for each robot (one per
         \item \textbf{KDL (Numerical Solver)}: Used exclusively for AR4 when Image-Based Visual Servoing (IBVS) is active. The iterative numerical approach allows continuous refinement of joint configurations in response to visual feedback, which is essential for the precision correction that IBVS provides
         \item \textbf{Solver Switching Logic}: When IBVS is activated on AR4, the IK solver switches from IKFast to KDL to support real-time visual servo corrections. When IBVS is inactive, both robots use IKFast for rapid planning and execution
     \end{itemize}
-    
-    IK solvers are critical for:
-    \begin{itemize}
-        \item Converting Cartesian end-effector poses (desired pick/place positions) to joint configurations
-        \item Finding multiple solution branches to select collision-free configurations
-        \item Incorporating constraints (joint limits, reachability limits)
-    \end{itemize}
-    
+        
     \item \textbf{Path Planning (RRTconnect)}: Uses MoveIt2's interface to OMPL (Open Motion Planning Library) with the RRTconnect algorithm as the primary motion planner. RRTconnect:
     \begin{itemize}
         \item Employs bi-directional Rapidly-Exploring Random Trees (RRT) from both start and goal configurations
@@ -322,11 +312,9 @@ The Planning Module is implemented as a ROS2 C++ node with direct MoveIt2 integr
     \begin{itemize}
         \item Synthetic grasping datasets (procedurally generated)
         \item Real-world grasp attempts (labeled for success/failure)
-        \item Domain adaptation techniques to transfer synthetic knowledge to real scenarios
     \end{itemize}
     
-    The output is a ranked list of candidate grasps with confidence scores, allowing the Planning Module to select collision-free grasps.
-    
+    The output is a grasping point with the highest confidence.
     \item \textbf{Grasp Pose Estimation}: Converts predicted gripper poses (relative to camera frame) into world coordinates:
     \begin{itemize}
         \item Camera calibration: Intrinsic parameters determined offline
@@ -361,12 +349,7 @@ The Perception Module is implemented as a ROS 2 Python node with GPU-accelerated
         \item Asynchronous inference using thread pools to avoid blocking the main ROS loop
         \item Frame skipping for non-critical grasp updates
     \end{itemize}
-    
-    \item \textbf{Fallback Strategies}: 
-    \begin{itemize}
-        \item If grasp learning fails: Use geometric grasp estimators (surface normal analysis)
-        \item If YOLOv8 fails (rare cases): Switch to simpler detection methods or manual intervention
-    \end{itemize}
+
 \end{itemize}
 
 \subsection{Layer 4: Low-Level Hardware Abstraction Layer}
@@ -381,11 +364,12 @@ The Hardware Abstraction Layer (HAL) decouples high-level ROS modules from hardw
 \begin{itemize}
     \item Robot joint encoders (via proprietary robot communication protocols)
 \end{itemize}
+\clearpage
 
 \textbf{Motor Drivers}: Interface with:
 \begin{itemize}
     \item AR4 servo motors (for joints and gripper)
-    \item Motor control boards managing PWM signals and current feedback
+    \item Motor control boards managing PWM signals 
 \end{itemize}
 
 \textbf{Camera Drivers}: ROS camera interface nodes for:
@@ -442,13 +426,12 @@ The Physical Hardware Layer comprises the actual robotic systems, sensors, and a
     \item High payload capacity
     \item Precise joint control via proprietary controller
     \item Pneumatic end-effector gripper for power grasping
-    \item Integrated force/torque feedback (optional)
 \end{itemize}
 
 \textbf{AR4 Robotic Arm}: Custom 6-DOF robotic arm with:
 \begin{itemize}
     \item Servo-based joints (high precision, lower payload)
-    \item Modular servo-gripper with integrated sensors
+    \item Modular servo-gripper
     \item ESP32 wrist-mounted camera for close-range visual servoing
     \item Lighter weight, suitable for fine manipulation tasks
 \end{itemize}
@@ -457,10 +440,9 @@ The Physical Hardware Layer comprises the actual robotic systems, sensors, and a
 \begin{itemize}
     \item Mounted at top of workspace, looking down
     \item Provides color image for YOLOv8 detection
-    \item Provides depth for 3D reconstruction 
 \end{itemize}
 
-\textbf{ESP32 Wrist Camera}: Custom lightweight camera module mounted on AR4 wrist:
+\textbf{ESP32 Wrist Camera}: Customized lightweight camera module mounted on AR4 wrist:
 \begin{itemize}
     \item OV2640 Wide angle lense 2MP camera sensor
     \item Real-time video streaming via WiFi
@@ -481,16 +463,16 @@ To complete the architectural understanding, this section describes how data and
 
 \subsubsection{Top-Down Command Flow}
 \begin{enumerate}
-    \item \textbf{User Input}: Operator specifies a brick picking and placing task in the GUI
+    \item \textbf{User Input}: Operator specifies a brick placing task in the GUI
     \item \textbf{Supervisor Interpretation}: Supervisor decomposes task into concrete motion commands
     \item \textbf{Planning}: Planning Module computes collision-free trajectories using IK and OMPL solvers
-    \item \textbf{Control}: Control Module executes trajectories with real-time feedback from encoders
+    \item \textbf{Control}: Control Module executes trajectories
     \item \textbf{Hardware Execution}: Motors and grippers execute commands, generating motion
 \end{enumerate}
 
 \subsubsection{Bottom-Up Feedback Flow}
 \begin{enumerate}
-    \item \textbf{Sensor Readings}: Hardware layer generates continuous sensor data (joint angles, camera frames)
+    \item \textbf{Sensor Readings}: Hardware layer generates continuous sensor data (camera frames)
     \item \textbf{Hardware Abstraction}: HAL layer processes raw sensor data and publishes standardized ROS messages
     \item \textbf{Control Feedback}: Control Module uses feedback for closed-loop corrections (e.g., IBVS visual servo)
     \item \textbf{Perception Updates}: Perception Module processes camera data to update world state
@@ -501,7 +483,7 @@ To complete the architectural understanding, this section describes how data and
 Between-module communication enables coordination:
 \begin{itemize}
     \item \textbf{Planning $\leftrightarrow$ Perception}: Planning Module queries Perception Module for current object poses
-    \item \textbf{Control $\leftrightarrow$ Perception}: Control Module may request precision updates from Perception during delicate operations
+    \item \textbf{Control $\leftrightarrow$ Perception}: Control Module requests precision updates from Perception during delicate operations
     \item \textbf{Supervisor $\leftrightarrow$ All Modules}: Supervisor broadcasts state information and receives status updates from all lower layers
 \end{itemize}
 
@@ -552,6 +534,5 @@ The layered architecture enables:
 \begin{itemize}
     \item \textbf{Collision Detection}: Multiple layers check for collisions
     \item \textbf{Joint Limits}: All control layers respect hardware limits
-    \item \textbf{Emergency Stop}: E-stop triggers immediate motion cessation at HAL layer
 \end{itemize}
 

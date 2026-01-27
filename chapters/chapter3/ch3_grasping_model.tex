@@ -128,6 +128,7 @@ To recover spatial resolution for pixel-wise grasp detection, we implement a lig
     \item \textbf{Grasp Prediction}: The fused tensor passes through a refinement block and a final upsampling to the original $160 \times 160$ resolution.
 \end{itemize}
 
+\clearpage
 \subsection{Implementation-Level Architecture}
 
 The implemented Swin-based model, defined in the class \texttt{SwinGraspNoWidth}, utilizes a Swin Transformer backbone integrated via the \texttt{timm} library with \texttt{features\_only=True}. The backbone exposes a pyramid of multi-scale feature maps, which a lightweight CNN fusion decoder then projects, aligns, and fuses to predict dense grasp maps at the input resolution.
@@ -147,6 +148,7 @@ The fused feature map is then upsampled to the final $160 \times 160$ input reso
 
 \subsubsection{Robustness to Feature Layout}
 To handle variations in the \texttt{timm} library, the forward pass includes a layout check. If intermediate features are returned in $NHWC$ (Channels-Last) format, they are permuted to $NCHW$ (Channels-First) before the \texttt{Conv2d} projection to prevent channel mismatch errors.
+\clearpage
 
 \subsubsection{Training and Optimization}
 The model is trained using the \texttt{AdamW} optimizer, which provides adaptive updates with decoupled weight decay. The primary training configurations are summarized in Table \ref{tab:hyperparameters}.
@@ -232,6 +234,7 @@ For each input crop, labels are rasterized into the following spatial representa
     \item \textbf{Negative Mask ($N$):} A mask $N(x, y)$ representing invalid grasp rectangles, with corresponding negative angle maps $\cos(2\theta_n)$ and $\sin(2\theta_n)$.
 \end{itemize}
 
+\clearpage
 \subsubsection{Angle Encoding and Recovery}
 The $2\theta$ encoding is utilized to remove the $180^\circ$ ambiguity inherent to parallel-jaw grippers, where $\theta$ and $\theta + \pi$ correspond to the identical jaw orientation. At inference time, the predicted angle $\theta(x, y)$ is recovered from the network outputs using the following relation:
 

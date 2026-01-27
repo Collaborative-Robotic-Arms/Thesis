@@ -122,6 +122,7 @@ While classification tasks typically prepend a [CLS] token to the sequence, dens
 Global self-attention has $\mathcal{O}(N^2)$ complexity in the number of tokens, which becomes expensive for high-resolution images. This motivates hierarchical or windowed Transformers (e.g., Swin) that reduce complexity by restricting attention to local windows while still enabling cross-window communication via shifting \cite{liu2021swin}. (Background: \cite{dosovitskiy2021vit, vaswani2017attention}.)
 
 ViT applies a Transformer encoder directly to a sequence of fixed-size image patches. Each patch is linearly embedded and combined with positional information, then processed through stacked multi-head self-attention and feed-forward layers. ViT demonstrates that pure Transformer backbones can match or outperform CNNs when trained at scale, while providing a flexible token-based representation \cite{dosovitskiy2021vit}.
+\clearpage
 
 \subsection{Hierarchical Transformers: Swin}
 The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricting self-attention to \textbf{local windows}. A key challenge for vision is the quadratic cost of global attention with respect to the number of tokens. Swin Transformer addresses this by restricting attention to local windows and introducing shifted-window attention to enable cross-window interaction. The result is a hierarchical, multi-resolution feature pyramid that resembles CNN behavior while retaining attention-based modeling capacity \cite{liu2021swin}.

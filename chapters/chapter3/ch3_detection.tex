@@ -154,7 +154,7 @@ This angle is then converted from radians to degrees and passed to the grasping 
 \subsubsection{Intuitive Explanation}
 PCA finds the dominant direction in a cloud of points. For an elongated object such as a brick, the longest spread corresponds to its length, and the direction of that spread gives the orientation. We compute PCA on the contour pixels; the first principal component points along the brick's major axis, and its angle indicates whether the brick is vertical, horizontal, or tilted.
 
-\subsubsection{Why Not Use the Bounding Box?}
+\subsubsection{Limitations of Bounding Box Representation}
 YOLO outputs boxes that are parallel to the image axes. If a brick is rotated by $45^\circ$, the axis-aligned box does not capture that tilt. PCA, however, uses the actual shape inside the box and therefore recovers the true orientation.
 
 \subsection{Workspace Partition and Grid Region}

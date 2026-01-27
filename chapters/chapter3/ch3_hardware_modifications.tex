@@ -57,43 +57,25 @@ Joint~3 achieved backlash-free motion.
 
 \subsection{Encoder Signal Noise in 5th and 6th joint}
 
-During system testing and motion execution, unstable and noisy encoder 
-readings were observed in Joints~5 and~6 of the AR4 robot. These fluctuations 
-resulted in inaccurate joint position feedback, which significantly affected 
-the forward and inverse kinematics calculations. Consequently, commanded joint 
-positions did not always correspond to the expected physical motion of the robot.
-
-A systematic debugging process was conducted, including signal tracing and 
-verification of the encoder wiring and power connections. This investigation 
-revealed that the encoders of Joints~5 and~6 were not properly connected to 
-the regulated $5\,\text{V}$ power supply. The improper power connection caused 
-voltage instability, leading to fluctuating encoder signals and unreliable 
-position measurements.
-
-After correcting the power supply connections and ensuring proper grounding, 
-the encoder signals became stable and consistent. This correction restored 
-accurate joint position feedback.
+\begin{itemize}
+    \item \textbf{Issue:} Unstable encoder readings in AR4 Joints 5 and 6 caused inaccurate feedback and errors in kinematics and physical motion.
+    \item \textbf{Investigation:} Signal tracing revealed encoders for Joints 5 and 6 were incorrectly connected to the $5\,\text{V}$ power supply.
+    \item \textbf{Root Cause:} Improper power connections led to voltage instability and fluctuating encoder signals.
+    \item \textbf{Correction:} Reconnected encoders to the regulated $5\,\text{V}$ supply and ensured proper grounding.
+    \item \textbf{Outcome:} Stabilized encoder signals and restored accurate joint position feedback.
+\end{itemize}
 
 \subsection{Joint 1 Backlash Due to Missing Fasteners}
 
-During mechanical inspection and testing of the AR4 robot,
-abnormal backlash was observed in Joint~1. This backlash was estimated 
-to be approximately $2^\circ$ and was found to adversely affect the base
-positioning accuracy of the robot, particularly during large workspace
-movements.
-
-A detailed mechanical inspection revealed that multiple fastening screws 
-within the Joint~1 assembly were missing. The absence of these fasteners 
-reduced the structural rigidity of the joint, allowing relative motion 
-between assembled components and introducing mechanical play during operation.
-
-After identifying the missing screws, all required fasteners were reinstalled 
-and properly tightened according to the recommended assembly specifications. 
-This action restored the mechanical integrity of Joint~1 and eliminated the 
-observed backlash. As a result, the positional accuracy and stability of the 
-robot base joint were significantly improved.
-
+\begin{itemize}
+    \item \textbf{Issue:} Abnormal backlash of approximately $2^\circ$ in AR4 Joint 1, causing poor base positioning accuracy during large movements.
+    \item \textbf{Investigation:} Mechanical inspection revealed several missing fastening screws within the Joint 1 assembly.
+    \item \textbf{Root Cause:} Lack of fasteners reduced structural rigidity, allowing relative motion and mechanical play between components.
+    \item \textbf{Correction:} Reinstalled and tightened all required fasteners to assembly specifications.
+    \item \textbf{Outcome:} Eliminated backlash, restored mechanical integrity, and improved positional accuracy and stability.
+\end{itemize}
 \subsection{Summary}
 Following the completion of all mechanical restorations and electrical corrections, the AR4 robot reached a stable and reliable hardware state suitable for precise operation. The corrective actions performed eliminated sources of mechanical backlash, improved structural rigidity, and ensured accurate encoder feedback across all joints. With these issues resolved, the robot was prepared for accurate kinematic modeling and motion execution.
 
 Based on this finalized hardware condition, a comprehensive calibration procedure was subsequently carried out to align the mathematical kinematic model with the physical robot. The calibration methodology, implementation, and results are presented in the following section.
+\clearpage

@@ -25,31 +25,14 @@ The Assembly Supervisor operates as a ROS 2 node with the following core respons
     \item \textbf{Grasp Inference:} Query the grasp pipeline to select stable grasps for each brick.
     \item \textbf{Motion Execution:} Issue action goals to the AR4 and ABB control servers to execute pick, place, and handover operations.
     \item \textbf{Coordination Logic:} Decide between direct assembly and handover strategies based on brick location and arm allocation.
-    \item \textbf{Reference Frame Management:} Transform all detected poses and grasp points into the appropriate coordinate frames using TF2 (ROS 2 Transform Library).
+    \item \textbf{Reference Frame Management:} Transform all detected poses and grasp points into the appropriate coordinate frames.
 \end{itemize}
-
-\subsubsection{Execution Model and Threading}
-
-The supervisor employs a multi-threaded executor with a \texttt{ReentrantCallbackGroup} to permit concurrent handling of asynchronous ROS 2 callbacks. This design allows:
-
-\begin{itemize}
-    \item Parallel service queries and action goal submissions without blocking the main state machine loop.
-    \item Safe re-entrant locking when multiple callbacks access shared state variables.
-    \item Non-blocking timer-based state machine updates at a controlled frequency (initially 1.0 Hz, reduced to 0.1 Hz during active task execution).
-\end{itemize}
-
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.9\textwidth]{Figures/placeholder_supervisor_architecture}
-    \caption{Assembly Supervisor Architecture: Clients, Callbacks, and State Machine}
-    \label{fig:supervisor_arch}
-\end{figure}
 
 \subsection{ROS 2 Communication: Services and Actions}
 
 \subsubsection{Service Clients}
 
-Services provide synchronous request-response communication for deterministic operations that do not require real-time feedback:
+Services provide asynchronous request-response communication for deterministic operations that do not require real-time feedback:
 
 \begin{enumerate}
     \item \textbf{get\_assembly\_plan (Service)}
@@ -91,8 +74,6 @@ Actions provide asynchronous, feedback-capable communication for long-running op
         \item \textbf{Used in States:} EXECUTE\_AR4\_DIRECT, AR4\_PICK\_FOR\_HANDOVER, \\AR4\_PLACE\_ON\_GRID, HANDOVER\_EXECUTION.
     \end{itemize}
 
-    \clearpage
-
     \item \textbf{ar4\_visual\_servo (Action)}
     \begin{itemize}
         \item \textbf{Purpose:} Execute Image-Based Visual Servoing (IBVS) feedback control via the ESP32-CAM.
@@ -112,16 +93,7 @@ Actions provide asynchronous, feedback-capable communication for long-running op
     \end{itemize}
 \end{enumerate}
 
-% \subsubsection{Communication Flow Diagram}
-
-% \begin{figure}[H]
-%     \centering
-%     % \includegraphics[width=1.0\textwidth]{Figures/placeholder_communication_flow}
-%     \caption{Supervisor Service and Action Communication Flow}
-%     \label{fig:comm_flow}
-% \end{figure}
-
-\subsection{Transform (TF2) Management and Coordinate Frames}
+\subsection{Transform Management and Coordinate Frames}
 
 \subsubsection{Coordinate Frame Hierarchy}
 
@@ -138,7 +110,7 @@ The system employs multiple coordinate frames, necessitating careful transformat
 
 \subsubsection{Transform Pipeline}
 
-The supervisor uses TF2 to establish and maintain transformations:
+The supervisor uses transfrom functions to establish and maintain transformations:
 
 \begin{enumerate}
     \item \textbf{Brick Detection to World Frame:}
@@ -161,39 +133,39 @@ The supervisor uses TF2 to establish and maintain transformations:
         \item The supervisor transforms this pose to \texttt{base\_link} for consistency.
     \end{itemize}
 \end{enumerate}
+\clearpage
+% \subsubsection{Transform Implementation Details}
 
-\subsubsection{Transform Implementation Details}
+% The supervisor implements transform lookups with error handling. A typical lookup operation:
 
-The supervisor implements transform lookups with error handling. A typical lookup operation:
+% \begin{verbatim}
+% def transform_pose_to_abb(self, input_pose):
+%     try:
+%         t = self.tf_buffer.lookup_transform(
+%             'base_link', 
+%             'camera_color_optical_frame', 
+%             rclpy.time.Time())
+%         transformed_pose = tf2_geometry_msgs.do_transform_pose(
+%             input_pose, t)
+%         return transformed_pose
+%     except TransformException as ex:
+%         self.get_logger().error(f'TF2 Error: {ex}')
+%         return input_pose  # Fallback
+% \end{verbatim}
 
-\begin{verbatim}
-def transform_pose_to_abb(self, input_pose):
-    try:
-        t = self.tf_buffer.lookup_transform(
-            'base_link', 
-            'camera_color_optical_frame', 
-            rclpy.time.Time())
-        transformed_pose = tf2_geometry_msgs.do_transform_pose(
-            input_pose, t)
-        return transformed_pose
-    except TransformException as ex:
-        self.get_logger().error(f'TF2 Error: {ex}')
-        return input_pose  # Fallback
-\end{verbatim}
+% This implementation:
+% \begin{itemize}
+%     \item Uses \texttt{rclpy.time.Time()} to request the latest available transform.
+%     \item Falls back to the original pose if transformation fails (avoiding system crash).
+%     \item Logs transformation errors for debugging.
+% \end{itemize}
 
-This implementation:
-\begin{itemize}
-    \item Uses \texttt{rclpy.time.Time()} to request the latest available transform.
-    \item Falls back to the original pose if transformation fails (avoiding system crash).
-    \item Logs transformation errors for debugging.
-\end{itemize}
-
-% \begin{figure}[H]
-%     \centering
-%     % \includegraphics[width=0.9\textwidth]{Figures/placeholder_tf_hierarchy}
-%     \caption{Coordinate Frame Hierarchy and Transform Chain}
-%     \label{fig:tf_hierarchy}
-% \end{figure}
+% % \begin{figure}[H]
+% %     \centering
+% %     % \includegraphics[width=0.9\textwidth]{Figures/placeholder_tf_hierarchy}
+% %     \caption{Coordinate Frame Hierarchy and Transform Chain}
+% %     \label{fig:tf_hierarchy}
+% % \end{figure}
 
 \subsection{Detailed State Machine Analysis}
 
@@ -601,15 +573,6 @@ When an action goal is rejected:
     \item The calling state decides on recovery (retry or skip).
 \end{itemize}
 
-\subsubsection{Transform Lookup Failures}
-
-If a TF2 transform is unavailable:
-\begin{itemize}
-    \item Catch \texttt{TransformException}.
-    \item Log the exception.
-    \item Return the original pose as fallback.
-\end{itemize}
-
 \subsubsection{Grasp Pipeline Failures}
 
 If the grasp service returns \texttt{success=False}:
@@ -627,24 +590,24 @@ If an action goal does not complete within a reasonable time:
     \item Proceed with the next brick.
 \end{itemize}
 
-\subsection{Concurrency and Threading Model}
+% \subsection{Concurrency and Threading Model}
 
-\subsubsection{ReentrantCallbackGroup}
+% \subsubsection{ReentrantCallbackGroup}
 
-The supervisor uses \texttt{ReentrantCallbackGroup} to allow concurrent callback execution:
-\begin{itemize}
-    \item Asynchronous service responses processed during state machine operation.
-    \item Non-blocking behavior for long-running actions.
-\end{itemize}
+% The supervisor uses \texttt{ReentrantCallbackGroup} to allow concurrent callback execution:
+% \begin{itemize}
+%     \item Asynchronous service responses processed during state machine operation.
+%     \item Non-blocking behavior for long-running actions.
+% \end{itemize}
 
-\subsubsection{MultiThreadedExecutor}
+% \subsubsection{MultiThreadedExecutor}
 
-The supervisor node uses \texttt{MultiThreadedExecutor}:
-\begin{itemize}
-    \item Allocates thread pool for callback handling.
-    \item Async/await patterns execute without blocking.
-    \item Safe re-entrant locking for shared state.
-\end{itemize}
+% The supervisor node uses \texttt{MultiThreadedExecutor}:
+% \begin{itemize}
+%     \item Allocates thread pool for callback handling.
+%     \item Async/await patterns execute without blocking.
+%     \item Safe re-entrant locking for shared state.
+% \end{itemize}
 
 \subsubsection{Potential Race Conditions}
 
@@ -768,7 +731,7 @@ The Assembly Supervisor implements a robust, multi-threaded state machine that o
 
 \begin{enumerate}
     \item \textbf{Modular Service/Action Architecture:} Clean separation between perception, execution, and decision logic.
-    \item \textbf{Transform Management:} Consistent use of TF2 for coordinate frame conversions.
+    \item \textbf{Transform Management:} Consistent use of transformations for coordinate frame conversions.
     \item \textbf{Comprehensive State Machine:} 12 states covering all operational phases with clear error recovery paths.
     \item \textbf{Concurrency Support:} MultiThreadedExecutor enables responsive, non-blocking operation.
     \item \textbf{Hardware Integration:} Direct control of two heterogeneous arms with different control models.
@@ -776,3 +739,4 @@ The Assembly Supervisor implements a robust, multi-threaded state machine that o
 \end{enumerate}
 
 The supervisor's structured approach provides a foundation for reliable, repeatable collaborative assembly operations and facilitates integration with the Digital Twin for monitoring and optimization.
+\clearpage

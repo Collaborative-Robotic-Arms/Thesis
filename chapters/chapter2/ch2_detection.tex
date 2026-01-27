@@ -1,7 +1,7 @@
 \section{Object detection and segmentation}
 \label{sec:ch2_detection}
 
-This thesis targets real-time robotic brick picking, which requires both accurate localization and reliable instance boundaries. Object detection provides coarse localization via bounding boxes, while instance segmentation adds pixel-level masks that improve geometric reasoning, overlap handling, and downstream grasp selection. One-stage detectors in the YOLO family are popular in such settings because they perform dense predictions in a single forward pass, enabling high throughput with competitive accuracy. The reference study evaluates YOLOv8 for instance segmentation and emphasizes its practicality for real-world imagery, including challenging scenes with occlusion and clutter. \cite{sapkota2024yolov8v11}
+Real-time robotic brick picking is targeted, which requires both accurate localization and reliable instance boundaries. Object detection provides coarse localization via bounding boxes, while instance segmentation adds pixel-level masks that improve geometric reasoning, overlap handling, and downstream grasp selection. One-stage detectors in the YOLO family are popular in such settings because they perform dense predictions in a single forward pass, enabling high throughput with competitive accuracy. The reference study evaluates YOLOv8 for instance segmentation and emphasizes its practicality for real-world imagery, including challenging scenes with occlusion and clutter. \cite{sapkota2024yolov8v11}
 
 \subsection{YOLOv8 Instance Segmentation Overview}
 YOLOv8 extends a detection pipeline with a segmentation branch that predicts per-instance masks in addition to bounding boxes. The model follows a backbone--neck--head structure:
@@ -19,7 +19,7 @@ YOLOv8 segmentation models generate object masks by combining learned mask repre
 During inference, YOLOv8 produces dense predictions across spatial locations and then filters detections based on confidence scores, followed by non-maximum suppression to remove redundant boxes. The segmentation outputs are aligned with the selected detections to generate final instance masks. This end-to-end pipeline is efficient and supports real-time operation, which is critical for the closed-loop perception and control in robotic manipulation. \cite{sapkota2024yolov8v11}
 
 \subsection{Model Choice for This Thesis (YOLOv8s-seg)}
-Based on the reference evaluation of YOLOv8 for instance segmentation, this thesis adopts \textbf{YOLOv8s-seg}, the small segmentation variant. The \emph{s} model size provides a favorable balance between speed and accuracy, making it suitable for on-line inference with limited computational resources. The segmentation capability is particularly valuable for bricks because it provides accurate outlines that help refine grasp candidate selection and reduce ambiguity when bricks are partially occluded or closely packed. \cite{sapkota2024yolov8v11}
+Based on the reference evaluation of YOLOv8 for instance segmentation, \textbf{YOLOv8s-seg} was adopted, the small segmentation variant. The \emph{s} model size provides a favorable balance between speed and accuracy, making it suitable for on-line inference with limited computational resources. The segmentation capability is particularly valuable for bricks because it provides accurate outlines that help refine grasp candidate selection and reduce ambiguity when bricks are partially occluded or closely packed. \cite{sapkota2024yolov8v11}
 
 \begin{figure}[H]
     \centering
