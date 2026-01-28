@@ -134,38 +134,6 @@ The supervisor uses transfrom functions to establish and maintain transformation
     \end{itemize}
 \end{enumerate}
 \clearpage
-% \subsubsection{Transform Implementation Details}
-
-% The supervisor implements transform lookups with error handling. A typical lookup operation:
-
-% \begin{verbatim}
-% def transform_pose_to_abb(self, input_pose):
-%     try:
-%         t = self.tf_buffer.lookup_transform(
-%             'base_link', 
-%             'camera_color_optical_frame', 
-%             rclpy.time.Time())
-%         transformed_pose = tf2_geometry_msgs.do_transform_pose(
-%             input_pose, t)
-%         return transformed_pose
-%     except TransformException as ex:
-%         self.get_logger().error(f'TF2 Error: {ex}')
-%         return input_pose  # Fallback
-% \end{verbatim}
-
-% This implementation:
-% \begin{itemize}
-%     \item Uses \texttt{rclpy.time.Time()} to request the latest available transform.
-%     \item Falls back to the original pose if transformation fails (avoiding system crash).
-%     \item Logs transformation errors for debugging.
-% \end{itemize}
-
-% % \begin{figure}[H]
-% %     \centering
-% %     % \includegraphics[width=0.9\textwidth]{Figures/placeholder_tf_hierarchy}
-% %     \caption{Coordinate Frame Hierarchy and Transform Chain}
-% %     \label{fig:tf_hierarchy}
-% % \end{figure}
 
 \subsection{Detailed State Machine Analysis}
 
@@ -589,25 +557,6 @@ If an action goal does not complete within a reasonable time:
     \item Transition to PROCESS\_NEXT.
     \item Proceed with the next brick.
 \end{itemize}
-
-% \subsection{Concurrency and Threading Model}
-
-% \subsubsection{ReentrantCallbackGroup}
-
-% The supervisor uses \texttt{ReentrantCallbackGroup} to allow concurrent callback execution:
-% \begin{itemize}
-%     \item Asynchronous service responses processed during state machine operation.
-%     \item Non-blocking behavior for long-running actions.
-% \end{itemize}
-
-% \subsubsection{MultiThreadedExecutor}
-
-% The supervisor node uses \texttt{MultiThreadedExecutor}:
-% \begin{itemize}
-%     \item Allocates thread pool for callback handling.
-%     \item Async/await patterns execute without blocking.
-%     \item Safe re-entrant locking for shared state.
-% \end{itemize}
 
 \subsubsection{Potential Race Conditions}
 

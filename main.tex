@@ -46,6 +46,16 @@
     footskip=1.2cm      % distance from bottom of text to baseline of footer
 }
 
+\pagenumbering{roman}
+
+\fancypagestyle{footeronly}{
+    \fancyhf{} % Clear all header and footer fields
+    \renewcommand{\headrulewidth}{0pt} % Remove the top horizontal line
+    \renewcommand{\footrulewidth}{0.2pt} % Keep the bottom horizontal line
+    \fancyfoot[R]{Page \thepage} % Keep the page number on the right
+    \renewcommand{\footrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \footrulewidth\hfill}}
+}
+
 \pagestyle{fancy} % apply fancyhdr to all pages
 \fancyhf{} % clear all fields
 \fancyhead[R]{\includegraphics[height=2.3cm]{Figures/Logos/1.jpeg}} 
@@ -54,9 +64,9 @@
     \vfill
     \hbox {\hfill%
       \begin{tabular}{l}
-        \color{darkgray}Faculty of Engineering \\
+        \color{darkgray}Faculty of Engineering - Ain Shams University\\
         \color{darkgray}Mechatronics Engineering Program \\
-        \color{darkgray}\text{CRSBA}
+        \color{darkgray}\text{Collaborative Robotic Arms}
       \end{tabular}%
     }%
     \vfill
@@ -79,6 +89,7 @@
 \begin{titlepage}
     \begin{center}
         \begin{figure}[H]
+            \vspace{-25pt}
             \centering
             \includegraphics[width=0.2\textwidth]{Figures/Logos/1.jpeg}
             \label{fig:logo}
@@ -136,7 +147,7 @@
 
 \clearpage
 
-\thispagestyle{plain} % removes header/footer if needed
+\thispagestyle{footeronly} % removes header/footer if needed
 \vspace*{-2cm} % move text up to start near top of page
 
 \begin{center}
@@ -180,7 +191,7 @@ January 29, 2026
 \clearpage
 
 \vspace*{-2cm} % move text up to start near top of page
-\thispagestyle{plain}
+\thispagestyle{footeronly}
 \begin{center}
     {\Large \textbf{Acknowledgment}} % smaller than \chapter*, centered
 \end{center}
@@ -198,7 +209,7 @@ Furthermore, we wish to extend a special note of recognition to the \textbf{Clas
 
 % ABSTRACT
 \vspace*{-2cm} % move text up to start near top of page
-\thispagestyle{plain}
+\thispagestyle{footeronly}
 \begin{center}
     {\Large \textbf{Abstract}} % smaller than \chapter*, centered
 \end{center}
@@ -267,6 +278,8 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 \end{description}
 
 \clearpage
+
+\pagenumbering{arabic}
 
 % ---------- CHAPTERS ----------
 \input{chapters/ch1_intro}
