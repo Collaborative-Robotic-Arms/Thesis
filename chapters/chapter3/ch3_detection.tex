@@ -70,8 +70,6 @@ These transformations improve generalization under changes in pose, illumination
 \subsection{Training Procedure (YOLOv8s-seg)}
 Training was performed using the Ultralytics YOLOv8 segmentation pipeline with the exported YOLOv8-format dataset. The model selected for deployment is \textbf{YOLOv8s-seg}, which provides a strong accuracy--speed trade-off for real-time robotic perception. The training process follows the standard YOLOv8 workflow: dataset loading, multi-scale feature learning, joint optimization of detection and segmentation objectives, and evaluation on held-out data.
 
-% Optional: add exact hyperparameters if desired (image size, batch size, epochs, LR, optimizer, hardware).
-
 \subsection{Node Structure and Parameters}
 The node is implemented as \texttt{YoloV8Detector}, a standard \texttt{rclpy} node. Key runtime parameters are:
 \begin{itemize}

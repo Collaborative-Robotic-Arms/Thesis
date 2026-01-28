@@ -187,7 +187,7 @@ January 29, 2026
 
 \vspace{1cm} % space after title
 
-First and foremost, we would like to express our deepest gratitude to our supervisors, \textbf{Assoc. Prof. Shady Ahmed} and \textbf{Dr. Mohamed Omar}. Their profound expertise in mechatronics and control systems served as a constant source of inspiration, pushing us to expand the boundaries of this project. We are sincerely grateful for their mentorship, for challenging us to maintain a critical perspective, and for their steadfast guidance through the most complex technical hurdles encountered during this work.
+First and foremost, we would like to express our deepest gratitude to our supervisors, \textbf{Assoc. Prof. Shady Ahmed} and \textbf{Dr. Mohamed Omar}. Their profound expertise in mechatronics and control systems served as a constant source of inspiration, pushing us to expand the boundaries of this project. We are sincerely grateful for their mentorship, for challenging us to maintain a critical perspective, and for their guidance through the most complex technical hurdles encountered during this work.
 
 We are equally appreciative of the support provided by \textbf{Eng. Dina Zakaria}. Her continuous follow-up, practical advice, and dedicated management were instrumental in keeping the project on schedule and ensuring that we upheld the highest standards of engineering practice.
 
@@ -278,6 +278,9 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 % \input{chapters/ch6_conclusion}
 
 % ---------- REFERENCES ----------
+\begingroup
+\makeatletter
+\let\ps@plain\ps@fancy 
 \bibliographystyle{ieeetr}
 \bibliography{bibliography/references}
 
@@ -285,5 +288,7 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 \appendix
 % \input{appendices/appA_calibration}
 \input{references}
+\makeatother
+\endgroup
 
 \end{document}
