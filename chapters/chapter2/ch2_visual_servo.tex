@@ -13,7 +13,7 @@ This linear relationship forms the basis for the \textbf{Interaction Matrix} (Im
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Figures/chapter2/Visual_servo/pinhole_model.png}
-    \caption{Pinhole camera projection model illustrating the mapping of a 3D point $P$ onto the image plane at point $p$ through focal length $\lambda$}
+    \caption{Pinhole camera projection model.}
     \label{fig:pinhole_model}
 \end{figure}
 
@@ -28,11 +28,11 @@ As described by Cho et al. \cite{Cho2023}, this thesis adopts the \textbf{equidi
 \end{equation}
 
 This contrasts with the standard pinhole model ($\rho = f \tan \theta$), which breaks down as $\theta$ approaches $90^{\circ}$ because the projection distance diverges to infinity. The equidistance model allows the representation of incident rays from very wide angles without this singularity.
-
+The fisheye model maintains a linear relationship between incident angle $\theta$ and radial distance $\rho = f\theta$, while the pinhole model uses $\rho = f\tan\theta$, which diverges as $\theta \to 90^{\circ}$, as shown in Figure ~\ref{fig:fisheye_vs_pinhole}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Figures/chapter2/Visual_servo/fisheye_vs_pinhole.png}
-    \caption{Comparison of fisheye equidistance projection (red) and pinhole projection (blue). The fisheye model maintains a linear relationship between incident angle $\theta$ and radial distance $\rho = f\theta$, while the pinhole model uses $\rho = f\tan\theta$, which diverges as $\theta \to 90^{\circ}$.}
+    \caption{Comparison of fisheye equidistance projection (red) and pinhole projection (blue).}
     \label{fig:fisheye_vs_pinhole}
 \end{figure}
 
@@ -87,7 +87,7 @@ Connected-component analysis identifies distinct spatial clusters (blobs) within
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Figures/chapter2/Visual_servo/hsv_color_space.png}
-    \caption{HSV color space representation showing hue ($H$), saturation ($S$), and value ($V$) components...}
+    \caption{HSV color space representation showing hue, saturation, and value components.}
     \label{fig:hsv_color_space}
 \end{figure}
 
@@ -99,7 +99,7 @@ PBVS involves reconstructing the 3D pose of the target with respect to the camer
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Figures/chapter2/Visual_servo/pbvs_diagram.png}
-    \caption{Position-Based Visual Servo (PBVS) architecture showing the transformation from 3D Cartesian task space to camera frame control.}
+    \caption{Position-Based Visual Servo (PBVS) architecture.}
     \label{fig:pbvs_diagram}
 \end{figure}
 
@@ -110,7 +110,7 @@ IBVS defines the control task directly in the 2D image feature space. The error 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Figures/chapter2/Visual_servo/ibvs_diagram.png}
-    \caption{Image-Based Visual Servo (IBVS) architecture showing error minimization directly in 2D image feature space.}
+    \caption{Image-Based Visual Servo (IBVS) architecture.}
     \label{fig:ibvs_diagram}
 \end{figure}
 
@@ -149,7 +149,7 @@ To bridge the gap between global perception (fixed camera) and local manipulatio
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/chapter2/Visual_servo/homography_geometry.png}
-    \caption{Planar homography transformation relationship between two camera perspectives, showing the projection of a planar target through homography matrix $H$.}
+    \caption{Planar homography transformation relationship between two camera perspectives.}
     \label{fig:homography_geometry}
 \end{figure}
 

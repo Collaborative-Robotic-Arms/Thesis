@@ -6,7 +6,7 @@ A common way to adapt Convolutional Neural Networks (CNNs) for dense prediction 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/chapter2/grasping/unet_encoder.png}
-    \caption{U-Net encoder–decoder architecture (adapted from Ronneberger et al., 2015).}
+    \caption{U-Net encoder–decoder architecture \cite{ronneberger2015unet}.}
     \label{fig:unet_arch}
 \end{figure}
 
@@ -18,7 +18,7 @@ Deep residual networks (\textbf{ResNet}) introduce \textbf{identity skip connect
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Figures/chapter2/grasping/resnet.png}
-    \caption{Residual learning building block and identity shortcut concept (from He et al., 2016).}
+    \caption{Residual learning building block and identity shortcut concept \cite{he2016resnet}.}
     \label{fig:resnet_block}
 \end{figure}
 
@@ -78,15 +78,15 @@ The \textbf{Vision Transformer (ViT)} adapts the Transformer encoder to images b
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Figures/chapter2/grasping/vit_overview.png}
-    \caption{Vision Transformer (ViT) overview and patch-based tokenization (from Dosovitskiy et al., 2021).}
+    \caption{Vision Transformer (ViT) overview and patch-based tokenization \cite{dosovitskiy2021vit}.}
     \label{fig:vit_overview}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Figures/chapter2/grasping/ViT.png}
-    \caption{Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}
-    \label{fig:ViT}
+    \caption{Collected patches \cite{liu2021swin}.}
+    \label{fig:collected_patches}
 \end{figure}
 
 Vision Transformer (ViT) adapts the Transformer encoder to images by representing an image as a sequence of patch tokens. Unlike CNNs that use convolutions for locality, ViT relies on tokenization (patch embedding) and self-attention for feature learning.
@@ -130,7 +130,7 @@ The \textbf{Swin Transformer} addresses the quadratic scaling issue by restricti
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Figures/chapter2/grasping/swin.png}
-    \caption{Swin Transformer hierarchical architecture and shifted-window self-attention concept (from Liu et al., 2021).}
+    \caption{Swin Transformer hierarchical architecture and shifted-window self-attention concept \cite{liu2021swin}.}
     \label{fig:swin_concept}
 \end{figure}
 

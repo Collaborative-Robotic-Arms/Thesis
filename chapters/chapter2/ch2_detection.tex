@@ -1,4 +1,4 @@
-\section{Object detection and segmentation}
+\section{Object Detection and Segmentation}
 \label{sec:ch2_detection}
 
 Real-time robotic brick picking is targeted, which requires both accurate localization and reliable instance boundaries. Object detection provides coarse localization via bounding boxes, while instance segmentation adds pixel-level masks that improve geometric reasoning, overlap handling, and downstream grasp selection. One-stage detectors in the YOLO family are popular in such settings because they perform dense predictions in a single forward pass, enabling high throughput with competitive accuracy. The reference study evaluates YOLOv8 for instance segmentation and emphasizes its practicality for real-world imagery, including challenging scenes with occlusion and clutter. \cite{sapkota2024yolov8v11}
@@ -24,6 +24,6 @@ Based on the reference evaluation of YOLOv8 for instance segmentation, \textbf{Y
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{Figures/chapter2/Detection/yolov8s_seg_arch.png}
-    \caption{YOLOv8s-seg architecture overview (based on Ultralytics YOLOv8-seg documentation). \cite{ultralytics_yolov8_docs}}
+    \caption{YOLOv8s-seg architecture overview (Ultralytics YOLOv8-seg \cite{ultralytics_yolov8_docs}). }
     \label{fig:yolov8s_seg_arch}
 \end{figure}

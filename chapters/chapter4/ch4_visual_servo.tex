@@ -34,14 +34,14 @@ The corresponding image-space behavior is shown in Figure~\ref{fig:sim_results}b
         \label{fig:error_conv}
     \end{subfigure}
     
-    \caption{\textbf{Simulation Results (Uncalibrated Parameters):} Performance of the IBVS controller in a simulation environment using uncalibrated controller parameters. (a) The Cartesian path of the camera frame. (b) The trajectories of the four feature points in the image plane ($u, v$) converging to the desired targets (stars). (c) The monotonic decrease of the error norm, demonstrating convergence despite the lack of parameter tuning.}
+    \caption{Simulation Results (Uncalibrated Parameters)} (a) The Cartesian path of the camera frame. (b) The trajectories of the four feature points in the image plane ($u, v$) converging to the desired targets (stars). (c) The monotonic decrease of the error norm, demonstrating convergence despite the lack of parameter tuning.
     \label{fig:sim_results}
 \end{figure}
 
 Finally, Figure~\ref{fig:sim_results}c confirms the stability of the system. The feature error norm decreases monotonically over time, converging to zero without significant oscillation. This demonstrates that the control law remains effective and ensures convergence even when operating with uncalibrated controller parameters.
 
 
-The behavior of the visual servoing controller was evaluated under constrained rotational conditions. In this simulation scenario, the controller was configured to restrict degrees of freedom in the camera's roll and pitch axes, permitting movement only in translation ($v_x, v_y, v_z$) and yaw rotation ($\omega_z$). The results are presented in Figure~\ref{fig:sim_results_constrained}.
+The behavior of the visual servoing controller was evaluated under constrained rotational conditions. In this simulation scenario, the controller was configured to restrict degrees of freedom in the camera's roll and pitch axes, permitting movement only in translation ($v_x, v_y, v_z$) and yaw rotation ($\omega_z$). The results are presented in Figure~\ref{fig:sim_results_constrained}. Note that roll ($\omega_x$) and pitch ($\omega_y$) rotations are explicitly restricted to zero throughout the task.
 \begin{figure}[H]
     \centering
     % First Subfigure
@@ -62,6 +62,6 @@ The behavior of the visual servoing controller was evaluated under constrained r
         \label{fig:linear_velocities}
     \end{subfigure}
     
-    \caption{\textbf{Simulation Results (Constrained Motion):} Performance of the IBVS controller configured with rotational constraints. Top: Commanded camera angular velocities. Bottom: Commanded linear velocities. Note that roll ($\omega_x$) and pitch ($\omega_y$) rotations are explicitly restricted to zero throughout the task.}
+    \caption{Simulation Results (Constrained Motion)}.
     \label{fig:sim_results_constrained}
 \end{figure}
