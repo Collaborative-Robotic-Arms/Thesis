@@ -1,0 +1,306 @@
+documentclass[11pt,a4paper,twoside]{report}
+\raggedbottom
+
+\usepackage{graphicx} % Required for inserting images
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{booktabs}   % for nicer tables
+\usepackage{float}      % for [H] placement
+\usepackage{tabularx}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb} 
+\usepackage{cite}
+\usepackage{wrapfig}
+\usepackage{arabtex}
+\usepackage{utf8}
+
+\newcommand{\textLR}[1]{{\small\beginR #1\endR}}
+\setcode{utf8}
+\captionsetup{justification=centering}
+
+\titleformat{\chapter}[display] % "display" puts number and title on separate lines
+  {\normalfont\huge\bfseries}   % formatting for both lines
+  {Chapter \thechapter}          % the label (number)
+  {0pt}                          % space between label and title
+  {\Huge}                        % formatting applied to title
+\titlespacing*{\chapter}{0pt}{0pt}{20pt} % left margin, space before, space after
+
+% \geometry{margin=1in}
+\geometry{
+    a4paper,
+    left=2cm,
+    right=2cm,
+    top=4cm,         % space for header
+    bottom=2.5cm,      % space for footer
+    headheight=3.7cm,
+    headsep=0.3cm,
+    footskip=1.2cm      % distance from bottom of text to baseline of footer
+}
+
+\pagenumbering{roman}
+
+\fancypagestyle{footeronly}{
+    \fancyhf{} % Clear all header and footer fields
+    \renewcommand{\headrulewidth}{0pt} % Remove the top horizontal line
+    \renewcommand{\footrulewidth}{0.2pt} % Keep the bottom horizontal line
+    \fancyfoot[R]{Page \thepage} % Keep the page number on the right
+    \renewcommand{\footrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \footrulewidth\hfill}}
+}
+
+\pagestyle{fancy} % apply fancyhdr to all pages
+\fancyhf{} % clear all fields
+\fancyhead[R]{\includegraphics[height=2.3cm]{Figures/Logos/1.jpeg}} 
+\fancyhead[L]{%
+  \vbox to 0.5\headheight{%
+    \vfill
+    \hbox {\hfill%
+      \begin{tabular}{l}
+        \color{darkgray}Faculty of Engineering - Ain Shams University\\
+        \color{darkgray}Mechatronics Engineering Program \\
+        \color{darkgray}\text{Collaborative Robotic Arms}
+      \end{tabular}%
+    }%
+    \vfill
+  }%
+}
+\fancyfoot[R]{Page \thepage}
+\renewcommand{\headrulewidth}{0.1pt} 
+\renewcommand{\footrulewidth}{0.2pt} 
+\renewcommand{\headrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \headrulewidth\hfill}} 
+\renewcommand{\footrule}{\hbox to\headwidth{\color{lightgray}\leaders\hrule height \footrulewidth\hfill}}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+
+% ---------------------------------------------------------
+% TITLE PAGE
+% ---------------------------------------------------------
+\begin{titlepage}
+    \begin{center}
+        \begin{figure}[H]
+            \vspace{-25pt}
+            \centering
+            \includegraphics[width=0.2\textwidth]{Figures/Logos/1.jpeg}
+            \label{fig:logo}
+            \vspace{-20pt}
+        \end{figure}
+        \vspace*{1cm}
+        
+        % {\Large \textbf{Ain Shams University}}\\[0.5cm]
+        % {\Large \textbf{Faculty of Engineering}}\\[0.5cm]
+        {\large \textbf{Mechatronics Engineering Department}}
+        
+        \vspace{2cm}
+        
+        % Thesis Title
+        {\Huge \textbf{Collaborative Robotic Arms}}\\[0.5cm]
+        {\Large \textit{Graduation Project Thesis}}
+        
+        \vspace{1cm}
+        
+        \normalsize Submitted in partial fulfillment of the requirements for the \\
+        B.Sc. degree in Mechatronics Engineering
+        
+        \vspace{1cm}
+        
+        % Team Members Table
+        \textbf{Team Members:} \\[0.5cm]
+        \begin{tabular}{c}
+            Kareem Saleh Hassan \\ 
+            Mariam Mohamed El Sebaey  \\ 
+            Marwan Mahmoud Ali \\ 
+            Mohamed Alaa Abdelkareem \\ 
+            Mohamed Tarek Abdelwahab \\ 
+            Omar Magdy Abdelsattar \\ 
+            Yahia Mohamed Abdelraouf \\ 
+        \end{tabular}
+        
+        \vspace{1cm}
+        
+        \textbf{Supervisors:} \\[0.5cm]
+        Assoc. Prof. Shady Ahmed \\
+        Dr. Mohamed Omar \\
+        Eng. Dina Zakaria
+
+        \vspace{1cm}
+
+        \textbf{Academic Year: 2025--2026} \\[0.5cm]
+        \text{1 Elsarayat St., Abbaseya, 11517 Cairo, Egypt} \\
+        Fax: (+20 2) 26850617 \\
+        www.eng.asu.edu.eg
+        
+    \end{center}
+\end{titlepage}
+
+
+\clearpage
+
+\thispagestyle{footeronly} % removes header/footer if needed
+\vspace*{-2cm} % move text up to start near top of page
+
+\begin{center}
+    {\Large \textbf{Declaration}} % smaller than \chapter*, centered
+\end{center}
+
+\vspace{1cm} % space after title
+
+We/I hereby certify that this project submitted as part of our/my partial fulfillment of
+BSc in Mechatronics Engineering is entirely our/my own work, that we/I have
+exercised reasonable care to ensure its originality, and does not to the best of our/my
+knowledge breach any copyrighted materials, and have not been taken from the work
+of others and to the extent that such work has been cited and acknowledged within the
+text of our/my work.
+
+\vspace{2cm} % space before signature table
+
+\textbf{Signed by:}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{2.5}  % bigger row height
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}  
+\hline
+\textbf{Name} & \textbf{Signature} \\ \hline
+Kareem Saleh Hassan &  \\ \hline
+Mariam Mohamed El Sebaey &  \\ \hline
+Marwan Mahmoud Ali &  \\ \hline
+Mohamed Alaa Abdelkareem &  \\ \hline
+Mohamed Tarek Abdelwahab &  \\ \hline
+Omar Magdy Abdelsattar &  \\ \hline
+Yahia Mohamed Abdelraouf &  \\ \hline
+\end{tabularx}
+\caption*{} % no caption number
+\label{tab:signatures}
+\end{table}
+
+\textbf{Date:}
+January 29, 2026
+\clearpage
+
+\vspace*{-2cm} % move text up to start near top of page
+\thispagestyle{footeronly}
+\begin{center}
+    {\Large \textbf{Acknowledgment}} % smaller than \chapter*, centered
+\end{center}
+
+\vspace{1cm} % space after title
+
+First and foremost, we would like to express our deepest gratitude to our supervisors, \textbf{Assoc. Prof. Shady Ahmed} and \textbf{Dr. Mohamed Omar}. Their profound expertise in mechatronics and control systems served as a constant source of inspiration, pushing us to expand the boundaries of this project. We are sincerely grateful for their mentorship, for challenging us to maintain a critical perspective, and for their guidance through the most complex technical hurdles encountered during this work.
+
+We are equally appreciative of the support provided by \textbf{Eng. Dina Zakaria}. Her continuous follow-up, practical advice, and dedicated management were instrumental in keeping the project on schedule and ensuring that we upheld the highest standards of engineering practice.
+
+We wish to express our special thanks and sincere gratitude to \textbf{Mr. Ahmed Abdelqader} for his dedication, continuous support, and patience, as well as his commitment to providing an optimal working environment throughout the duration of this project.
+
+Furthermore, we wish to extend a special note of recognition to the \textbf{Class of 2025 project team}. The foundational work they performed on the mechanical hardware of the robotic arms and the development of the initial Graphical User Interface (GUI) provided the robust platform upon which this thesis was built. Their commitment to engineering excellence left an invaluable legacy, allowing us to pivot our focus toward advanced control, perception, and system integration. It has been a true honor to carry the torch forward and bring this collaborative system to its successful completion.
+\clearpage
+
+% ABSTRACT
+\vspace*{-2cm} % move text up to start near top of page
+\thispagestyle{footeronly}
+\begin{center}
+    {\Large \textbf{Abstract}} % smaller than \chapter*, centered
+\end{center}
+
+\vspace{1cm} % space after title
+
+This thesis presents a collaborative robotic assembly system integrating an ABB industrial manipulator and an AR4 robotic arm to execute efficient brick assembly through coordinated perception, grasping, handover, and placement. The proposed system combines global scene understanding from an Intel RealSense camera with local ``eye-in-hand'' sensing using an ESP32-CAM mounted on the AR4, enabling both coarse positioning and fine alignment during grasping via Image-Based Visual Servoing (IBVS). A structured state machine governs end-to-end task allocation and execution, selecting between direct assembly and cross-side handover based on brick and robot allocation logic derived from GUI/database input and global perception.
+
+\setlength{\parskip}{1em}
+To achieve accurate interaction in a shared workspace, calibration is treated as a core requirement. AR4 calibration is performed by collecting data at multiple X--Y locations at two height levels (0 mm and 50 mm) and fitting mapping functions using multiple approaches (Radial Basis Function (RBF), linear, and polynomial). Polynomial regression demonstrated superior performance and was validated using training/testing splits. Similarly, global camera calibration based on polynomial regression is applied using samples across varying X, Y, and Z coordinates to enable reliable estimation of brick world pose across the entire table. Perception is implemented through YOLOv8 segmentation for brick and feature detection, while grasp selection is addressed using a transformer-based encoder-decoder trained with both successful grasps (True Grasps) and failure/avoidance cases (False Grasps), enabling negative reinforcement to reduce unstable grasp predictions. During fine control, homography is used to map feature points between the RealSense global view and the ESP32-CAM local view, simplifying tracking and improving approach robustness.
+
+\setlength{\parskip}{1em}
+Experimental results demonstrate improved positional accuracy using polynomial calibration, effective brick detection performance using segmentation, increased grasp stability using the True/False labeling strategy, and robust end-to-end execution under a state-machine framework. The thesis concludes with limitations and future directions, including improved domain adaptation, force-aware handovers, and enhanced Digital Twin synchronization for higher fidelity planning and monitoring.
+\clearpage
+
+\begingroup
+\makeatletter
+\let\ps@plain\ps@fancy % Temporary override: make plain act like fancy
+\tableofcontents
+\listoffigures
+\makeatother
+\endgroup
+\clearpage
+
+\listoftables
+\thispagestyle{fancy}
+\clearpage
+
+% ---------- NOMENCLATURE ----------
+\chapter*{Nomenclature}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{NOMENCLATURE}
+
+\begin{description}
+    \setlength{\itemsep}{0pt}
+    \item[DDS:] Data Distribution Service
+    \item[DOF:] Degrees of Freedom
+    \item[FoV:] Field of View
+    \item[GPIO:] General Purpose Input/Output
+    \item[GUI:] Graphical User Interface
+    \item[HAL:] Hardware Abstraction Layer
+    \item[HSV:] Hue, Saturation, Value (Color Space)
+    \item[IBVS:] Image-Based Visual Servoing
+    \item[IK:] Inverse Kinematics
+    \item[IoU:] Intersection over Union
+    \item[JSON:] JavaScript Object Notation
+    \item[KDL:] Kinematics and Dynamics Library
+    \item[LAN:] Local Area Network
+    \item[MAE:] Mean Absolute Error
+    \item[mAP:] mean Average Precision
+    \item[MRTA:] Multi-Robot Task Allocation
+    \item[OMPL:] Open Motion Planning Library
+    \item[PBVS:] Position-Based Visual Servoing
+    \item[PID:] Proportional-Integral-Derivative (Controller)
+    \item[RBF:] Radial Basis Function
+    \item[RGB:] Red, Green, Blue (Color Model)
+    \item[RMSE:] Root Mean Square Error
+    \item[ROI:] Region of Interest
+    \item[ROS:] Robot Operating System
+    \item[RRT:] Rapidly-exploring Random Tree
+    \item[TF2:] Transform Library version 2
+    \item[UART:] Universal Asynchronous Receiver-Transmitter
+    \item[UDP:] User Datagram Protocol
+    \item[URDF:] Unified Robot Description Format
+    \item[ViT:] Vision Transformer
+    \item[YOLOv8:] You Only Look Once version 8
+\end{description}
+
+\clearpage
+
+\pagenumbering{arabic}
+
+% ---------- CHAPTERS ----------
+\input{chapters/ch1_intro}
+\input{chapters/chapter2/ch2_all}
+\input{chapters/chapter3/ch3_all}
+\input{chapters/chapter4/ch4_all}
+\input{chapters/chapter5/ch5_all}
+\input{chapters/arabic_summary}
+% \input{chapters/ch6_conclusion}
+
+% ---------- REFERENCES ----------
+\begingroup
+\makeatletter
+\let\ps@plain\ps@fancy 
+\bibliographystyle{ieeetr}
+\bibliography{bibliography/references}
+
+% ---------- APPENDICES ----------
+\appendix
+% \input{appendices/appA_calibration}
+\input{references}
+\makeatother
+\endgroup
+
+\end{document}
