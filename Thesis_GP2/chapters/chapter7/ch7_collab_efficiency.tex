@@ -1,0 +1,79 @@
+This chapter presents a comprehensive evaluation of the Digital-Twin-enabled dual-arm collaborative assembly system. The performance of the system is quantified through rigorous testing in both the simulated environment and on the physical hardware deployment comprising the ABB IRB120 and AR4 manipulators. The analysis is divided into operational metrics, focusing on the efficiency of parallel execution and part handovers, and safety metrics, validating the robustness of the dynamic collision avoidance architecture.
+
+\section{Collaboration Efficiency}
+
+To quantify the benefits of transitioning from a sequential, single-arm architecture to a multithreaded, dual-arm collaborative cell, several Key Performance Indicators (KPIs) were established. The primary metrics evaluated include total cycle time, parallel execution efficiency, and the reliability of the handover state machine. 
+
+\subsection{Execution Timing and Throughput}
+
+Throughput and cycle time were measured by executing a standardized assembly sequence consisting of [INSERT NUMBER] bricks, distributed between the AR4 and ABB reachable workspaces. The system was benchmarked under two operational paradigms: strictly sequential execution (where only one arm moves at any given time) and the implemented parallel execution framework.
+
+The performance metrics collected include:
+\begin{itemize}
+    \item \textbf{Total Assembly Time ($T_{total}$):} The absolute time from the initialization of the first pick command to the completion of the final place command.
+    \item \textbf{Parallel Utilization Rate ($U_p$):} The percentage of the total assembly time where both manipulators were in simultaneous motion.
+    \item \textbf{Arm Starvation/Idle Time ($T_{idle}$):} The cumulative time an arm spent waiting for the other to clear a shared zone or complete a handover.
+\end{itemize}
+
+% PLACEHOLDER: Table comparing Sequential vs Parallel times
+\begin{table}[htbp]
+    \centering
+    \caption{Cycle Time Comparison: Sequential vs. Parallel Execution}
+    \label{tab:cycle_time_comparison}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Metric} & \textbf{Sequential Mode} & \textbf{Parallel Mode} & \textbf{Improvement (\%)} \\
+        \midrule
+        Total Assembly Time (s) & [Data] & [Data] & [Data]\% \\
+        AR4 Active Time (s)     & [Data] & [Data] & - \\
+        ABB Active Time (s)     & [Data] & [Data] & - \\
+        Total Idle Time (s)     & [Data] & [Data] & [Data]\% \\
+        Throughput (Bricks/min) & [Data] & [Data] & [Data]\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% PLACEHOLDER: Graph showing a Gantt chart of arm activity
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{images/gantt_chart_parallel.png}
+    \rule{0.9\textwidth}{6cm} % Placeholder box
+    \caption{Gantt chart illustrating the simultaneous active and idle states of the AR4 and ABB arms during a continuous assembly cycle.}
+    \label{fig:gantt_chart}
+\end{figure}
+
+\subsection{Handover Success Rates}
+
+The collaborative handover process is mechanically and logically complex, particularly when dealing with asymmetric components such as Z-shape bricks. To evaluate the reliability of the handover state machine and the dynamic orientation logic, [INSERT NUMBER] continuous handover trials were conducted. 
+
+A trial is classified as a \textit{Success} if the brick is successfully transferred from the giver to the receiver without dropping, slipping, or triggering a system fault. \textit{Failures} are categorized into grasp failures (poor initial grip), kinematic failures (IK solver timed out), or synchronization failures (receiver closed too early/late).
+
+% PLACEHOLDER: Table detailing Handover Success Rates
+\begin{table}[htbp]
+    \centering
+    \caption{Handover Reliability and Failure Modality (Based on [X] Trials)}
+    \label{tab:handover_success}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Metric} & \textbf{Standard Bricks} & \textbf{Asymmetric (Z/I) Bricks} \\
+        \midrule
+        Total Trials            & [Data] & [Data] \\
+        Successful Handovers    & [Data] & [Data] \\
+        \textbf{Success Rate}   & \textbf{[Data]\%} & \textbf{[Data]\%} \\
+        \midrule
+        Grasp Failures          & [Data] & [Data] \\
+        Kinematic IK Failures   & [Data] & [Data] \\
+        Sync/Timing Failures    & [Data] & [Data] \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% PLACEHOLDER: Image of a successful handover in progress
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{images/handover_physical.jpg}
+    \rule{0.8\textwidth}{5cm} % Placeholder box
+    \caption{Physical execution of the handover sequence, demonstrating the Z-height offset and dynamic yaw presentation.}
+    \label{fig:physical_handover}
+\end{figure}
+

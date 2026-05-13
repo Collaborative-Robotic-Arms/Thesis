@@ -1,0 +1,42 @@
+\section{Parallel Execution Framework}
+
+To maximize assembly throughput and align with Industry 4.0 efficiency standards, the system is designed to execute pick-and-place operations concurrently when the robotic arms are operating in mutually exclusive workspaces. Managing multiple heterogeneous manipulators requires a decoupled, asynchronous architecture to prevent control bottlenecks and ensure real-time responsiveness. This framework is built upon a distributed ROS 2 Action Server topology, orchestrated by a centralized state machine.
+
+\subsection{Asynchronous Supervisory Control}
+The core of the execution framework is the \texttt{UnifiedAssemblySupervisor} node. Implemented using Python's \texttt{asyncio} library and executing within a ROS 2 \texttt{MultiThreadedExecutor}, this node maintains the global state of the assembly sequence without blocking critical telemetry pipelines. 
+
+When a sequence is received from the planning module, the Supervisor categorizes tasks based on their assigned manipulator (AR4 or ABB) and operation type (Independent Pick/Place or Handover). For parallel operations, the system bypasses standard sequential execution and spawns independent asynchronous worker threads (\texttt{execute\_ar4\_worker} and \texttt{execute\_abb\_worker}). 
+
+By utilizing \texttt{ReentrantCallbackGroup} structures, these workers operate concurrently. They independently handle camera perception queries, grasp pose transformations, and hardware-specific coordinate offsets. This ensures that if one arm experiences a slight delay during perception or motion planning, the other arm continues its execution uninterrupted, maximizing the operational uptime of the cell.
+
+\begin{figure}[htbp]
+    \centering
+    % PLACEHOLDER FOR IMAGE: Architecture diagram showing the UnifiedAssemblySupervisor dispatching asynchronous goals to the AR4 and ABB action servers.
+    \rule{0.85\textwidth}{6.5cm} 
+    \caption{Asynchronous dispatch architecture of the Unified Assembly Supervisor.}
+    \label{fig:async_supervisor_architecture}
+\end{figure}
+
+\subsection{Distributed Action Server Architecture}
+To decouple high-level decision-making from computationally intensive kinematic calculations, the system employs dedicated C++ Action Servers (\texttt{ar4\_task\_server} and \texttt{abb\_task\_server}). The Supervisor acts solely as an Action Client, sending parameterized \texttt{ExecuteTask} goals (e.g., "PICK", "PLACE", "HOME") and waiting for asynchronous feedback.
+
+This distributed architecture offers two primary advantages:
+\begin{enumerate}
+    \item \textbf{Computational Isolation:} Inverse Kinematics (IK) solving and collision checking are offloaded to the individual C++ nodes, preventing the Python-based Supervisor from freezing during complex path computations.
+    \item \textbf{Preemption and Cancellation:} The ROS 2 Action protocol allows the Supervisor to asynchronously cancel active goals. If the Zone Manager detects a proximity breach, the Supervisor instantly broadcasts a cancel request, halting the hardware controllers mid-trajectory before transferring control to the conflict resolution module.
+\end{enumerate}
+
+\subsection{Heterogeneous Trajectory Execution Constraints}
+A major challenge in parallelizing heterogeneous robots is accounting for their differing mechanical reliabilities. The execution framework dictates specific motion constraints tailored to the capabilities of each manipulator.
+
+The ABB IRB120, an industrial-grade manipulator, exhibits high repeatability and precision. Consequently, the \texttt{abb\_task\_server} utilizes standard joint-space interpolation (\texttt{move\_group->plan()}) for the entirety of its transit, allowing for rapid, fluid, and energy-efficient movements between waypoints.
+
+Conversely, the AR4 is a research-grade arm, which inherently introduces minor positional uncertainties. To mitigate the risk of mechanical deviations—especially when interacting with dense brick clusters—the \texttt{ar4\_task\_server} enforces strict Cartesian path planning (\texttt{computeCartesianPath}). During the final approach and retreat phases of a pick or place, the AR4 end-effector is mathematically constrained to move in a perfectly vertical, straight line. If the planner cannot find a linear path for at least $95\%$ of the required distance, the trajectory is aborted. This strict constraint prevents the AR4 from executing unpredictable joint-space arcs that could inadvertently collide with adjacent workpieces.
+
+\begin{figure}[htbp]
+    \centering
+    % PLACEHOLDER FOR IMAGE: Comparison diagram showing Joint-Space interpolation (curved path) vs. Cartesian path planning (straight vertical line) during a pick operation.
+    \rule{0.7\textwidth}{5cm} 
+    \caption{Trajectory generation constraints: Joint-space interpolation vs. Cartesian linear constraints.}
+    \label{fig:trajectory_constraints}
+\end{figure}

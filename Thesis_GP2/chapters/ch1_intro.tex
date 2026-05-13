@@ -1,0 +1,52 @@
+\chapter{Introduction}
+\thispagestyle{fancy}
+\vspace*{0cm} % move text up to start near top of page
+
+\section{Background and Motivation}
+Collaborative robotic systems are rapidly evolving from isolated automated stations into interconnected, intelligent cells that form the backbone of Industry 4.0. While foundational capabilities such as perception and basic grasping establish the groundwork for robotic assembly, scaling these systems to true industrial efficiency requires concurrent operation, advanced spatial awareness, and remote observability. 
+
+Despite the advantages of multi-robot collaboration, executing parallel tasks introduces substantial technical challenges. These include:
+\begin{itemize}
+    \item Managing concurrent command streams to execute parallel operations without control bottlenecks.
+    \item Ensuring collision-free trajectories within shared physical workspaces dynamically.
+    \item Synchronizing complex, multi-stage maneuvers, such as part handovers, between heterogeneous robot architectures.
+    \item Bridging the gap between physical hardware and virtual monitoring for remote management and pre-execution safety validation.
+\end{itemize}
+
+Building upon the perception and basic control frameworks established in the first semester, Phase II of this project addresses these challenges. It transitions the two-robot assembly system—integrating an ABB IRB120 industrial robot and an AR4 research arm—into a fully integrated, parallelized, and remotely monitored cell. By leveraging multithreading, advanced task construction, and a multi-mode Digital Twin architecture within ROS 2 (Jazzy Jalisco), this phase shifts the focus toward system safety, execution efficiency, and Industrial Internet of Things (IIoT) connectivity.
+
+\section{Problem Statement}
+The primary problem addressed in this phase of the project is the specific challenge of synchronizing multiple heterogeneous manipulators and ensuring safe, collision-free workspaces while enabling remote industrial management. Specifically, the system must be capable of:
+\begin{enumerate}
+    \item Executing parallel processes via multithreading to eliminate idle times and maximize throughput.
+    \item Preventing mechanical interference through intelligent zone management and dynamic collision avoidance strategies.
+    \item Synchronizing the logical "Give" and "Take" states to perform seamless and safe handovers of bricks between the two distinct arms.
+    \item Providing a comprehensive virtual replica of the system that allows for real-time monitoring, efficient trajectory teaching (avoiding redundant calculations), and pre-execution safety validation.
+    \item Extending the system's accessibility by integrating an IoT framework that separates the control room from the physical robotic cell.
+\end{enumerate}
+
+\section{Project Objectives}
+The objectives of this second-semester thesis are summarized as follows:
+\begin{itemize}
+    \item Develop a parallel execution framework utilizing multithreading to manage concurrent control streams for the ABB and AR4 arms.
+    \item Implement modular task planning using MoveIt Task Constructor (MTC) to orchestrate complex operations like the handover process.
+    \item Design and integrate a Zone Manager to define shared versus exclusive workspaces, guaranteeing collision-free runs.
+    \item Establish a Multi-Mode Digital Twin mapped to RViz, featuring real-time monitoring, program storage via Forward Kinematics, and a simulated sandbox for pre-execution validation.
+    \item Architect an IIoT communication bridge to link local controllers with a remote, decentralized control room dashboard.
+    \item Conduct a comprehensive industrial feasibility analysis evaluating the economic viability, technical integration, and safety compliance of deploying the proposed system in real-world factory environments.
+\end{itemize}
+
+\section{Thesis Organization}
+This thesis is organized as follows:
+\begin{itemize}
+    \item \textbf{Chapter 2} reviews advanced literature on collaborative robotics, Digital Twin frameworks, IIoT communication, and collision avoidance strategies.
+    \item \textbf{Chapter 3} details the collaborative system architecture, focusing on the parallel execution framework, MoveIt Task Constructor implementation, the handover process, and the Zone Manager.
+    \item \textbf{Chapter 4} presents the Multi-Mode Digital Twin, explaining the synchronization engine and the functionalities of real-time monitoring, trajectory teaching, and pre-execution validation.
+    \item \textbf{Chapter 5} outlines the IoT and remote control integration, describing the network architecture, the control room interface, and the command flow.
+    \item \textbf{Chapter 6} covers the implementation and technical setup, including the software stack, messaging protocols, and hardware wiring.
+    \item \textbf{Chapter 7} provides the results and performance analysis, evaluating collaboration efficiency, collision avoidance success, Digital Twin accuracy, and IoT reliability.
+    \item \textbf{Chapter 8} discusses the industrial feasibility and deployment analysis, analyzing economic viability, legacy system integration, safety compliance, and human factors.
+    \item \textbf{Chapter 9} concludes the thesis, summarizing the achievements, addressing challenges overcome, and offering recommendations for future work.
+\end{itemize}
+
+\clearpage

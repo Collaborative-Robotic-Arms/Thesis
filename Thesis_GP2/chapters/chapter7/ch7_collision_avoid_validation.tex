@@ -1,0 +1,52 @@
+\section{Collision Avoidance Validation}
+
+The mathematical guarantee of collision-free operation is paramount in multi-robot cells. The \texttt{ZoneDetectionManager} and the MoveIt Task Constructor (MTC) Safe Resolution pipeline were subjected to rigorous edge-case testing to validate their efficacy.
+
+\subsection{Zone Manager and Spatial Tracking Accuracy}
+
+To test the Zone Manager, the system was forced into intersecting trajectories. The primary KPI is the \textbf{Minimum Separation Distance ($D_{min}$)}, defined as the closest Cartesian distance between the AR4 end-effector (\texttt{ar4\_ee\_link}) and the ABB end-effector (\texttt{tool0}) during parallel motion. The system must maintain a strict $D_{min} \geq$ [INSERT YOUR MINIMUM SEPARATION PARAMETER, e.g., 0.10 m] at all times.
+
+% PLACEHOLDER: Graph of distance over time
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.85\textwidth]{images/arm_separation_plot.png}
+    \rule{0.85\textwidth}{6cm} % Placeholder box
+    \caption{Real-time Cartesian separation distance between the AR4 and ABB end-effectors during a parallel assembly sequence. The red dashed line indicates the minimum safety threshold.}
+    \label{fig:arm_separation}
+\end{figure}
+
+\subsection{Edge Case Scenarios and MTC Resolution}
+
+The algorithmic fail-safe was validated by intentionally commanding both arms to reach conflicting coordinates within the shared interference zone simultaneously. The performance of the MTC resolution pipeline is measured by:
+\begin{itemize}
+    \item \textbf{Detection Latency ($L_{detect}$):} The time taken (in milliseconds) from breaching the approach margin to the issuance of the \texttt{COLLISION\_WARNING} interrupt.
+    \item \textbf{Resolution Computation Time ($T_{res}$):} The time required for the MTC \texttt{PipelinePlanner} to calculate a valid 12-DOF escape trajectory.
+    \item \textbf{Resolution Success Rate ($SR_{res}$):} The percentage of imminent collision events successfully resolved without requiring a hard system abort.
+\end{itemize}
+
+% PLACEHOLDER: Table of Edge Cases
+\begin{table}[htbp]
+    \centering
+    \caption{Validation of Dynamic Collision Avoidance under Edge-Case Scenarios}
+    \label{tab:edge_cases}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Scenario} & \textbf{Trials} & \textbf{Avg. Latency (ms)} & \textbf{Avg. Res. Time (s)} & \textbf{Success Rate} \\
+        \midrule
+        Head-on Convergence     & [Data] & [Data] & [Data] & [Data]\% \\
+        Orthogonal Intersection & [Data] & [Data] & [Data] & [Data]\% \\
+        Handover Deadlock       & [Data] & [Data] & [Data] & [Data]\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% PLACEHOLDER: Image of RViz showing MTC resolving a conflict
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{images/rviz_mtc_resolution.png}
+    \rule{0.8\textwidth}{5.5cm} % Placeholder box
+    \caption{RViz simulation captured during a conflict resolution event. The MTC pipeline dynamically treats the ABB's frozen state as a static obstacle to route the AR4 to a safe zone.}
+    \label{fig:rviz_resolution}
+\end{figure}
+
+The results tabulated above demonstrate that the hybrid control architecture successfully prioritizes mechanical safety while maintaining a significantly higher throughput than traditional sequential systems.

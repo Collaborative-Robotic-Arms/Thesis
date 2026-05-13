@@ -1,0 +1,15 @@
+\section{Technical Integration and Legacy Systems}
+
+A major hurdle in modernizing factory floors is "brownfield" deployment—integrating cutting-edge robotic architectures into existing infrastructure. The proposed system relies on a modern software stack (ROS 2 Jazzy Jalisco, MoveIt 2, and Python/C++ asynchronous nodes), which differs fundamentally from the legacy systems typically found in industry.
+
+\subsection{Cloud-Hybrid Communication Architecture}
+Traditional factory floors are governed by Programmable Logic Controllers (PLCs) and Supervisory Control and Data Acquisition (SCADA) systems communicating via deterministic, localized protocols (e.g., PROFINET, EtherCAT). By contrast, the implemented architecture employs a modern, cloud-hybrid IIoT approach using a Firestore database as the central communication hub between the remote user interface and the local robotic cell.
+
+As implemented in the \texttt{firestore\_bridge} module, the remote GUI pushes the requested assembly sequence to a specific document within the cloud database via a JSON payload. The local system maintains an active snapshot listener on this document. Once a change is detected, the bridge extracts the JSON array and translates it into a localized MQTT/ROS 2 topic (\texttt{/assembly/raw\_sequence}). This data is then ingested by a dedicated \texttt{BrickProcessorNode}, which parses the geometric coordinates, assigns the appropriate start and target manipulators (AR4 or ABB) based on spatial logic, and finally serves the refined plan to the Supervisor via a ROS 2 Service.
+
+\subsection{Bridging the Legacy Gap}
+While this Firestore-to-ROS 2 bridge enables unparalleled remote accessibility and global monitoring, integrating it with legacy factory systems presents distinct challenges. 
+\begin{itemize}
+    \item \textbf{Latency vs. Determinism:} Cloud-based databases introduce variable network latency. While acceptable for high-level task dispatching (like sending an assembly plan), it cannot be used for microsecond-level motion control. Therefore, the architecture strictly isolates communication: the cloud database dictates \textit{what} to do, but the local MoveIt 2 pipelines and C++ Action Servers independently determine \textit{how} to do it safely.
+    \item \textbf{MES Integration:} For a full industrial rollout, the Firestore database schema would need to be bridged to the factory's existing Manufacturing Execution System (MES). This could be achieved using middleware protocols like OPC UA (Open Platform Communications Unified Architecture), acting as a secure translator between the cloud JSON payloads and the factory's internal PLC registries.
+\end{itemize}

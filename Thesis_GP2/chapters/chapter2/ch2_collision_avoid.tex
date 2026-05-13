@@ -1,0 +1,29 @@
+\section{Collision Avoidance Strategies}
+
+In multi-robot collaborative cells, the intersection of robotic workspaces is mathematically inevitable when performing cooperative tasks such as part handovers or shared assembly. Consequently, ensuring that manipulators do not collide with each other, the environment, or the workpieces is a fundamental requirement for system viability. The challenge of collision avoidance in these environments necessitates a multi-layered approach, bridging high-level trajectory generation with low-level workspace regulation \cite{khatib1986real}.
+
+This section reviews the evolution of motion planning algorithms in dynamic environments, the implementation of zone management strategies, and the integration of these concepts within modern robotic middleware.
+
+\subsection{Motion Planning in Dynamic Environments}
+
+Classical motion planning for industrial manipulators often assumes a static environment where obstacles are known a priori. Algorithms such as Probabilistic Roadmap (PRM) and Rapidly-exploring Random Trees (RRT) efficiently find collision-free paths in high-dimensional configuration spaces by sampling valid poses \cite{lavalle2006planning}. However, when multiple robots operate simultaneously, the environment becomes highly dynamic. The physical presence of one arm acts as a moving obstacle to the other.
+
+To address dynamic environments, modern frameworks employ advanced sampling-based algorithms, such as RRT-Connect or Bi-directional Space-Time (BIT*) algorithms, which can rapidly replan when the configuration space changes \cite{gammell2015batch}. Within the Robot Operating System (ROS 2) ecosystem, the MoveIt 2 framework facilitates this by continuously updating the planning scene using sensor data and forward kinematics from all active agents \cite{coleman2014reducing}. Furthermore, for complex, multi-stage operations like part handovers, modular planning tools like MoveIt Task Constructor (MTC) allow developers to break down trajectories into discrete sub-tasks, ensuring that local paths are verified for collisions before execution \cite{görner2019moveit}.
+
+\subsection{Zone Management and Workspace Allocation}
+
+While dynamic motion planning computes mathematical paths, relying solely on real-time replanning in high-speed industrial applications introduces unacceptable computational latency and unpredictable behavior. To guarantee absolute safety, Industry 4.0 systems implement \textit{Zone Management}—a spatial partitioning strategy that manages access to physical space through logical constraints \cite{michalos2015design}.
+
+Zone management divides the robotic cell into two primary categories:
+\begin{itemize}
+    \item \textbf{Exclusive Zones:} Areas of the workspace that can only be reached by a single specific robot. Motions within these zones do not require inter-robot collision checks, allowing for maximum operational speed.
+    \item \textbf{Shared (Interference) Zones:} Volumes of space reachable by both manipulators, such as the exact coordinate space where a part handover occurs. 
+\end{itemize}
+
+Access to shared zones is typically governed by state machines acting as digital semaphores or mutexes (mutual exclusions). When one robot requests entry into the shared zone, the Zone Manager evaluates the state of the other robot. If the zone is occupied, the requesting robot is paused or its path is heavily constrained until the zone is vacated \cite{erdmann1987multiple}. This logic, deeply tied to the multithreading architecture of the system, ensures that parallel execution remains strictly collision-free.
+
+\subsection{Pre-Execution Validation vs. Reactive Control}
+
+Collision avoidance strategies are generally categorized as either reactive or proactive. Reactive control methods, such as Artificial Potential Fields, dynamically push the robot away from obstacles in real-time \cite{khatib1986real}. While effective for unpredictable human-robot interactions, they are prone to local minima and can disrupt the strict timing required for synchronized robot-robot handovers.
+
+Therefore, deterministic multi-robot cells rely heavily on proactive, pre-execution validation. By leveraging a Digital Twin, the system simulates the exact sequence of commands—including both individual arm trajectories and the state of the Zone Manager—in a virtual sandbox before the hardware moves \cite{glaessgen2012digital}. This ensures that dynamic motion planning and workspace allocation rules resolve perfectly, catching potential geometric clashes or logical deadlocks with zero physical risk.

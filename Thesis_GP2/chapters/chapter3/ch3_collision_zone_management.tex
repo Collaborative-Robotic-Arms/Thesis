@@ -1,0 +1,27 @@
+\section{Zone Manager \& Collision Avoidance}
+
+To facilitate safe parallel operations in a shared physical space, the system utilizes a \texttt{ZoneDetectionManager}. This module acts as a continuous spatial watchdog, mathematically guaranteeing that the two heterogeneous manipulators do not collide during independent task execution.
+
+\subsection{Real-Time Spatial Tracking}
+Operating entirely independently from the MoveIt trajectory planners, the Zone Manager utilizes a \texttt{tf2\_ros::Buffer} to continuously track the live Cartesian coordinates of the physical (or simulated) robots. By tracking the \texttt{ar4\_ee\_link} and the ABB \texttt{tool0} against the global \texttt{abb\_table} frame, the manager maintains an uncorrupted view of the cell's physical state, regardless of what the motion planners intend to do.
+
+\subsection{Workspace Partitioning}
+The shared workspace is mathematically partitioned into distinct logical volumes based on spherical radii originating from the central handover coordinate. The Zone Manager evaluates the live end-effector poses against these radii to classify their current state:
+\begin{itemize}
+    \item \textbf{Safe Zone:} The arms are operating exclusively within their own isolated, reachable bounds. No collision is geometrically possible.
+    \item \textbf{Approach Zone:} An arm has entered the peripheral margin (\texttt{approach\_margin}), indicating a trajectory heading toward the shared center.
+    \item \textbf{Handover Zone:} The strict spatial volume where the physical brick transfer occurs.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    % PLACEHOLDER FOR IMAGE: 3D or 2D top-down diagram illustrating the Handover Zone radius, Approach Margin, and Safe Zones within the robotic cell.
+    \rule{0.6\textwidth}{6cm} 
+    \caption{Spatial workspace partitioning managed by the Zone Detection Manager.}
+    \label{fig:zone_management}
+\end{figure}
+
+\subsection{Dynamic Collision Risk Assessment}
+Simultaneously, the manager continuously calculates the Euclidean distance between the two end-effectors. A minimum safe separation threshold (\texttt{min\_arm\_separation}) is defined in the system parameters. 
+
+If the calculated distance between the arms falls below this threshold while the system is \textit{not} executing a sanctioned handover, a \texttt{COLLISION\_WARNING} interrupt is immediately broadcast. This alert triggers the Supervisor's emergency stop mechanism, instantly halting the action servers and transferring control to the MTC node for safe, algorithmic conflict resolution as detailed in Section 3.2.
