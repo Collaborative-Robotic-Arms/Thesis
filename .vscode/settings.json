@@ -1,0 +1,22 @@
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk_active",
+      "command": "latexmk",
+      "args": [
+        "-pdf",
+        "-interaction=nonstopmode",
+        "-synctex=1",
+        "%DOC%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk (active file)",
+      "tools": ["latexmk_active"]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "latexmk (active file)",
+  "latex-workshop.latex.build.forceRecipeUsage": true
+}
