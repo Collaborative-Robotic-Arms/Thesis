@@ -3,7 +3,14 @@
 To facilitate safe parallel operations in a shared physical space, the system utilizes a \texttt{ZoneDetectionManager}. This module acts as a continuous spatial watchdog, mathematically guaranteeing that the two heterogeneous manipulators do not collide during independent task execution.
 
 \subsection{Real-Time Spatial Tracking}
-Operating entirely independently from the MoveIt trajectory planners, the Zone Manager utilizes a \texttt{tf2\_ros::Buffer} to continuously track the live Cartesian coordinates of the physical (or simulated) robots. By tracking the \texttt{ar4\_ee\_link} and the ABB \texttt{tool0} against the global \texttt{abb\_table} frame, the manager maintains an uncorrupted view of the cell's physical state, regardless of what the motion planners intend to do.
+Operating entirely independently from the MoveIt trajectory planners, the Zone Manager utilizes a \texttt{tf2\_ros::Buffer} to continuously track the live Cartesian coordinates of the physical (or simulated) robots. By tracking the \texttt{ar4\_ee\_link} and the ABB \texttt{tool0} against the global \texttt{abb\_table} frame, the manager maintains an uncorrupted view of the cell's physical state, regardless of what the motion planners intend to do. The end-to-end data pipeline from raw transform lookup to asynchronous goal preemption is structurally outlined in Figure~\ref{fig:safety_data_flow}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/chapter3/ch3_collision/Safety_Node_Data_Flow.png}
+    \caption{Data routing and message flow of the independent spatial safety watchdog infrastructure.}
+    \label{fig:safety_data_flow}
+\end{figure}
 
 \subsection{Workspace Partitioning}
 The shared workspace is mathematically partitioned into distinct logical volumes based on spherical radii originating from the central handover coordinate. The Zone Manager evaluates the live end-effector poses against these radii to classify their current state:
@@ -22,6 +29,13 @@ The shared workspace is mathematically partitioned into distinct logical volumes
 \end{figure}
 
 \subsection{Dynamic Collision Risk Assessment}
-Simultaneously, the manager continuously calculates the Euclidean distance between the two end-effectors. A minimum safe separation threshold (\texttt{min\_arm\_separation}) is defined in the system parameters. 
+Simultaneously, the manager continuously calculates the Euclidean distance between the two end-effectors. A minimum safe separation threshold (\texttt{min\_arm\_separation}) is defined in the system parameters. To perform these tasks deterministically, the node runs an unblocked high-frequency diagnostic loop, detailed in Figure~\ref{fig:collision_logic_loop}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\textwidth]{figures/chapter3/ch3_collision/Collision_Avoidance_Logic_Loop.png}
+    \caption{Flowchart of the continuous diagnostic loop executed by the Zone Detection Manager.}
+    \label{fig:collision_logic_loop}
+\end{figure}
 
 If the calculated distance between the arms falls below this threshold while the system is \textit{not} executing a sanctioned handover, a \texttt{COLLISION\_WARNING} interrupt is immediately broadcast. This alert triggers the Supervisor's emergency stop mechanism, instantly halting the action servers and transferring control to the MTC node for safe, algorithmic conflict resolution as detailed in Section 3.2.

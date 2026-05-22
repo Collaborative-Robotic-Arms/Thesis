@@ -8,22 +8,23 @@ A significant challenge in multi-robot collaboration is the discrepancy between 
 To bridge this gap, the Supervisor isolates coordinate logic. In simulation mode, trajectories utilize a 1:1 pass-through. In hardware mode, the system applies explicit mathematical translations and rotational quaternion overrides. These offsets compensate for the physical calibration discrepancies between the camera frame, the AR4 base, and the ABB base, ensuring that the robots meet precisely at the shared handover coordinate.
 
 \subsection{Handover State Machine}
-The handover sequence is governed by a strict "Give-and-Take" handshake protocol within the Supervisor node:
+The handover sequence is governed by a strict "Give-and-Take" handshake protocol within the Supervisor node. The explicit interaction timeline, transactional boundaries, and multi-node callback hooks driving this state machine are structured chronologically in Figure~\ref{fig:handover_sequence}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/chapter3/ch3_handover/Give_and_Take_Sequence_Diagram.png}
+    \caption{UML sequence diagram tracking data exchanges and coordination during the collaborative handover.}
+    \label{fig:handover_sequence}
+\end{figure}
+
+The discrete steps executed within this state boundary progress as follows:
 \begin{enumerate}
     \item \textbf{Pick and Move to Zone:} The designated "giver" arm picks the brick and traverses to a predefined mid-air coordinate (\texttt{handover\_pose}). Mid-air Z-height overrides are applied to pull the trajectory above table level, ensuring a safe meeting point.
     \item \textbf{Query Handover Grasp:} Once the giver is holding position, the "receiver" arm queries the perception pipeline. The system calculates a receiver grasp pose relative to the brick's current orientation within the giver's gripper.
     \item \textbf{Take and Release:} The receiver arm approaches, grasps the exposed geometry of the brick, and signals completion. The giver arm opens its gripper and retracts along a safe Cartesian vector before returning to its home state.
 \end{enumerate}
 
-\begin{figure}[htbp]
-    \centering
-    % PLACEHOLDER FOR IMAGE: Sequence diagram or flowchart of the Give-and-Take handover logic between AR4 and ABB.
-    \rule{0.7\textwidth}{6cm} 
-    \caption{Logical sequencing of the collaborative handover state machine.}
-    \label{fig:handover_sequence}
-\end{figure}
-
 \subsection{Orientation and Z-Brick Presentation}
-A unique collaborative challenge arises when handing over asymmetric parts, such as "Z-shape" bricks. The system must ensure that the receiving gripper grasps a viable flat surface without colliding with the giver's gripper. 
+A unique collaborative challenge arises when handing over asymmetric parts, such as "Z-shape" bricks. The system must ensure that the receiving gripper grasps a viable flat surface without colliding with the giver's gripper. The Supervisor implements dynamic presentation logic to solve this. 
 
-The Supervisor implements dynamic presentation logic to solve this. By calculating the spatial differential between the AI-generated grasp point (the center of mass/optimal grasp) and the YOLO-detected geometric center of the brick, the system determines the dominant offset axis. Based on this differential, the giver arm automatically applies a $90^\circ$ or $180^\circ$ yaw rotation to its presentation angle. This rotational logic guarantees the receiver arm is presented with a clear, unobstructed parallel surface for the final take.
+By calculating the spatial differential between the AI-generated grasp point (the center of mass/optimal grasp) and the YOLO-detected geometric center of the brick, the system determines the dominant offset axis. Based on this differential, the giver arm automatically applies a $90^\circ$ or $180^\circ$ yaw rotation to its presentation angle. This rotational logic guarantees the receiver arm is presented with a clear, unobstructed parallel surface for the final take.

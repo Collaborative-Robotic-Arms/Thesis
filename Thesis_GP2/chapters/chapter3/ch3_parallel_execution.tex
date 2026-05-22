@@ -1,42 +1,123 @@
 \section{Parallel Execution Framework}
 
-To maximize assembly throughput and align with Industry 4.0 efficiency standards, the system is designed to execute pick-and-place operations concurrently when the robotic arms are operating in mutually exclusive workspaces. Managing multiple heterogeneous manipulators requires a decoupled, asynchronous architecture to prevent control bottlenecks and ensure real-time responsiveness. This framework is built upon a distributed ROS 2 Action Server topology, orchestrated by a centralized state machine.
+To maximize assembly throughput and align with Industry 4.0 efficiency standards, the system is designed to execute pick-and-place operations concurrently when the robotic arms are operating in mutually exclusive workspaces. Managing multiple heterogeneous manipulators requires a decoupled, asynchronous architecture to prevent control bottlenecks and ensure real-time responsiveness. 
 
-\subsection{Asynchronous Supervisory Control}
-The core of the execution framework is the \texttt{UnifiedAssemblySupervisor} node. Implemented using Python's \texttt{asyncio} library and executing within a ROS 2 \texttt{MultiThreadedExecutor}, this node maintains the global state of the assembly sequence without blocking critical telemetry pipelines. 
-
-When a sequence is received from the planning module, the Supervisor categorizes tasks based on their assigned manipulator (AR4 or ABB) and operation type (Independent Pick/Place or Handover). For parallel operations, the system bypasses standard sequential execution and spawns independent asynchronous worker threads (\texttt{execute\_ar4\_worker} and \texttt{execute\_abb\_worker}). 
-
-By utilizing \texttt{ReentrantCallbackGroup} structures, these workers operate concurrently. They independently handle camera perception queries, grasp pose transformations, and hardware-specific coordinate offsets. This ensures that if one arm experiences a slight delay during perception or motion planning, the other arm continues its execution uninterrupted, maximizing the operational uptime of the cell.
+This framework is built upon a distributed ROS 2 Action Server topology, orchestrated by a centralized state machine. The global interaction of these distributed entities is visually mapped out in Figure~\ref{fig:ros2_node_topology}, highlighting the communication interfaces between external perception nodes, the local controller nodes, and the advanced planning subsystems.
 
 \begin{figure}[htbp]
     \centering
-    % PLACEHOLDER FOR IMAGE: Architecture diagram showing the UnifiedAssemblySupervisor dispatching asynchronous goals to the AR4 and ABB action servers.
-    \rule{0.85\textwidth}{6.5cm} 
-    \caption{Asynchronous dispatch architecture of the Unified Assembly Supervisor.}
+    \includegraphics[width=0.95\textwidth]{figures/chapter3/ch3_parallel_execution/ROS2_Node_Topology_Architecture.png}
+    \caption{High-level ROS 2 node topology and message interface architecture of the collaborative cell.}
+    \label{fig:ros2_node_topology}
+\end{figure}
+
+\subsection{Asynchronous Supervisory Control}
+The core of the execution framework is the \texttt{UnifiedAssemblySupervisor} node. Implemented using Python's \texttt{asyncio} library and executing within a ROS 2 \texttt{MultiThreadedExecutor}, this node maintains the global state of the assembly sequence without blocking critical telemetry pipelines. When a sequence is received from the planning module, the Supervisor categorizes tasks based on their assigned manipulator (AR4 or ABB) and operation type (Independent Pick/Place or Handover).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/chapter3/ch3_parallel_execution/Parallel_State_Machine_Logic.png}
+    \caption{Algorithmic flowchart of the supervisor's master state machine loop execution.}
+    \label{fig:parallel_state_machine}
+\end{figure}
+
+For parallel operations, the system bypasses standard sequential execution and spawns independent asynchronous worker threads (\texttt{execute\_ar4\_worker} and \texttt{execute\_abb\_worker}). By utilizing \texttt{ReentrantCallbackGroup} structures, these workers operate concurrently. 
+
+As shown in the internal threading layout in Figure~\ref{fig:async_supervisor_architecture}, the executor isolates these workers, allowing them to independently handle camera perception queries, grasp pose transformations, and hardware-specific coordinate offsets. This ensures that if one arm experiences a slight delay during perception or motion planning, the other arm continues its execution uninterrupted, maximizing the operational uptime of the cell.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/chapter3/ch3_parallel_execution/Callback_Executor_Architecture.png}
+    \caption{Thread and callback group allocation within the multi-threaded executor architecture of the Unified Assembly Supervisor.}
     \label{fig:async_supervisor_architecture}
 \end{figure}
 
-\subsection{Distributed Action Server Architecture}
-To decouple high-level decision-making from computationally intensive kinematic calculations, the system employs dedicated C++ Action Servers (\texttt{ar4\_task\_server} and \texttt{abb\_task\_server}). The Supervisor acts solely as an Action Client, sending parameterized \texttt{ExecuteTask} goals (e.g., "PICK", "PLACE", "HOME") and waiting for asynchronous feedback.
+The non-blocking handshake sequence generated by this multi-threaded setup is visually documented in Figure~\ref{fig:handshake_sequence}. The timeline confirms how async goal dispatches allow the arms to travel concurrently before syncing at a terminal join state.
 
-This distributed architecture offers two primary advantages:
+\begin{figure}[!htbp] % Added ! to tighten placement priorities
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/chapter3/ch3_parallel_execution/Asynchronous_Handshake_Sequence.png}
+    \caption{UML sequence diagram of the non-blocking asynchronous handshake protocol during parallel execution.}
+    \label{fig:handshake_sequence}
+\end{figure}
+
+\FloatBarrier % <-- This locks previous figures from leaking into the next subsections
+
+\subsection{Distributed Action Server Architecture}
+To decouple high-level decision-making from computationally intensive kinematic calculations, the system employs dedicated C++ Action Servers (\texttt{ar4\_task\_server} and \texttt{abb\_task\_server}). The Supervisor acts solely as an Action Client, sending parameterized \texttt{ExecuteTask} goals (e.g., "PICK", "PLACE", "HOME") and waiting for asynchronous feedback. This distributed architecture offers two primary advantages:
 \begin{enumerate}
     \item \textbf{Computational Isolation:} Inverse Kinematics (IK) solving and collision checking are offloaded to the individual C++ nodes, preventing the Python-based Supervisor from freezing during complex path computations.
     \item \textbf{Preemption and Cancellation:} The ROS 2 Action protocol allows the Supervisor to asynchronously cancel active goals. If the Zone Manager detects a proximity breach, the Supervisor instantly broadcasts a cancel request, halting the hardware controllers mid-trajectory before transferring control to the conflict resolution module.
 \end{enumerate}
 
 \subsection{Heterogeneous Trajectory Execution Constraints}
-A major challenge in parallelizing heterogeneous robots is accounting for their differing mechanical reliabilities. The execution framework dictates specific motion constraints tailored to the capabilities of each manipulator.
+A major challenge in parallelizing heterogeneous robots is accounting for their differing mechanical reliabilities. The execution framework dictates specific motion constraints tailored to the capabilities of each manipulator. The ABB IRB120, an industrial-grade manipulator, exhibits high repeatability and precision. Consequently, the \texttt{abb\_task\_server} utilizes standard joint-space interpolation (\texttt{move\_group->plan()}) for the entirety of its transit, allowing for rapid, fluid, and energy-efficient movements between waypoints.
 
-The ABB IRB120, an industrial-grade manipulator, exhibits high repeatability and precision. Consequently, the \texttt{abb\_task\_server} utilizes standard joint-space interpolation (\texttt{move\_group->plan()}) for the entirety of its transit, allowing for rapid, fluid, and energy-efficient movements between waypoints.
+Conversely, the AR4 is a research-grade arm, which inherently introduces minor positional uncertainties. To mitigate the risk of mechanical deviations—especially when interacting with dense brick clusters—the \texttt{ar4\_task\_server} enforces strict Cartesian path planning (\texttt{computeCartesianPath}). During the final approach and retreat phases of a pick or place, the AR4 end-effector is mathematically constrained to move in a perfectly vertical, straight line. 
 
-Conversely, the AR4 is a research-grade arm, which inherently introduces minor positional uncertainties. To mitigate the risk of mechanical deviations—especially when interacting with dense brick clusters—the \texttt{ar4\_task\_server} enforces strict Cartesian path planning (\texttt{computeCartesianPath}). During the final approach and retreat phases of a pick or place, the AR4 end-effector is mathematically constrained to move in a perfectly vertical, straight line. If the planner cannot find a linear path for at least $95\%$ of the required distance, the trajectory is aborted. This strict constraint prevents the AR4 from executing unpredictable joint-space arcs that could inadvertently collide with adjacent workpieces.
+If the planner cannot find a linear path for at least $95\%$ of the required distance, the trajectory is aborted. This strict constraint prevents the AR4 from executing unpredictable joint-space arcs that could inadvertently collide with adjacent workpieces.
 
 \begin{figure}[htbp]
     \centering
-    % PLACEHOLDER FOR IMAGE: Comparison diagram showing Joint-Space interpolation (curved path) vs. Cartesian path planning (straight vertical line) during a pick operation.
-    \rule{0.7\textwidth}{5cm} 
-    \caption{Trajectory generation constraints: Joint-space interpolation vs. Cartesian linear constraints.}
+    \begin{tikzpicture}[
+        scale=1.0, 
+        important line/.style={thick, font=\small},
+        axis/.style={very thick, ->, >=Stealth},
+        path arc/.style={line width=1.5pt, red, dashed, ->, >=Stealth},
+        path straight/.style={line width=1.5pt, black!70!green, ->, >=Stealth},
+        every node/.style={font=\small\sffamily}
+    ]
+
+        % Draw Table Top Plane
+        \draw[line width=2pt, black!30] (-1,0) -- (9,0);
+        \node[right, black!50] at (9,0) {Tabletop Plane ($Z=0$)};
+
+        % Draw Target Brick Clusters
+        \draw[fill=orange!30, draw=orange!80, thick] (1,0) rectangle (2.5,0.6);
+        \draw[fill=orange!40, draw=orange!85, thick] (2.5,0) rectangle (4.0,0.6);
+        \draw[fill=orange!50, draw=orange!90, thick] (1.5,0.6) rectangle (3.0,1.2);
+        \node[below] at (2.5,-0.1) {Target Brick Stack};
+
+        % Draw Neighboring Obstacle Brick (The risk zone)
+        \draw[fill=red!20, draw=red!60, thick] (5,0) rectangle (6.5,0.6);
+        \node[below, red!80] at (5.75,-0.1) {Adjacent Brick};
+
+        % Starting High/Home Coordinate Node
+        \coordinate (Start) at (7,5);
+        \filldraw[black] (Start) circle (3pt) node[above right] {Initial Pose (Home/Transit)};
+
+        % Target Grasp Coordinate Node
+        \coordinate (Grasp) at (2.25,1.2);
+        \filldraw[black] (Grasp) circle (2.5pt) node[above=4pt] {Grasp Pose};
+
+        % Approach Height Coordinate Node
+        \coordinate (Approach) at (2.25,4.0);
+        \filldraw[black!60] (Approach) circle (2pt) node[left=3pt] {Approach Threshold ($95\%$ Linear Bounds)};
+
+        % --- PATH 1: Joint-Space Interpolation (ABB Style, but dangerous for AR4) ---
+        % A sweeping, unconstrained curved path that drops dangerously close to the adjacent brick
+        \draw[path arc] (Start) .. controls (7,2.5) and (6,1.2) .. (Grasp);
+        \node[red, right, text width=4.5cm, align=left] at (7.1,2.3) {
+            \textbf{Joint-Space Interpolation}\\
+            \texttt{move\_group->plan()}\\
+            $\bullet$ Unpredictable non-linear arc\\
+            $\bullet$ High collision risk with adjacent workpieces
+        };
+
+        % --- PATH 2: Strict Cartesian Linear Constraints (AR4 Guarded Approach) ---
+        % Step A: Joint space to approach point
+        \draw[path arc, blue, dotted] (Start) .. controls (6.5,4.5) and (4.5,4.2) .. (Approach);
+        \node[blue!80!black, above] at (4.8,4.5) {Fluid Transit Phase};
+        
+        % Step B: Perfectly linear straight down vertical plunge
+        \draw[path straight] (Approach) -- (Grasp);
+        \node[black!60!green, left, text width=4.2cm, align=right] at (1.9,2.6) {
+            \textbf{Cartesian Constraint}\\
+            \texttt{computeCartesianPath()}\\
+            $\bullet$ Guarded linear approach\\        
+        };
+
+    \end{tikzpicture}
+    \caption{Trajectory generation constraints: Unconstrained joint-space interpolation curves versus guarded Cartesian straight-line linear constraints during close-proximity picking operations.}
     \label{fig:trajectory_constraints}
 \end{figure}
+\FloatBarrier
