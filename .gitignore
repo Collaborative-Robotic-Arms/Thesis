@@ -8,3 +8,14 @@
 *.synctex.gz
 *.lof
 *.lot
+/.quarto/
+*__files/
+*_files/
+/_freeze/
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
