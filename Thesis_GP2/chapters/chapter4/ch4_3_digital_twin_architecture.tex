@@ -1,0 +1,140 @@
+\section{Digital Twin Architecture}
+
+The digital twin architecture was implemented as a ROS 2 system that runs the physical robot stack and the virtual twin stack side by side. The physical side communicates with the real ABB and AR4 controllers, while the twin side runs a Gazebo model under the \texttt{/twin} namespace. Between them, custom synchronization nodes transfer state information, monitor divergence, and support program validation.
+
+The architecture is launched primarily through \texttt{twin.launch.py}. This launch file can operate in two twin modes. In \texttt{monitor} mode, the real robot joint states are mirrored into the Gazebo twin so that the virtual cell follows the physical cell. In \texttt{program} mode, the twin acts as a safe programming and validation environment where saved programs can be checked before real execution.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.65cm and 0.9cm,
+        real/.style={draw, rounded corners=2pt, align=center, minimum width=2.45cm, minimum height=0.78cm, fill=blue!8},
+        twin/.style={draw, rounded corners=2pt, align=center, minimum width=2.45cm, minimum height=0.78cm, fill=green!8},
+        logic/.style={draw, rounded corners=2pt, align=center, minimum width=2.75cm, minimum height=0.78cm, fill=orange!10},
+        iface/.style={draw, rounded corners=2pt, align=center, minimum width=2.55cm, minimum height=0.78cm, fill=purple!8},
+        topic/.style={draw, rounded corners=2pt, align=center, minimum width=2.3cm, minimum height=0.68cm, fill=gray!8},
+        arrow/.style={-Latex, thick},
+        feedback/.style={-Latex, thick, dashed}
+    ]
+        \node[real] (robots) at (0,0) {Physical robots\\ABB IRB120 / AR4};
+        \node[real, right=of robots] (control) {\texttt{ros2\_control}\\real controllers};
+        \node[topic, right=of control] (realjs) {Real state\\\texttt{/joint\_states}};
+        \node[logic, right=of realjs] (mirror) {\texttt{joint\_state\_to\_trajectory.py}\\monitor-mode mirror};
+        \node[twin, right=of mirror] (twinctrl) {\texttt{/twin/controller\_manager}\\twin controllers};
+        \node[twin, right=of twinctrl] (gazebo) {Gazebo twin\\virtual robots};
+        \node[topic, right=of gazebo] (twinjs) {Twin state\\\texttt{/twin/joint\_states}};
+        \node[topic, right=of twinjs] (twintf) {Twin TF\\\texttt{/twin/tf}};
+
+        \node[logic, below=1.0cm of mirror] (div) {\texttt{divergence\_monitor.py}\\state comparison};
+        \node[topic, right=of div] (divout) {Divergence output\\\texttt{/twin/divergence}};
+        \node[iface, right=of divout] (rvizmon) {RViz / operator\\monitoring};
+
+        \draw[arrow] (robots) -- (control);
+        \draw[arrow] (control) -- (realjs);
+        \draw[arrow] (realjs) -- (mirror);
+        \draw[arrow] (mirror) -- (twinctrl);
+        \draw[arrow] (twinctrl) -- (gazebo);
+        \draw[arrow] (gazebo) -- (twinjs);
+        \draw[arrow] (twinjs) -- (twintf);
+        \draw[arrow] (realjs.south) |- (div.west);
+        \draw[arrow] (twinjs.south) |- (div.east);
+        \draw[arrow] (div) -- (divout);
+        \draw[arrow] (divout) -- (rvizmon);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt, fit=(robots)(control)(realjs), inner sep=0.22cm, label=above:Physical hardware stack] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(twinctrl)(gazebo)(twinjs)(twintf), inner sep=0.22cm, label=above:Gazebo twin stack] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(mirror)(div)(divout)(rvizmon), inner sep=0.24cm, label=below:Monitoring synchronization path] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+
+    \vspace{0.45cm}
+
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.7cm and 1.0cm,
+        real/.style={draw, rounded corners=2pt, align=center, minimum width=2.55cm, minimum height=0.78cm, fill=blue!8},
+        twin/.style={draw, rounded corners=2pt, align=center, minimum width=2.55cm, minimum height=0.78cm, fill=green!8},
+        logic/.style={draw, rounded corners=2pt, align=center, minimum width=2.85cm, minimum height=0.78cm, fill=orange!10},
+        iface/.style={draw, rounded corners=2pt, align=center, minimum width=2.65cm, minimum height=0.78cm, fill=purple!8},
+        data/.style={draw, rounded corners=2pt, align=center, minimum width=2.6cm, minimum height=0.78cm, fill=gray!8},
+        arrow/.style={-Latex, thick},
+        feedback/.style={-Latex, thick, dashed}
+    ]
+        \node[iface] (teach) {RViz teach panel\\record waypoints};
+        \node[data, right=of teach] (yaml) {YAML programs\\\texttt{\textasciitilde/.ros/dt\_programs}};
+        \node[logic, right=of yaml] (simrunner) {\texttt{program\_sim\_runner.py}\\validate and save plan};
+        \node[iface, right=of simrunner] (moveit) {\texttt{move\_group}\\\texttt{/move\_action}};
+        \node[twin, right=of moveit] (simctrl) {Twin execution\\Gazebo controllers};
+
+        \node[data, below=1.1cm of yaml] (commands) {ROS command topics\\\texttt{/dt/program\_*}};
+        \node[logic, right=of commands] (realrunner) {\texttt{program\_real\_executor.py}\\load validated YAML};
+        \node[real, right=of realrunner] (realctrl) {Real trajectory\\controllers};
+
+        \draw[arrow] (teach) -- (yaml);
+        \draw[arrow] (teach.south) |- (commands.west);
+        \draw[arrow] (yaml) -- (simrunner);
+        \draw[arrow] (commands.east) -- ++(0.28,0) |- (simrunner.west);
+        \draw[arrow] (simrunner) -- (moveit);
+        \draw[arrow] (moveit) -- (simctrl);
+        \draw[feedback] (simrunner.south west) to[bend left=10] (yaml.south east);
+        \draw[arrow] (commands) -- (realrunner);
+        \draw[arrow] (yaml.east) -- ++(0.25,0) |- (realrunner.west);
+        \draw[arrow] (realrunner) -- (realctrl);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt, fit=(teach)(yaml)(commands), inner sep=0.24cm, label=above:Program creation tool] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(simrunner)(moveit)(simctrl), inner sep=0.24cm, label=above:Twin validation path] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(realrunner)(realctrl), inner sep=0.24cm, label=below:Real execution path] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{Overall architecture of the implemented digital twin system.}
+    \label{fig:dt_overall_architecture}
+\end{figure}
+
+Figure~\ref{fig:dt_overall_architecture} summarizes the main architectural layers. The design keeps the real hardware stack and the twin stack independent enough to run with separate controllers, while still connecting them through explicit ROS 2 topics and program execution interfaces.
+
+\subsection{Physical Hardware Stack}
+
+The physical hardware stack is responsible for controlling the real ABB and AR4 robots. It is built around \texttt{ros2\_control\_node} and the real \texttt{/controller\_manager}. The controller manager loads the joint state broadcaster and the trajectory controllers required by the selected robot configuration. For the AR4, the stack uses the \texttt{ar4\_trajectory\_controller} and \texttt{ar4\_gripper\_controller}. For the ABB, it uses the \texttt{irb120\_controller} and, when enabled, the ABB gripper controller.
+
+The physical stack publishes the real robot state on \texttt{/joint\_states}. This topic is the main source of truth for real robot motion. The standard \texttt{robot\_state\_publisher} converts the real joint states and URDF model into a transform tree, allowing MoveIt and RViz to display the current robot configuration.
+
+For the ABB, the architecture also includes the \texttt{abb\_rws\_client}, which communicates with the robot controller over the ABB Robot Web Services interface. This keeps the ABB hardware interface integrated with the ROS 2 control stack while still preserving the same high-level digital twin workflow used for the AR4.
+
+\subsection{Gazebo Twin Stack}
+
+The virtual twin is implemented as a Gazebo model spawned from the \texttt{dual\_arms\_twin.xacro} description. Unlike the real hardware stack, the twin controllers are namespaced under \texttt{/twin}. This separation prevents the simulated controllers from conflicting with the real controller manager.
+
+The twin stack has its own \texttt{/twin/controller\_manager}, joint state broadcaster, arm trajectory controllers, and gripper controllers. The twin robot state publisher listens to \texttt{/twin/joint\_states} and publishes the corresponding transform tree on \texttt{/twin/tf} and \texttt{/twin/tf\_static}. This creates an independent virtual representation of the cell that can either follow the real robots or execute simulated validation trajectories.
+
+This separation is important because the twin must be able to operate in two different roles. In monitoring mode, it behaves as a follower of the physical system. In program mode, it behaves as an executable simulation environment where planned trajectories can be tested before being accepted for real hardware execution.
+
+\subsection{ROS 2 Synchronization Layer}
+
+The synchronization layer connects the real and virtual stacks. In monitoring mode, the node \texttt{joint\_state\_to\_trajectory.py} subscribes to the real \texttt{/joint\_states} topic, extracts the relevant joints, and publishes short trajectory commands to the corresponding twin controllers. Separate instances are launched for the AR4 arm, AR4 gripper, ABB arm, and ABB gripper when those components are enabled.
+
+This design converts passive state feedback into active commands for the twin. The Gazebo robot therefore moves according to the same joint positions observed on the physical robot. Because the twin has its own controllers, the mirror process does not directly overwrite the simulated joint state; it commands the twin through the same trajectory-control abstraction used elsewhere in the system.
+
+The \texttt{divergence\_monitor.py} node provides a second synchronization function. It subscribes to both \texttt{/joint\_states} and \texttt{/twin/joint\_states}, compares matching joints, and publishes the resulting differences on \texttt{/twin/divergence}. This makes synchronization quality measurable rather than only visual.
+
+\subsection{MoveIt and RViz Visualization Layer}
+
+MoveIt and RViz form the planning and visualization layer of the architecture. The \texttt{move\_group} node loads the robot description, semantic description, kinematics configuration, joint limits, OMPL planning configuration, and controller information. It maintains the planning scene and provides the action interface used during program validation.
+
+RViz is used as the operator-facing interface. In monitoring mode, it allows the operator to observe the real and virtual state of the cell. In program-related workflows, it also hosts the custom teach panel and the MoveIt MotionPlanning display. This makes RViz both a visualization tool and an interaction point for creating and validating robot programs.
+
+The architecture supports launching MoveIt and RViz optionally. This is useful because the system can be run in a lightweight mode for backend testing or in a full operator mode when visualization, teaching, and debugging are required.
+
+\subsection{Program Storage and Execution Interfaces}
+
+The final architectural layer connects the digital twin to program creation and execution. Programs created by the teach panel are stored as YAML files in \texttt{\textasciitilde/.ros/dt\_programs}. These files contain ordered waypoint and gripper steps, including robot names, joint vectors, end-effector poses, timestamps, and validation flags.
+
+The \texttt{program\_sim\_runner.py} node uses the twin and MoveIt to validate these saved programs. During validation, it sends each waypoint to the MoveIt action interface, checks whether planning succeeds, and saves the planned trajectory back into the YAML file. The \texttt{program\_real\_executor.py} node later loads the same file and blocks real execution unless the program has been marked as validated.
+
+This interface is what turns the twin from a visualization tool into an operational component. The virtual cell becomes the approval stage between teaching and physical execution: a program is created by the operator, validated in the twin, and only then sent to the real controllers.

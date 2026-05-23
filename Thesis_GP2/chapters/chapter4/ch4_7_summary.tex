@@ -1,0 +1,15 @@
+\section{Summary of the Digital Twin Contribution}
+
+This chapter presented the digital twin layer developed for the dual-arm collaborative assembly system. The chapter began by defining digital twinning as more than a visual simulation: it is a synchronized virtual representation that can receive data from the physical system, reproduce its behavior, and support decisions before or during real operation.
+
+For this project, the digital twin is useful because the task requires two robot arms, grippers, teaching tools, planning components, and physical controllers to work together in one workflow. Without the twin, the system would depend mainly on direct hardware testing and isolated visualization. With the twin, the operator gains a structured environment for observing the cell, teaching programs, validating motion, and reducing the risk of sending untested commands to the physical robots.
+
+The implemented architecture combines the physical robot stack, the Gazebo twin stack, MoveIt planning, RViz visualization, synchronization nodes, and program runners. The physical and virtual systems are separated through namespaces and controller interfaces, but connected through ROS topics and actions. This makes the twin part of the operating system of the cell rather than a separate offline model.
+
+Two main digital twin modes were developed. In real-time monitoring mode, the real robot joint states drive the simulated robots. The twin follows the measured motion through trajectory commands, while the divergence monitor compares \texttt{/joint\_states} and \texttt{/twin/joint\_states}. This provides live visualization and diagnostic feedback about how closely the virtual model matches the physical cell.
+
+In program validation and execution mode, the workflow starts from a YAML program created by the RViz teach panel. The program is first loaded by the simulation runner, checked through MoveIt, executed in the Gazebo twin, and saved again with validation results and planned trajectories. Only after this validation step can the real execution runner command the physical controllers. This creates a clear gate between taught intent and real motion.
+
+The teach panel supports this workflow by acting as the operator's programming tool. It is not a digital twin mode by itself, but it is the bridge between human teaching and the program mode. It allows the operator to create waypoints, add gripper commands, save programs, request simulation validation, and request real execution after validation has succeeded.
+
+Overall, the digital twin contribution is the integration of observation, teaching, validation, and execution into one ROS 2 workflow. The twin gives the system a live virtual counterpart for monitoring and a pre-execution environment for testing programs. This helps achieve the general project goal by making the dual-arm assembly cell more observable, easier to program, and less dependent on trial-and-error directly on the physical hardware.

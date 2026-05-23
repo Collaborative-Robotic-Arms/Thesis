@@ -8,3 +8,5 @@
 *.synctex.gz
 *.lof
 *.lot
+.vscode
+.vscode/settings.json
