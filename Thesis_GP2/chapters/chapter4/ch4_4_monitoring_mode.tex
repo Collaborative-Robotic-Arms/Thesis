@@ -1,0 +1,89 @@
+\section{Mode 1: Real-Time Monitoring Mode}
+
+The first operating mode of the digital twin is the real-time monitoring mode. In this mode, the physical robot cell remains the source of motion, while the Gazebo twin follows the measured joint states of the real robots. The purpose is not to generate a new program or command the real cell from the simulation. Instead, the mode creates a continuously updated virtual copy of the physical motion so that the operator can observe, compare, and diagnose the behavior of the system while it is running.
+
+Monitoring mode is selected in \texttt{twin.launch.py} through the \texttt{twin\_mode=monitor} launch argument. When this mode is active, the launch file starts the physical control stack, the Gazebo twin stack, the twin controllers, the RViz visualization layer, and the custom synchronization nodes required to mirror the real robot motion into the simulated robots.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\small,
+        node distance=0.85cm and 1.15cm,
+        real/.style={draw, rounded corners=2pt, align=center, minimum width=2.9cm, minimum height=0.9cm, fill=blue!8},
+        twin/.style={draw, rounded corners=2pt, align=center, minimum width=2.9cm, minimum height=0.9cm, fill=green!8},
+        logic/.style={draw, rounded corners=2pt, align=center, minimum width=3.15cm, minimum height=0.9cm, fill=orange!10},
+        topic/.style={draw, rounded corners=2pt, align=center, minimum width=2.8cm, minimum height=0.8cm, fill=gray!8},
+        view/.style={draw, rounded corners=2pt, align=center, minimum width=2.8cm, minimum height=0.85cm, fill=purple!8},
+        arrow/.style={-Latex, thick}
+    ]
+        \node[real] (realctrl) {Physical robot\\controllers};
+        \node[topic, right=of realctrl] (realjs) {Real state\\\texttt{/joint\_states}};
+        \node[logic, right=of realjs] (mirror) {\texttt{joint\_state\_to\_trajectory.py}\\per arm / gripper};
+        \node[twin, right=of mirror] (twinctrl) {Twin trajectory\\controllers};
+        \node[twin, right=of twinctrl] (gazebo) {Gazebo twin\\motion};
+        \node[topic, right=of gazebo] (twinjs) {Twin state\\\texttt{/twin/joint\_states}};
+
+        \node[logic, below=1.05cm of mirror] (div) {\texttt{divergence\_monitor.py}\\joint comparison};
+        \node[topic, right=of div] (divout) {Difference signal\\\texttt{/twin/divergence}};
+        \node[view, right=of divout] (rviz) {RViz / operator\\awareness};
+
+        \draw[arrow] (realctrl) -- (realjs);
+        \draw[arrow] (realjs) -- (mirror);
+        \draw[arrow] (mirror) -- (twinctrl);
+        \draw[arrow] (twinctrl) -- (gazebo);
+        \draw[arrow] (gazebo) -- (twinjs);
+
+        \draw[arrow] (realjs.south) |- (div.west);
+        \draw[arrow] (twinjs.south) |- (div.east);
+        \draw[arrow] (div) -- (divout);
+        \draw[arrow] (divout) -- (rviz);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt, fit=(realctrl)(realjs), inner sep=0.25cm, label=above:Physical cell] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(twinctrl)(gazebo)(twinjs), inner sep=0.25cm, label=above:Virtual twin] {};
+            \node[draw, dashed, rounded corners=4pt, fit=(mirror)(div)(divout)(rviz), inner sep=0.3cm, label=below:Monitoring mode logic] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{Real-time monitoring mode data flow.}
+    \label{fig:dt_monitoring_mode}
+\end{figure}
+
+\subsection{Purpose of Monitoring Mode}
+
+The main purpose of monitoring mode is to maintain a live virtual representation of the cell during real operation. This helps the operator understand the state of the robot system without relying only on the physical view of the hardware. In a dual-arm setup, this is particularly useful because the operator must track two manipulators, grippers, shared workspaces, and possible interaction regions at the same time.
+
+The digital twin also provides a structured way to detect inconsistency. If the virtual robot is supposed to follow the physical robot, then the difference between their joint states becomes a useful diagnostic signal. A large difference may indicate delayed communication, a missing joint, a controller fault, an incorrect joint mapping, or a simulation-side issue. Therefore, monitoring mode transforms the twin from a passive visualization into an active supervision layer.
+
+\subsection{Real-to-Twin Joint-State Mirroring}
+
+The real robot state is published on the standard ROS 2 topic \texttt{/joint\_states}. This topic contains the measured joint names, positions, and, when available, velocities of the physical robots. Monitoring mode uses this topic as the source of truth for the twin.
+
+The node \texttt{joint\_state\_to\_trajectory.py} converts the incoming joint-state feedback into short trajectory commands for the simulated controllers. Separate instances of this node are launched for each enabled subsystem. For the AR4, the system launches one mirror node for the arm joints and one for the gripper joints. For the ABB, it launches a mirror node for the arm joints and, when the ABB gripper is enabled, another node for the gripper joints.
+
+Each mirror node extracts only the joints assigned to its controller. It then publishes a trajectory message to the corresponding twin arm or gripper controller under the \texttt{/twin} namespace. This design keeps the twin controller interface consistent with the rest of the ROS 2 control stack: the twin is not moved by directly overwriting simulated joint states, but by sending commands through trajectory controllers.
+
+The launch file configures the arm mirror nodes at a high update rate, with short trajectory durations, so the simulated robot can follow the physical robot smoothly. Gripper mirror nodes use a lower rate because their motion is simpler and does not require the same update frequency as the arm joints.
+
+\subsection{Twin Motion and Visualization}
+
+The Gazebo twin runs under the \texttt{/twin} namespace. Its controllers, joint-state broadcaster, and transform publishers are separate from the real robot controllers. This namespacing is essential because it allows the physical and virtual stacks to run in the same ROS graph without controller-name conflicts.
+
+After the twin controllers receive the mirrored trajectory commands, Gazebo updates the simulated robot motion and publishes the resulting state on \texttt{/twin/joint\_states}. The twin robot state publisher converts this simulated state into the corresponding transform tree on \texttt{/twin/tf} and \texttt{/twin/tf\_static}. RViz can then display the virtual robot configuration alongside the real robot visualization.
+
+This gives the operator two complementary views. The real robot state shows what the hardware reports, while the twin state shows how the virtual model responds to the same measured motion. If both remain aligned, the system has a consistent physical-virtual representation. If they diverge, the operator has a visible and measurable indication that the twin is no longer accurately following the cell.
+
+\subsection{Divergence Monitoring}
+
+The \texttt{divergence\_monitor.py} node measures the consistency between the physical and virtual systems. It subscribes to \texttt{/joint\_states} and \texttt{/twin/joint\_states}, matches joints by name, and computes the absolute difference between the real and twin positions.
+
+For revolute joints, the node uses a shortest angular distance calculation. This avoids incorrect large errors when an angle crosses the \(-\pi\) to \(\pi\) boundary. For gripper joints, the difference is treated as a linear displacement. The result is published as a \texttt{Float32MultiArray} on \texttt{/twin/divergence}, with the joint names stored in the message layout dimension label.
+
+The node also applies configurable warning and critical thresholds. In the current implementation, these thresholds are used to log warnings and error messages when the difference becomes too large. They do not directly command a hardware stop. This distinction is important: monitoring mode provides a supervision and diagnosis signal, while hard safety actions must remain part of the dedicated safety and controller layers.
+
+\subsection{Contribution to the Digital Twin Task}
+
+Monitoring mode is the mode that gives the digital twin its live connection to the physical cell. Without it, the Gazebo model would only be a simulation running separately from the real system. By continuously feeding real joint states into the twin and comparing the resulting twin state against the physical state, the system establishes a bidirectional awareness loop: the physical robot drives the virtual model, and the virtual model is checked against the physical robot.
+
+This helps the overall collaborative assembly task in three ways. First, it improves operator awareness by making the robot cell observable through RViz and Gazebo even when the hardware view is limited. Second, it improves debugging by exposing synchronization errors as measurable divergence values instead of relying only on visual inspection. Third, it prepares the architecture for the program mode, because the same twin controllers, robot description, and visualization stack used for monitoring are reused when validating saved programs before real execution.

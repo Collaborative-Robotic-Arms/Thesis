@@ -1,0 +1,33 @@
+\section{Relevance to the Collaborative Assembly Task}
+
+\subsection{Need for a Twin in a Dual-Arm Cell}
+
+The collaborative assembly task is more complex than a conventional single-arm pick-and-place operation. It combines two heterogeneous manipulators, the ABB IRB120 and the AR4, each with different mechanical accuracy, controllers, grippers, reachable workspaces, and motion constraints. The robots also share part of the same physical table, especially around the handover and assembly regions. As a result, safe execution depends not only on whether each robot can reach its own target, but also on whether both robots remain consistent with the shared scene and with each other.
+
+The digital twin is introduced to manage this complexity. It provides a virtual environment in which the full cell can be observed as one system: the real hardware stack, the Gazebo twin, the MoveIt planning scene, the RViz interface, and the program execution workflow. This makes the twin useful for both online monitoring and offline preparation of motion programs.
+
+Without this virtual layer, the operator would have to rely mainly on physical observation and trial execution. This would be inefficient and risky, especially when developing handover poses, teaching new waypoints, or debugging synchronization errors between the two arms. The twin reduces this dependency on physical trial-and-error by making the state of the system visible and testable before or during execution.
+
+\subsection{Monitoring Physical-Virtual Consistency}
+
+One of the primary roles of the twin is to verify that the virtual representation follows the real system. In monitoring mode, the real robot joint feedback published on \texttt{/joint\_states} is converted into trajectory commands for the twin controllers. These commands drive the Gazebo twin through the \texttt{/twin} controller namespace, producing a separate \texttt{/twin/joint\_states} stream. The \texttt{divergence\_monitor.py} node then compares the real and twin joint states and publishes the difference on \texttt{/twin/divergence}.
+
+This consistency check is important because a digital twin is only useful if its state remains close to the physical system. If the real robot moves but the twin does not follow, the operator loses trust in the visualization. If the twin deviates beyond a predefined threshold, the system can issue warnings or indicate a possible synchronization fault. In the implemented system, angular thresholds are used for robot joints, while separate linear thresholds are used for gripper joints.
+
+For the assembly task, this allows the operator to detect whether the simulated view in RViz is still a reliable representation of the physical cell. This is especially useful when both arms are active, because a small mismatch in one robot may affect the apparent clearance, handover alignment, or collision risk in the shared workspace.
+
+\subsection{Reducing Risk During Program Development}
+
+The second major benefit is safer program development. The project includes a custom RViz teach panel that allows the operator to create waypoint programs through marker dragging, servo jogging, or manually entering target poses. These programs are saved as YAML files under \texttt{\textasciitilde/.ros/dt\_programs}. Each waypoint stores the robot name, joint values, end-effector pose, timestamp, validation state, and, when needed, gripper commands.
+
+The digital twin allows these programs to be validated before real execution. Instead of immediately sending a newly taught program to the physical ABB or AR4, the program can first be loaded by the simulation runner. The runner sends the waypoint goals to MoveIt, checks whether valid plans can be produced, and stores the resulting planned trajectories back into the YAML program. Only after the program is marked as validated is real execution allowed.
+
+This validation step is particularly valuable for the AR4 and ABB system because taught poses may appear reasonable in isolation but still fail due to joint limits, unreachable orientations, controller constraints, or motion conflicts. By discovering these problems inside the twin first, the system protects the hardware from unnecessary attempts and gives the operator a repeatable workflow for refining programs.
+
+\subsection{Supporting Remote Supervision and Debugging}
+
+The digital twin also improves supervision and debugging. Since the twin is connected through ROS 2 topics, actions, controllers, and MoveIt interfaces, it exposes information that is difficult to infer from physical observation alone. The operator can inspect robot motion in RViz, monitor joint-state divergence, follow program validation status, and observe execution progress.
+
+This is useful during remote or semi-remote operation, where the operator may not be standing directly beside the cell. It also supports debugging during development: if a program fails, the failure can be traced to a specific layer, such as missing joint states, unavailable MoveIt action servers, invalid waypoint data, failed trajectory planning, or blocked real execution due to an unvalidated program.
+
+Therefore, the digital twin contributes directly to the project's general goal of building a reliable collaborative robotic assembly system. It increases observability during real-time operation, reduces the risk of programming new motions, and creates a structured bridge between taught programs, simulated validation, and controlled real-hardware execution.

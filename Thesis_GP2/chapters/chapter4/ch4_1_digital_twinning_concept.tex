@@ -1,0 +1,21 @@
+\section{Digital Twinning Concept}
+
+A digital twin is a virtual representation of a physical system that remains connected to the real system through data exchange. In robotics, this means that the virtual model is not only a static CAD or simulation scene. It is updated using robot states, transforms, controller feedback, planning information, and task-level events so that the operator can understand the current state of the cell and test future actions before applying them physically \cite{glaessgen2012digital,wang2020digital}.
+
+\subsection{Definition of a Digital Twin}
+
+In the context of this project, the digital twin represents the ABB IRB120, the AR4 manipulator, the shared assembly table, the grippers, the relevant coordinate frames, and the motion state of the system. The twin is built on the same ROS 2 and MoveIt model used by the physical cell, allowing it to receive live joint states, publish transforms, visualize robot motion, and execute simulated programs.
+
+The key characteristic is synchronization. A normal simulation can show how a robot may move under ideal assumptions, but a digital twin is continuously related to the real system. This relation allows the virtual scene to be used for monitoring, validation, and operational decision-making rather than only offline visualization.
+
+\subsection{Simulation Versus Digital Twin}
+
+Simulation and digital twinning are closely related but not identical. A simulation is usually used to model expected behavior before or without hardware execution. It can test kinematic reachability, controller behavior, or scene layout in an isolated environment. A digital twin extends this by maintaining a live relationship with the real cell.
+
+For the collaborative robotic cell, the Gazebo model alone would be considered a simulation. It becomes part of a digital twin when it is connected to the real robot state, the ROS 2 control system, the MoveIt planning scene, and the program validation workflow. This connection allows the virtual cell to either mirror the physical robots in monitoring mode or act as a safe validation environment for programs before real execution.
+
+\subsection{Digital Twins in Robotic Cells}
+
+Robotic cells benefit from digital twins because robot behavior depends on many interacting layers: mechanical geometry, joint limits, controller timing, collision objects, end-effector states, and task logic. In a single-arm cell, these layers can often be inspected locally. In a dual-arm cell, the complexity increases because both manipulators can affect each other through shared workspaces and synchronized operations.
+
+The digital twin therefore provides a unified view of robot state, task state, and scene state. It helps the operator verify that the physical system is behaving as intended, develop programs without repeatedly moving the hardware, and check planned trajectories before sending them to the real robots.
