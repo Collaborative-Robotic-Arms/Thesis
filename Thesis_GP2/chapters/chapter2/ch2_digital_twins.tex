@@ -1,0 +1,33 @@
+\section{Digital Twins for Robotic Cells}
+
+Digital twinning extends conventional simulation by maintaining a data-connected virtual representation of a physical system. In robotics, this means that the virtual cell is updated through robot states, transforms, controller feedback, planning information, and task-level events rather than remaining a static CAD or offline simulation model. This connection allows the virtual representation to support monitoring, diagnosis, validation, and operational decision-making before or during physical execution \cite{glaessgen2012digital,wang2020digital,kritzinger2018digital}.
+
+\subsection{Definition of a Digital Twin}
+
+A digital twin is commonly described as a virtual counterpart of a physical asset or process that remains linked to the real system through data exchange. Manufacturing literature emphasizes three related elements: the physical object or process, the virtual model, and the data connection between them \cite{kritzinger2018digital,tao2018digital}. For robotic cells, the virtual model may include robot kinematics, joint limits, grippers, workpieces, fixtures, coordinate frames, controller interfaces, and the current state of the planning scene.
+
+The key characteristic is synchronization. A normal simulation can show how a robot may move under ideal assumptions, but a digital twin is continuously related to the real system. This relation allows the virtual scene to be used for real-time monitoring, fault detection, and validation of future actions instead of only offline visualization \cite{glaessgen2012digital,wang2020digital}.
+
+\subsection{Simulation Versus Digital Twin}
+
+Simulation and digital twinning are closely related but not identical. A simulation is usually used to model expected behavior before or without hardware execution. It can test kinematic reachability, controller behavior, or scene layout in an isolated environment. A digital twin extends this by maintaining a live relationship with the real cell and by feeding operational data back into the virtual representation \cite{kritzinger2018digital}.
+
+For a robotic assembly system, a Gazebo or CAD-based model alone is therefore a simulation. It becomes part of a digital twin when it is connected to the robot state, control system, planning scene, and execution workflow. This connection allows the same virtual cell to mirror physical operation in one mode and act as a safe validation environment for programs in another mode.
+
+\subsection{Digital Twins in Multi-Robot Cells}
+
+Robotic cells benefit from digital twins because robot behavior depends on several interacting layers: mechanical geometry, joint limits, controller timing, collision objects, end-effector states, task logic, and communication middleware. In a single-arm cell, many of these layers can be inspected locally. In a dual-arm or multi-robot cell, the complexity increases because each manipulator can affect the other through shared workspaces, synchronized operations, and handover constraints \cite{matheson2019human,kruger2009cooperation}.
+
+The digital twin provides a unified view of robot state, task state, and scene state. It helps the operator verify that the physical system is behaving as intended, develop programs without repeatedly moving the hardware, and check planned trajectories before sending them to the real robots. When combined with middleware such as ROS 2 and planning frameworks such as MoveIt, the twin can reuse the same robot descriptions, transforms, controllers, and planning interfaces used by the physical system \cite{macenski2022robot,coleman2014reducing}.
+
+\subsection{Relevance to Collaborative Assembly}
+
+Collaborative assembly tasks are more complex than conventional single-arm pick-and-place operations. They may combine heterogeneous manipulators with different mechanical accuracy, controllers, grippers, reachable workspaces, and motion constraints. The robots may also share part of the same physical table, especially around handover and assembly regions. Safe execution therefore depends not only on whether each robot can reach its own target, but also on whether both robots remain consistent with the shared scene and with each other \cite{michalos2015design,erdmann1987multiple}.
+
+Digital twins reduce this complexity by providing a virtual environment in which the full cell can be observed and tested as one system. Without this virtual layer, the operator must rely mainly on physical observation and trial execution. This is inefficient and risky when developing handover poses, teaching new waypoints, or debugging synchronization errors between two arms. A twin reduces dependence on direct hardware trial-and-error by making the state of the system visible, measurable, and testable before or during execution \cite{wang2020digital,tao2018digital}.
+
+\subsection{Monitoring, Validation, and Remote Supervision}
+
+The main value of a robotic digital twin can be grouped into monitoring, validation, and supervision. In monitoring, the physical robot drives or updates the virtual robot, and differences between the two states become a diagnostic signal. In validation, candidate programs are tested in the virtual environment before being accepted for real execution. In supervision, the operator can inspect the system through visualization, status topics, progress signals, and planning feedback, even when direct physical observation is limited \cite{glaessgen2012digital,wang2017collaborative,wang2020digital}.
+
+These capabilities are especially important for multi-robot systems. A small mismatch in one robot may affect apparent clearance, handover alignment, or collision risk in the shared workspace. Similarly, a taught pose may appear reasonable in isolation but still fail because of joint limits, unreachable orientations, controller constraints, or motion conflicts. By discovering such problems in the twin first, the system gains a structured bridge between taught programs, simulated validation, and controlled real-hardware execution.
