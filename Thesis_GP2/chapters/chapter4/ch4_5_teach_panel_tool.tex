@@ -46,6 +46,15 @@ The panel was implemented as a custom RViz plugin in the \texttt{dual\_arms\_tea
     \label{fig:dt_teach_panel_workflow}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.78\textheight]{figures/teach_panel.png}
+    \caption{RViz teach panel interface used to create and manage digital twin programs.}
+    \label{fig:dt_teach_panel_interface}
+\end{figure}
+
+\newpage
+
 \subsection{Purpose of the Teach Panel}
 
 The purpose of the teach panel is to provide a practical lead-through programming workflow for the dual-arm cell. Instead of manually writing trajectory files or directly editing joint vectors, the operator can define meaningful robot poses from inside RViz and save them as named program steps.
@@ -83,6 +92,8 @@ Programs are stored as YAML files by the \texttt{ProgramManager} class. The file
 Each program file contains the program name, creation timestamp, global validation flag, and an ordered list of steps. Each step stores its type, name, robot, validation state, timestamp, joint values, end-effector pose, and, when applicable, gripper state. This format is human-readable, easy to inspect during debugging, and simple for the program runners to load.
 
 An abbreviated example of a saved program is shown below. The first entry is a robot motion waypoint, while the second entry is a gripper command in the same ordered sequence.
+
+\newpage
 
 \begin{Verbatim}[fontsize=\small, frame=single]
 program_name: pick_and_place_demo
