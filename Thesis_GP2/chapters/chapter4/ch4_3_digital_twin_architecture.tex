@@ -1,6 +1,6 @@
 \section{Digital Twin Architecture}
 
-The digital twin architecture was implemented as a ROS 2 system that runs the physical robot stack and the virtual twin stack side by side. The physical side communicates with the real ABB and AR4 controllers, while the twin side runs a Gazebo model under the \texttt{/twin} namespace. Between them, custom synchronization nodes transfer state information, monitor divergence, and support program validation.
+Building on the digital-twin concepts reviewed in Chapter 2, the architecture was implemented as a ROS 2 system that runs the physical robot stack and the virtual twin stack side by side. The physical side communicates with the real ABB and AR4 controllers, while the twin side runs a Gazebo model under the \texttt{/twin} namespace. Between them, custom synchronization nodes transfer state information, monitor divergence, and support program validation \cite{macenski2022robot,wang2020digital}.
 
 The architecture is launched primarily through \texttt{twin.launch.py}. This launch file can operate in two twin modes. In \texttt{monitor} mode, the real robot joint states are mirrored into the Gazebo twin so that the virtual cell follows the physical cell. In \texttt{program} mode, the twin acts as a safe programming and validation environment where saved programs can be checked before real execution.
 
@@ -125,7 +125,7 @@ The \texttt{divergence\_monitor.py} node provides a second synchronization funct
 
 \subsection{MoveIt and RViz Visualization Layer}
 
-MoveIt and RViz form the planning and visualization layer of the architecture. The \texttt{move\_group} node loads the robot description, semantic description, kinematics configuration, joint limits, OMPL planning configuration, and controller information. It maintains the planning scene and provides the action interface used during program validation.
+MoveIt and RViz form the planning and visualization layer of the architecture. The \texttt{move\_group} node loads the robot description, semantic description, kinematics configuration, joint limits, OMPL planning configuration, and controller information. It maintains the planning scene and provides the action interface used during program validation \cite{coleman2014reducing,görner2019moveit}.
 
 RViz is used as the operator-facing interface. In monitoring mode, it allows the operator to observe the real and virtual state of the cell. In program-related workflows, it also hosts the custom teach panel and the MoveIt MotionPlanning display. This makes RViz both a visualization tool and an interaction point for creating and validating robot programs.
 
