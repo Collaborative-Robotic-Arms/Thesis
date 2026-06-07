@@ -1,22 +1,20 @@
-This chapter presents a comprehensive evaluation of the Digital-Twin-enabled dual-arm collaborative assembly system. The performance of the system is quantified through rigorous testing in both the simulated environment and on the physical hardware deployment comprising the ABB IRB120 and AR4 manipulators. The analysis is divided into operational metrics, focusing on the efficiency of parallel execution and part handovers, and safety metrics, validating the robustness of the dynamic collision avoidance architecture.
-
 \section{Collaboration Efficiency}
 
-To quantify the benefits of transitioning from a sequential, single-arm architecture to a multithreaded, dual-arm collaborative cell, several Key Performance Indicators (KPIs) were established. The primary metrics evaluated include total cycle time, parallel execution efficiency, and the reliability of the handover state machine. 
+To quantify the benefits of transitioning from a sequential, single-arm architecture to a multithreaded, dual-arm collaborative cell, several Key Performance Indicators (KPIs) were established. The primary metrics evaluated include total cycle time, parallel execution efficiency, and the reliability of the handover state machine.
 
 \subsection{Execution Timing and Throughput}
 
-Throughput and cycle time were measured by executing a standardized assembly sequence consisting of [INSERT NUMBER] bricks, distributed between the AR4 and ABB reachable workspaces. The system was benchmarked under two operational paradigms: strictly sequential execution (where only one arm moves at any given time) and the implemented parallel execution framework.
+Throughput and cycle time were measured by executing a standardized assembly sequence, distributed between the AR4 and ABB reachable workspaces. The system was benchmarked under two operational paradigms: strictly sequential execution (where only one arm moves at any given time) and the implemented parallel execution framework. The performance metrics collected include:
 
-The performance metrics collected include:
+
 \begin{itemize}
     \item \textbf{Total Assembly Time ($T_{total}$):} The absolute time from the initialization of the first pick command to the completion of the final place command.
     \item \textbf{Parallel Utilization Rate ($U_p$):} The percentage of the total assembly time where both manipulators were in simultaneous motion.
     \item \textbf{Arm Starvation/Idle Time ($T_{idle}$):} The cumulative time an arm spent waiting for the other to clear a shared zone or complete a handover.
 \end{itemize}
 
-% PLACEHOLDER: Table comparing Sequential vs Parallel times
-\begin{table}[htbp]
+
+\begin{table}[H]
     \centering
     \caption{Cycle Time Comparison: Sequential vs. Parallel Execution}
     \label{tab:cycle_time_comparison}
@@ -24,56 +22,57 @@ The performance metrics collected include:
         \toprule
         \textbf{Metric} & \textbf{Sequential Mode} & \textbf{Parallel Mode} & \textbf{Improvement (\%)} \\
         \midrule
-        Total Assembly Time (s) & [Data] & [Data] & [Data]\% \\
-        AR4 Active Time (s)     & [Data] & [Data] & - \\
-        ABB Active Time (s)     & [Data] & [Data] & - \\
-        Total Idle Time (s)     & [Data] & [Data] & [Data]\% \\
-        Throughput (Bricks/min) & [Data] & [Data] & [Data]\% \\
+        Total Assembly Time (s) & 74.8 & 40.0 & 46.5\% \\
+        AR4 Active Time (s)     & 37.0 & 35.2 & - \\
+        ABB Active Time (s)     & 33.1 & 33.6 & - \\
+        Total Idle Time (s)     & 79.5 & 11.1 & 86.0\% \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-% PLACEHOLDER: Graph showing a Gantt chart of arm activity
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    % \includegraphics[width=0.9\textwidth]{images/gantt_chart_parallel.png}
-    \rule{0.9\textwidth}{6cm} % Placeholder box
-    \caption{Gantt chart illustrating the simultaneous active and idle states of the AR4 and ABB arms during a continuous assembly cycle.}
+    \includegraphics[width=1\textwidth]{figures/chapter7/collab_efficiency/Sequential Vs Parallel.png}
+    \caption{Comparing sequential logic against the parallel execution framework.}
     \label{fig:gantt_chart}
 \end{figure}
 
-\subsection{Handover Success Rates}
+\subsection{Handover Phase Execution Metrics}
 
-The collaborative handover process is mechanically and logically complex, particularly when dealing with asymmetric components such as Z-shape bricks. To evaluate the reliability of the handover state machine and the dynamic orientation logic, [INSERT NUMBER] continuous handover trials were conducted. 
+The collaborative handover process is mechanically and logically complex, requiring precise dynamic orientation, particularly when dealing with asymmetric components such as Z-shape bricks. The handover state machine was analyzed based on its computational overhead and temporal efficiency during a successful execution sequence.
 
-A trial is classified as a \textit{Success} if the brick is successfully transferred from the giver to the receiver without dropping, slipping, or triggering a system fault. \textit{Failures} are categorized into grasp failures (poor initial grip), kinematic failures (IK solver timed out), or synchronization failures (receiver closed too early/late).
+The handover was decomposed into four discrete functional stages to evaluate the performance of both the MoveIt Task Constructor (MTC) and the physical hardware. The performance metrics collected include:
 
-% PLACEHOLDER: Table detailing Handover Success Rates
-\begin{table}[htbp]
+\begin{itemize}
+    \item \textbf{MTC Computation Time:} The duration required by the pipeline planner to calculate the synchronized Cartesian approach and the dynamic presentation yaw.
+    \item \textbf{Spatial Approach Latency:} The physical execution time for both manipulators to converge at the predefined handover coordinate in the shared workspace.
+    \item \textbf{Hardware Synchronization Delay:} The latency associated with the ROS 2 hardware handshake, measuring the time between the receiver's gripper closing and the giver's gripper opening.
+    \item \textbf{Safe Retraction Time:} The time taken for both arms to safely exit the shared critical zone and resume independent operations.
+\end{itemize}
+
+\begin{table}[H]
     \centering
-    \caption{Handover Reliability and Failure Modality (Based on [X] Trials)}
-    \label{tab:handover_success}
+    \caption{Temporal Execution Metrics for Collaborative Handover Sequence}
+    \label{tab:handover_metrics}
     \begin{tabular}{lcc}
         \toprule
-        \textbf{Metric} & \textbf{Standard Bricks} & \textbf{Asymmetric (Z/I) Bricks} \\
+        \textbf{Handover Phase} & \textbf{Duration (s)} & \textbf{\% of Total Exchange} \\
         \midrule
-        Total Trials            & [Data] & [Data] \\
-        Successful Handovers    & [Data] & [Data] \\
-        \textbf{Success Rate}   & \textbf{[Data]\%} & \textbf{[Data]\%} \\
+        MTC Pipeline Computation & [Data] & [Data]\% \\
+        Spatial Approach         & [Data] & [Data]\% \\
+        Hardware Synchronization & [Data] & [Data]\% \\
+        Safe Retraction          & [Data] & [Data]\% \\
         \midrule
-        Grasp Failures          & [Data] & [Data] \\
-        Kinematic IK Failures   & [Data] & [Data] \\
-        Sync/Timing Failures    & [Data] & [Data] \\
+        \textbf{Total Exchange Time} & \textbf{[Data]} & \textbf{100\%} \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-% PLACEHOLDER: Image of a successful handover in progress
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    % \includegraphics[width=0.8\textwidth]{images/handover_physical.jpg}
-    \rule{0.8\textwidth}{5cm} % Placeholder box
-    \caption{Physical execution of the handover sequence, demonstrating the Z-height offset and dynamic yaw presentation.}
+    \includegraphics[width=0.8\textwidth]{figures/chapter7/collab_efficiency/physical_handover.png}
+    \caption{Physical execution of the handover sequence.}
     \label{fig:physical_handover}
 \end{figure}
 
+\clearpage

@@ -1,18 +1,25 @@
 \section{Collision Avoidance Validation}
 
-The mathematical guarantee of collision-free operation is paramount in multi-robot cells. The \texttt{ZoneDetectionManager} and the MoveIt Task Constructor (MTC) Safe Resolution pipeline were subjected to rigorous edge-case testing to validate their efficacy.
+The mathematical guarantee of collision-free operation is paramount in multi-robot cells. 
+
+The \texttt{ZoneDetectionManager} and the MoveIt Task Constructor (MTC) Safe Resolution pipeline were subjected to rigorous edge-case testing to validate their efficacy.
 
 \subsection{Zone Manager and Spatial Tracking Accuracy}
 
-To test the Zone Manager, the system was forced into intersecting trajectories. The primary KPI is the \textbf{Minimum Separation Distance ($D_{min}$)}, defined as the closest Cartesian distance between the AR4 end-effector (\texttt{ar4\_ee\_link}) and the ABB end-effector (\texttt{tool0}) during parallel motion. The system must maintain a strict $D_{min} \geq$ [INSERT YOUR MINIMUM SEPARATION PARAMETER, e.g., 0.10 m] at all times.
+To test the Zone Manager, the system was forced into intersecting trajectories. The primary KPI is the \textbf{Minimum Separation Distance ($D_{min}$)}, defined as the closest Cartesian distance between the AR4 end-effector (\texttt{ar4\_ee\_link}) and the ABB end-effector (\texttt{tool0}) during parallel motion. The system successfully maintained a strict $D_{min} \geq 0.10 \text{ m}$ at all times, with recorded hardware tests bottoming out at a safe margin of approximately $0.16 \text{ m}$.
 
-% PLACEHOLDER: Graph of distance over time
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.85\textwidth]{images/arm_separation_plot.png}
-    \rule{0.85\textwidth}{6cm} % Placeholder box
-    \caption{Real-time Cartesian separation distance between the AR4 and ABB end-effectors during a parallel assembly sequence. The red dashed line indicates the minimum safety threshold.}
+    \includegraphics[width=0.8\textwidth]{figures/chapter7/collision_avoidance/End effector seperation distance.png}
+    \caption{Real-time Cartesian separation distance between the AR4 and ABB end-effectors.}
     \label{fig:arm_separation}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/chapter7/collision_avoidance/Workspace Zone Occupancy.png}
+    \caption{Timeline mapping the concurrent workspace zone occupancy for both manipulators.}
+    \label{fig:zone_occupancy}
 \end{figure}
 
 \subsection{Edge Case Scenarios and MTC Resolution}
@@ -24,7 +31,6 @@ The algorithmic fail-safe was validated by intentionally commanding both arms to
     \item \textbf{Resolution Success Rate ($SR_{res}$):} The percentage of imminent collision events successfully resolved without requiring a hard system abort.
 \end{itemize}
 
-% PLACEHOLDER: Table of Edge Cases
 \begin{table}[htbp]
     \centering
     \caption{Validation of Dynamic Collision Avoidance under Edge-Case Scenarios}
@@ -40,13 +46,12 @@ The algorithmic fail-safe was validated by intentionally commanding both arms to
     \end{tabular}
 \end{table}
 
-% PLACEHOLDER: Image of RViz showing MTC resolving a conflict
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    % \includegraphics[width=0.8\textwidth]{images/rviz_mtc_resolution.png}
-    \rule{0.8\textwidth}{5.5cm} % Placeholder box
-    \caption{RViz simulation captured during a conflict resolution event. The MTC pipeline dynamically treats the ABB's frozen state as a static obstacle to route the AR4 to a safe zone.}
-    \label{fig:rviz_resolution}
+    \includegraphics[width=0.9\textwidth]{figures/chapter7/collision_avoidance/Rviz_MTC_Collision.png}
+    \caption{RViz simulation captured during a conflict resolution event.}
 \end{figure}
 
 The results tabulated above demonstrate that the hybrid control architecture successfully prioritizes mechanical safety while maintaining a significantly higher throughput than traditional sequential systems.
+
+\clearpage
