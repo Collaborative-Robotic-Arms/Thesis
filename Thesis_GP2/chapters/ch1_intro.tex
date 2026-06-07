@@ -15,13 +15,40 @@ Despite the advantages of multi-robot collaboration, executing parallel tasks in
 
 Building upon the perception and basic control frameworks established in the first semester, Phase II of this project addresses these challenges. It transitions the two-robot assembly system—integrating an ABB IRB120 industrial robot and an AR4 research arm—into a fully integrated, parallelized, and remotely monitored cell. By leveraging multithreading, advanced task construction, and a multi-mode Digital Twin architecture within ROS 2 (Jazzy Jalisco), this phase shifts the focus toward system safety, execution efficiency, and Industrial Internet of Things (IIoT) connectivity.
 
+\section{Phase I Foundation and Recap}
+\label{sec:phase1_recap}
+The development of the Collaborative Robotic Arms cell was structured across two academic phases. The first phase focused on establishing the core hardware modifications, system calibration, and the foundational software and perception pipelines from the ground up. This section serves as a summary of the foundational work completed during the first phase, providing context for the advanced multi-agent orchestration detailed in the subsequent chapters of this thesis.
+
+\subsection{Hardware Architecture and Customization}
+To achieve a scalable collaborative cell, Phase I identified, integrated, and physically modified the core components:
+\begin{itemize}
+    \item \textbf{Primary Manipulator (ABB IRB120):} Selected as the industrial backbone of the cell, providing high-speed, repeatable, and deterministic execution for standard pick-and-place operations.
+    \item \textbf{Secondary Manipulator (AR4 Research Arm):} Selected as a collaborative counterpart to handle secondary tasks and dynamic handovers, showcasing the ability to bridge industrial and research-grade hardware.
+    \item \textbf{End-Effector Redesign:} The grippers for both the ABB and AR4 manipulators were entirely redesigned and customized to ensure stable, reliable grasping of the targeted assembly workpieces.
+    \item \textbf{Vision Hardware:} A perception strategy was established, utilizing an Intel RealSense depth camera for global workspace monitoring.
+\end{itemize}
+
+\subsection{Perception, Calibration, and Execution Strategies}
+A significant portion of Phase I was dedicated to building the spatial awareness and execution logic from scratch:
+\begin{itemize}
+    \item \textbf{Custom Detection and Grasping System:} The object detection and grasping intelligence was developed entirely from scratch, enabling the system to reliably identify, segment, and compute accurate grasp poses for standard assembly bricks.
+    \item \textbf{System-Wide Calibration:} Rigorous calibration protocols were developed to spatially align both robotic arms with the global and local camera systems, ensuring a unified and highly accurate shared Cartesian workspace.
+    \item \textbf{Pick-and-Place Foundation:} Core pick-and-place strategies were formulated, programmed, and validated to ensure stable and repeatable manipulation of parts before introducing concurrent dual-arm motion.
+\end{itemize}
+
+\subsection{Software Integration and User Interface}
+The software backbone was initialized by migrating to modern, distributed architectures and establishing operator control:
+\begin{itemize}
+    \item \textbf{GUI and ROS 2 Integration:} A custom Graphical User Interface (GUI) wassuccessfully bridged with the underlying ROS 2 stack, providing operators with a seamless dashboard to trigger and monitor robotic sequences.
+\end{itemize}
+
 \section{Problem Statement}
-The primary problem addressed in this phase of the project is the specific challenge of synchronizing multiple heterogeneous manipulators and ensuring safe, collision-free workspaces while enabling remote industrial management. Specifically, the system must be capable of:
+While Phase I successfully established the individual operation of the manipulators, it operated under strictly sequential logic. The primary problem addressed in this second phase is the specific challenge of synchronizing multiple heterogeneous manipulators, ensuring safe, collision-free workspaces, and enabling remote industrial management. Specifically, the system must be capable of:
 \begin{enumerate}
     \item Executing parallel processes via multithreading to eliminate idle times and maximize throughput.
     \item Preventing mechanical interference through intelligent zone management and dynamic collision avoidance strategies.
     \item Synchronizing the logical "Give" and "Take" states to perform seamless and safe handovers of bricks between the two distinct arms.
-    \item Providing a comprehensive virtual replica of the system that allows for real-time monitoring, efficient trajectory teaching (avoiding redundant calculations), and pre-execution safety validation.
+    \item Providing a comprehensive virtual replica of the system that allows for real-time monitoring, efficient trajectory teaching, and pre-execution safety validation.
     \item Extending the system's accessibility by integrating an IoT framework that separates the control room from the physical robotic cell.
 \end{enumerate}
 
@@ -35,6 +62,7 @@ The objectives of this second-semester thesis are summarized as follows:
     \item Architect an IIoT communication bridge to link local controllers with a remote, decentralized control room dashboard.
     \item Conduct a comprehensive industrial feasibility analysis evaluating the economic viability, technical integration, and safety compliance of deploying the proposed system in real-world factory environments.
 \end{itemize}
+\clearpage
 
 \section{Thesis Organization}
 This thesis is organized as follows:
