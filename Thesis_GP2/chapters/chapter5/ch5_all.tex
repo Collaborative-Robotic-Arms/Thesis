@@ -1,3 +1,161 @@
 \chapter{IIOT and Remote Control Integration}
 \thispagestyle{fancy}
 \vspace*{0cm} % move text up to start near top of page
+
+The robotic system developed in this thesis consists of two computational nodes operating on separate local networks at geographically distinct locations: a \textbf{control laptop} hosting the ROS2 planning and trajectory-generation processes, and a \textbf{station laptop} co-located with the physical manipulators, responsible for perception and low-level execution. Because these two nodes cannot share a physical local area network (LAN), a communication architecture was required that could provide reliable, low-latency data exchange across the public internet while preserving the publish--subscribe semantics that ROS2 depends on. This chapter describes the networking layer that bridges the two sites, the middleware and wire protocol that carry the robotic data over that link, and the rationale behind each design decision.
+
+\section{Networking}
+
+\subsection{The Cross-Site Connectivity Problem}
+
+ROS2 was designed under the assumption that participating nodes reside on a common subnet where they can discover one another through IP multicast. In the deployment considered here, the control and station laptops sit behind separate consumer routers, each performing Network Address Translation (NAT) and assigning private, non-routable addresses. Under these conditions, neither node can address the other directly, and the multicast discovery traffic on which the middleware relies is not forwarded across subnet or NAT boundaries. A connectivity layer was therefore required that makes the two physically separated machines behave, from the operating system's perspective, as though they were attached to the same LAN.
+
+\subsection{ZeroTier Virtual Overlay Network}
+
+To resolve this, the system uses \textbf{ZeroTier}, a software-defined networking platform that establishes an encrypted virtual Layer~3 overlay network across the public internet. Each participating device joins a common ZeroTier network and is assigned a stable virtual IP address from a private overlay range, independent of its physical location or the NAT configuration of its local router. ZeroTier performs NAT traversal automatically using UDP hole-punching to establish direct peer-to-peer links between members, and transparently falls back to relayed routing through its infrastructure only when a direct path cannot be negotiated.
+
+From the perspective of the host operating system, the ZeroTier interface appears as an ordinary network interface carrying a routable IP address. Consequently, application-layer protocols --- including the ROS2 middleware --- can use the ZeroTier addresses exactly as if the two machines shared a single LAN, provided the middleware is explicitly configured to bind to and communicate over the virtual interface rather than the physical WiFi adapter. Because ZeroTier preserves the virtual IP assignments across sessions, the addresses of the control and station laptops remain fixed, which allows the higher-level communication stack to be configured statically without requiring dynamic address resolution during operation.
+
+In effect, ZeroTier collapses the geographically distributed deployment into a single logical network. This decision deliberately delegates the hardest part of the problem --- NAT traversal and cross-internet reachability --- to a dedicated networking layer, leaving the robotic middleware free to operate under its native LAN-style assumptions.
+
+% PLACEHOLDER: Network architecture diagram (physical vs. virtual topology)
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.95\textwidth]{images/network_architecture_zerotier.png}
+    \rule{0.95\textwidth}{6cm} % Placeholder box
+    \caption{Network architecture: the control and station laptops sit on separate NAT-ed local networks (dashed boxes) and are bridged by the ZeroTier virtual overlay (solid line), which assigns each node a stable, routable virtual IP across the public internet.}
+    \label{fig:network_architecture}
+\end{figure}
+
+\section{Communication Protocol}
+
+\subsection{DDS and the RTPS Wire Protocol}
+
+ROS2 builds its communication on the \textbf{Data Distribution Service (DDS)} standard~\cite{omg_dds14}, defined by the Object Management Group (OMG)~\cite{pardo2003dds}. DDS is a data-centric publish--subscribe middleware that provides a structured model for distributed communication: rather than addressing one another directly, nodes publish typed data to named \textit{Topics} and subscribe to the Topics they require, while the middleware transparently handles participant discovery, data-type matching, and delivery. This abstraction keeps the application logic decoupled from the specifics of the underlying network.
+
+A central feature of DDS is its \textbf{Quality of Service (QoS)} policy system, which lets the developer specify behavioral contracts for data delivery. Policies such as \textit{Reliability} (guaranteed delivery versus best-effort), \textit{Durability} (whether late-joining subscribers receive previously published data), and \textit{Deadline} (the maximum acceptable interval between messages) are enforced by the middleware and govern whether a given publisher and subscriber are permitted to match. In ROS2 these policies are exposed directly through the node API and map one-to-one onto the underlying DDS layer.
+
+The wire protocol that DDS implementations use to exchange data is the \textbf{Real-Time Publish-Subscribe Protocol (RTPS)}, standardized by the OMG as DDSI-RTPS~\cite{omg_rtps25}. RTPS defines the binary packet format, the participant and endpoint discovery procedures --- Simple Participant Discovery Protocol (SPDP) and Simple Endpoint Discovery Protocol (SEDP) --- and the reliability mechanisms (sequence numbering, heartbeat submessages, and acknowledgement-based retransmission) that operate over UDP. Because all major DDS vendors implement RTPS, the ROS2 middleware abstraction layer (\texttt{rmw}) allows the DDS vendor to be selected at runtime, through the \texttt{RMW\_IMPLEMENTATION} environment variable, without modifying any application code.
+
+By default, RTPS performs participant discovery using IP multicast, broadcasting presence announcements to a well-known multicast group. As noted in the previous section, this mechanism works reliably within a flat LAN but breaks down across subnet boundaries, NAT gateways, and the public internet, since multicast is not forwarded across these boundaries. Overcoming this limitation is the key configuration challenge addressed below.
+
+% PLACEHOLDER: Communication stack layering diagram
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.55\textwidth]{images/communication_stack.png}
+    \rule{0.55\textwidth}{7cm} % Placeholder box
+    \caption{Layering of the communication stack, from the ROS2 application down to the physical link: ROS2 node API $\rightarrow$ \texttt{rmw} abstraction $\rightarrow$ Fast DDS $\rightarrow$ RTPS $\rightarrow$ UDP $\rightarrow$ ZeroTier virtual interface $\rightarrow$ public internet.}
+    \label{fig:communication_stack}
+\end{figure}
+
+\subsection{Choice of Messaging Paradigm: DDS versus Broker-Based IoT Protocols}
+
+Before selecting a specific DDS implementation, a more fundamental question must be addressed: why a data-centric DDS/RTPS paradigm at all, rather than one of the broker-based messaging protocols that dominate the wider Internet-of-Things landscape, such as \textbf{MQTT}~\cite{oasis_mqtt5}, \textbf{AMQP}~\cite{oasis_amqp10}, or \textbf{Apache Kafka}~\cite{kreps2011kafka}, Because these protocols are the conventional choice for IIoT telemetry, the decision to retain DDS warrants explicit justification. The principal characteristics of each are contrasted in Table~\ref{tab:protocol_comparison}.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Comparison of DDS/RTPS with common broker-based IoT messaging protocols. The qualitative characterization is informed by the protocol specifications~\cite{omg_dds14,oasis_mqtt5,oasis_amqp10,kreps2011kafka} and the comparative evaluation of Profanter \textit{et al.}~\cite{profanter2019protocols}.}
+    \label{tab:protocol_comparison}
+    \begin{tabular}{p{0.15\textwidth} p{0.17\textwidth} p{0.16\textwidth} p{0.15\textwidth} p{0.19\textwidth}}
+        \toprule
+        \textbf{Property} & \textbf{DDS / RTPS} & \textbf{MQTT} & \textbf{AMQP} & \textbf{Kafka} \\
+        \midrule
+        Architecture & Brokerless, peer-to-peer & Central broker & Central broker & Broker cluster \\
+        \addlinespace
+        Data model & Data-centric, strongly typed & Topic with opaque payload & Message queues & Partitioned log \\
+        \addlinespace
+        Transport & UDP (RTPS) & TCP & TCP & TCP \\
+        \addlinespace
+        QoS & 20+ fine-grained policies & 3 levels (0/1/2) & Ack/queue-level & Offset/retention \\
+        \addlinespace
+        Discovery & Automatic (SPDP/SEDP) & Via broker & Via broker & Via broker/ZooKeeper \\
+        \addlinespace
+        Real-time focus & Yes (designed for it) & No (telemetry) & No (enterprise msg.) & No (stream/batch) \\
+        \addlinespace
+        Typical use & Real-time control, robotics, defense & Constrained-device telemetry to cloud & Enterprise integration & High-throughput data pipelines \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The decisive distinction is \textbf{architectural}. MQTT, AMQP, and Kafka are all \textit{broker-centric}: every message travels from the publisher to a central broker and only then to the subscriber. For two peer nodes exchanging real-time robotic data, a broker would impose an extra network hop, introduce a single point of failure, and raise the question of where the broker should even be hosted across the two sites. DDS, by contrast, is \textbf{brokerless and peer-to-peer} --- participants discover one another and exchange data directly --- which maps naturally onto the two-node, peer-to-peer topology established over the ZeroTier overlay and requires no additional always-on infrastructure.
+
+Beyond topology, DDS was retained for the following reasons:
+
+\begin{itemize}
+    \item \textbf{Native to ROS2.} ROS2 is built directly on DDS, so the entire robotic application --- typed messages, services, and actions --- maps onto it without translation. Adopting MQTT or AMQP instead would require an external bridge that re-serializes every message, adding latency, a failure point, and the loss of ROS2's native QoS semantics at the boundary.
+    \item \textbf{Rich, per-stream QoS.} The system mixes data of very different criticality: high-rate joint feedback, perception detections, and status flags. DDS exposes more than twenty fine-grained QoS policies (Reliability, Deadline, Liveliness, Durability, and others) that can be tuned independently per stream. MQTT offers only three coarse delivery levels, which is insufficient to express these mixed real-time contracts.
+    \item \textbf{Data-centric and strongly typed.} DDS transports typed data structures directly and the middleware understands their schema, enabling type-safe matching between endpoints. MQTT and Kafka treat payloads as opaque byte blobs, pushing all serialization and type management into the application.
+    \item \textbf{Real-time, low-latency transport.} DDS runs over UDP with optional reliable retransmission tailored to real-time delivery, whereas the broker-based protocols run over TCP with broker buffering --- acceptable for telemetry or batch streaming, but adding latency that is undesirable for closed-loop control.
+\end{itemize}
+
+This is not to say the broker-based protocols are inferior in general; rather, they are optimized for a different problem. MQTT in particular excels at delivering telemetry from large fleets of constrained, intermittently-connected devices up to a cloud backend --- a topology with one logical sink and many lightweight sources. The system in this thesis is the opposite case: a small number of capable nodes exchanging real-time, bidirectional control and state data peer-to-peer, where DDS's decentralized model and QoS granularity are precisely what is required. It is worth noting, however, that where a particular payload did \textit{not} suit a streaming publish--subscribe model --- the bulk program-storage file --- the system likewise did not force it onto a broker, but instead used a dedicated file-synchronization service, as described in Section~\ref{sec:two_channel} and Chapter~\ref{chap:implementation}.
+
+\subsection{Middleware Selection}
+
+Two candidate communication approaches were evaluated for use over the ZeroTier overlay: the standard RTPS-based DDS stack, and \textbf{Zenoh}, an alternative publish--subscribe protocol supported in ROS2 through the \texttt{rmw\_zenoh} plugin. Zenoh is designed to operate natively across heterogeneous topologies --- including WAN links and NAT boundaries --- without requiring multicast, using a routed architecture in which a router daemon forwards data between nodes that cannot reach each other directly. It is well suited to scenarios where nodes are scattered across many networks with no shared overlay, or where constrained embedded devices must join the same communication fabric.
+
+However, because ZeroTier already resolves the primary obstacle --- NAT traversal and cross-internet connectivity --- by presenting a flat virtual network with stable, routable addresses, the principal advantage Zenoh would offer is redundant in this deployment. A standard RTPS stack over ZeroTier, configured with unicast peer discovery, provides equivalent connectivity with a simpler operational model and without the QoS-fidelity limitations inherent in Zenoh's partial mapping of DDS semantics. The native RTPS path also preserves full interoperability with DDS-based external tooling, whereas \texttt{rmw\_zenoh} is not wire-compatible with the standard DDS implementations and would require an additional bridge for any future integration. The standard DDS/RTPS stack was therefore retained.
+
+\subsection{Comparison of DDS Vendors}
+
+Having committed to a standard DDS/RTPS stack, a specific DDS implementation had to be chosen. Because all conforming vendors share the same RTPS wire protocol, the choice does not affect interoperability; it is instead a question of licensing, the quality of ROS2 integration, configuration ergonomics, and runtime performance. Three implementations were considered: \textbf{eProsima Fast DDS}~\cite{eprosima_fastdds}, \textbf{Eclipse CycloneDDS}~\cite{eclipse_cyclonedds}, and \textbf{RTI Connext DDS}~\cite{rti_connext}. Their relevant characteristics are summarized in Table~\ref{tab:dds_vendor_comparison}; the comparative performance figures draw on published ROS2 middleware benchmarks~\cite{maruyama2016ros2,kronauer2021latency}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparison of the candidate DDS implementations~\cite{eprosima_fastdds,eclipse_cyclonedds,rti_connext,kronauer2021latency}.}
+    \label{tab:dds_vendor_comparison}
+    \begin{tabular}{p{0.20\textwidth} p{0.23\textwidth} p{0.23\textwidth} p{0.22\textwidth}}
+        \toprule
+        \textbf{Criterion} & \textbf{Fast DDS (eProsima)} & \textbf{CycloneDDS (Eclipse)} & \textbf{Connext (RTI)} \\
+        \midrule
+        License & Open source (Apache~2.0) & Open source (EPL/EDL) & Commercial, license required \\
+        \addlinespace
+        ROS2 Jazzy status & Default \texttt{rmw}, Tier~1 & Supported, Tier~1 & Supported, Tier~1 \\
+        \addlinespace
+        Configuration & Rich XML profiles; \texttt{initialPeers}, interface whitelist, Discovery Server & Compact XML; minimal setup & Extensive XML/QoS tooling; steeper setup \\
+        \addlinespace
+        Footprint / latency & Low; competitive throughput & Very lightweight; low baseline latency & Heavier; highly optimized, tunable \\
+        \addlinespace
+        Notable features & Discovery Server, broad ROS2 documentation & Simplicity, small code base & Safety certification, monitoring tools, enterprise support \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{RTI Connext} is the most feature-complete and is widely used in safety-critical and certified industrial deployments, but it is a commercial product that requires a paid license for production use. For an academic graduation project with no certification requirement, the licensing overhead is not justified, so Connext was eliminated early.
+
+The decision therefore reduced to \textbf{Fast DDS} versus \textbf{CycloneDDS}, both of which are open source and hold Tier~1 support in ROS2. CycloneDDS is attractive for its small footprint, simple configuration, and low baseline latency. However, \textbf{Fast DDS was selected} for this system for the following reasons:
+
+\begin{itemize}
+    \item \textbf{Default and best-supported in ROS2 Jazzy.} Fast DDS (\texttt{rmw\_fastrtps\_cpp}) is the default middleware shipped with ROS2 Jazzy, which means it is the most thoroughly tested path, carries the broadest base of documentation and community knowledge, and requires no additional installation or runtime substitution.
+    \item \textbf{Mature configuration model for our use case.} The custom networking arrangement in this project --- disabling multicast and forcing static unicast discovery over a single bound interface --- depends entirely on the middleware's configuration facilities. Fast DDS exposes a well-documented XML participant-profile system (\texttt{initialPeers}, interface whitelisting, and per-topic QoS) that maps cleanly onto exactly the unicast-over-ZeroTier setup required.
+    \item \textbf{Scalability headroom.} Fast DDS additionally provides a \textit{Discovery Server} mode, which centralizes discovery and removes the need for every participant to know every peer in advance. While the two-node deployment did not require it, this feature offers a clear migration path should the system grow to more nodes in the future.
+    \item \textbf{No licensing cost and stable maintenance.} Being Apache-2.0 licensed and actively maintained as the reference ROS2 middleware, Fast DDS imposes no cost and minimal long-term maintenance risk.
+\end{itemize}
+
+In short, while CycloneDDS would have been a viable alternative, Fast DDS offered the lowest-friction, best-documented route to the specific unicast configuration this deployment needed, with no offsetting disadvantage at the scale of this system.
+
+\subsection{Fast DDS Configuration over the Overlay}
+
+The system runs on \textbf{ROS2 Jazzy} using \textbf{eProsima Fast DDS} as the DDS vendor, selected by setting \texttt{RMW\_IMPLEMENTATION=rmw\_fastrtps\_cpp}, with a shared \texttt{ROS\_DOMAIN\_ID} used to scope communication to this system. Because the default multicast discovery cannot cross the internet path between the two sites, Fast DDS is reconfigured for \textbf{static unicast discovery} by means of an XML participant profile, supplied through the \texttt{FASTRTPS\_DEFAULT\_PROFILES\_FILE} environment variable. This profile applies three essential changes on each node:
+
+\begin{itemize}
+    \item \textbf{Multicast discovery is disabled} and replaced with an explicit \textbf{initial peers} list. Each laptop is given the ZeroTier IP address of its counterpart as the sole initial discovery endpoint, so that SPDP announcements are sent directly, by unicast, to the remote participant rather than broadcast to a multicast group.
+    \item \textbf{The discovery and data traffic are bound to the ZeroTier interface} through an interface whitelist. This prevents Fast DDS from advertising the physical WiFi addresses --- which are private and unreachable from the remote site --- inside its RTPS locator lists, ensuring that the peer only ever attempts to contact the routable overlay address.
+    \item \textbf{QoS policies} appropriate to each data stream (discussed in the following chapter) are declared so that the reliability and durability contracts are honored end-to-end across the tunnel.
+\end{itemize}
+
+With this configuration in place, RTPS participant discovery proceeds through unicast SPDP exchanges sent directly between the two ZeroTier addresses. Once discovery and endpoint matching complete, all ROS2 topic traffic flows as RTPS UDP packets encapsulated within ZeroTier's encrypted tunnel. The effective latency is therefore governed by the underlying internet path and ZeroTier's tunneling overhead rather than by any inefficiency at the middleware level, and the full set of ROS2 QoS semantics remains available to the application exactly as it would on a local network.
+
+This layered design --- ZeroTier providing transparent cross-internet connectivity, RTPS carrying the middleware traffic over that link by unicast discovery, and Fast DDS implementing the DDS publish--subscribe model that the ROS2 nodes interact with through their standard publisher and subscriber APIs --- preserves complete ROS2 QoS fidelity, retains interoperability with DDS-based tooling, and avoids the complexity of any additional routing infrastructure.
+
+\subsection{A Two-Channel Communication Architecture}\label{sec:two_channel}
+
+While the DDS/RTPS stack carries the system's live, high-rate traffic, not all of the data exchanged between the two nodes is well matched to a publish--subscribe transport. The communication architecture is therefore split into \textbf{two complementary channels}, both riding the same ZeroTier overlay:
+
+\begin{itemize}
+    \item \textbf{A real-time messaging channel} based on Fast~DDS/RTPS, used for continuous, time-sensitive streams --- sensor detections, joint-state feedback, and status flags --- where low latency and per-message QoS contracts matter most.
+    \item \textbf{A file-synchronization channel} based on \textbf{Syncthing}, an open-source peer-to-peer continuous file-synchronization service, used to deliver the planned execution program (a \texttt{YAML} document) from the control laptop to the station laptop.
+\end{itemize}
+
+The rationale for the second channel is one of fitness for purpose. The execution program is not a stream of small messages but a single, self-contained file that is regenerated only when the plan changes; treating it as a synchronized file rather than forcing it through a pub--sub topic gives more robust delivery, automatic resumption after a dropped connection, and built-in versioning. Crucially, Syncthing establishes its own encrypted peer-to-peer connection directly over the same stable ZeroTier virtual IP addresses used by DDS, so this second channel requires no additional networking infrastructure --- it reuses the overlay already in place. The concrete payloads carried on each channel, and the mechanics of the Syncthing transfer, are detailed in Chapter~\ref{chap:implementation}.
