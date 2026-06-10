@@ -1,13 +1,11 @@
-\section{Safety and Regulatory Compliance}
+\section{Safety Compliance and International Standards}
 
-Deploying collaborative robotics in an industrial setting requires strict adherence to international safety standards, primarily \textbf{ISO 10218-1/2} (Safety requirements for industrial robots) and \textbf{ISO/TS 15066} (Collaborative robots).
+Safety is a mandatory, non-negotiable requirement for industrial deployment; adherence to international safety standards acts as a facility's license to operate. The proposed dual-arm collaborative cell must strictly align with the frameworks established by the International Organization for Standardization (ISO).
 
-\subsection{Robot-Robot vs. Human-Robot Collaboration}
-It is critical to distinguish that the proposed architecture is primarily a \textit{Robot-Robot Collaboration} (RRC) system. The collaboration occurs between the AR4 and ABB manipulators, while the human operator is physically removed to an IoT control room. 
+\subsection{ISO 10218 and ISO/TS 15066 Integration}
+Traditional industrial robots (such as the ABB IRB120) are governed by ISO 10218-1 and ISO 10218-2, which dictate safety requirements for industrial environments. However, the inclusion of a collaborative workspace requires adherence to ISO/TS 15066. This technical specification provides comprehensive risk assessment guidance, including pain onset level studies used to establish maximum force and pressure thresholds for human-robot contact across 29 specific body areas.
 
-Because the ABB IRB120 is a standard industrial robot (not inherently a force-limited cobot), the cell cannot rely on Power and Force Limiting (PFL) safety paradigms. Instead, the cell must employ Speed and Separation Monitoring (SSM) and strict safety zones to ensure safe parallel execution.
+\subsection{Speed and Separation Monitoring (SSM)}
+The primary safety protocol for collaborative overlap in this cell is Speed and Separation Monitoring (SSM). ISO/TS 15066 mandates that a minimum protective distance be continuously maintained between the operator and the robotic system. The SSM equation calculates this protective distance based on variables including the human's travel speed, the robot's current speed, the system's response time, and the distance the robot travels during its braking sequence. If the separation distance falls below the calculated threshold, the system must trigger a protective stop or seamlessly transition to a safe alternative path. 
 
-\subsection{Evaluating the Software Zone Manager}
-The implemented \texttt{ZoneDetectionManager} successfully creates logical "Safe," "Approach," and "Handover" zones to prevent robot-robot collisions, triggering MTC resolution when necessary. However, from a regulatory standpoint, standard ROS 2 nodes running on a general-purpose operating system (like Linux) are not generally certified to Performance Level \textit{d} (PL d) or Safety Integrity Level 2 (SIL 2), which are required by ISO standards for human safety.
-
-Therefore, while the algorithmic Zone Manager is highly effective for equipment preservation and operational efficiency, a fully compliant commercial deployment requires hardware-in-the-loop safety integration. This limitation will be addressed in the Future Work section, detailing how the software state machine must be backed by physical safety relays (such as safety laser scanners or light curtains) to override motor power instantaneously in the event of an unpredictable intrusion.
+The integration of the \texttt{ZoneDetectionManager} in this project serves as the software-level precursor to this requirement, continuously evaluating spatial proximities to prevent both robot-robot and robot-human interference.
