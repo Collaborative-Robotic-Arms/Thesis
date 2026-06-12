@@ -7,8 +7,7 @@ Building on the communication architecture established in the previous chapter, 
 
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.9\textwidth]{images/data_exchange_flow.png}
-    \rule{0.9\textwidth}{6cm} % Placeholder box
+    \includegraphics[width=0.9\textwidth]{figures/chapter6/iot/zero_tier.png}
     \caption{Zerotier UI}
     \label{fig:zerotier_ui}
 \end{figure}
@@ -51,8 +50,8 @@ This arrangement cleanly separates the two kinds of traffic: time-critical, high
 % PLACEHOLDER: Data-exchange flow diagram between the two laptops
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.9\textwidth]{images/data_exchange_flow.png}
-    \rule{0.9\textwidth}{6cm} % Placeholder box
+    \includegraphics[width=0.9\textwidth]{figures/chapter6/iot/syncthing_2.png}
+    % \rule{0.9\textwidth}{6cm} % Placeholder box
     \caption{Syncthing Folder Exchange UI.}
     \label{fig:syncthing_ui}
 \end{figure}
@@ -77,8 +76,8 @@ The complete set of payloads exchanged across the link is summarized below and i
 % PLACEHOLDER: Data-exchange flow diagram between the two laptops
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.9\textwidth]{images/data_exchange_flow.png}
-    \rule{0.9\textwidth}{6cm} % Placeholder box
-    \caption{Data-exchange flow between the control and station laptops. The station streams brick detections, joint states, and status flags to the control laptop over ROS2/Fast~DDS, while the control laptop returns the planned program storage (\texttt{YAML}) to the station over Syncthing; both channels run on the shared ZeroTier overlay.}
+    \includegraphics[width=0.9\textwidth]{figures/chapter6/iot/data_flow2.png}
+    % \rule{0.9\textwidth}{6cm} % Placeholder box
+    \caption{Data-exchange flow between the control and station laptops.}
     \label{fig:data_exchange_flow}
 \end{figure}
