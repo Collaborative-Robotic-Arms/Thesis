@@ -1,0 +1,160 @@
+
+
+\section{IOT System Reliability and Evaluation}
+
+This section evaluates the reliability and performance of the distributed communication architecture described in Chapters~\ref{chap:implementation} and earlier. Because the two computational nodes are bridged across the public internet rather than a shared LAN, every design claim made for the architecture --- low latency, full ROS2 QoS fidelity, and graceful recovery from disruption --- is treated here as a hypothesis to be verified experimentally. The evaluation mirrors the layers of the architecture (the ZeroTier overlay and the Fast~DDS real-time channel), followed by an end-to-end system assessment and a discussion of failure modes and resilience.
+
+In this context, \textit{reliability} is defined as the system's ability to deliver data correctly and on time, and to recover gracefully, over an inherently unreliable public-internet path.
+
+\subsection{Evaluation Methodology}
+
+The communication stack was instrumented and measured under controlled conditions. Table~\ref{tab:iot_test_setup} summarizes the test environment, and the following tools and scenarios were used:
+
+\begin{itemize}
+    \item \textbf{Network-layer measurement:} \texttt{ping} for round-trip latency, jitter, and loss over the ZeroTier virtual interface, and \texttt{iperf3} for available throughput.
+    \item \textbf{Middleware-layer measurement:} timestamped ROS2 messages (and \texttt{ros2 topic hz}/\texttt{delay}) to measure per-topic end-to-end latency, achieved publication rate, and message-drop rate; \texttt{ros2 bag} for capture and offline analysis.
+    \item \textbf{Stress testing:} the Linux traffic-control facility (\texttt{tc}/\texttt{netem}) to inject controlled packet loss and latency, emulating a degraded internet path.
+\end{itemize}
+
+Four scenarios were exercised: (i) \textit{nominal} operation, (ii) \textit{degraded network} (injected loss/delay), (iii) \textit{link drop and recovery}, and (iv) a long-duration \textit{soak test}.
+
+% PLACEHOLDER: Table describing the test environment
+\begin{table}[htbp]
+    \centering
+    \caption{Test environment for the IoT reliability evaluation.}
+    \label{tab:iot_test_setup}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Parameter} & \textbf{Value} \\
+        \midrule
+        Control-laptop location / network     & [Data] \\
+        Station-laptop location / network      & [Data] \\
+        Approximate geographic separation      & [Data] \\
+        ROS2 distribution / RMW                & Jazzy / \texttt{rmw\_fastrtps\_cpp} \\
+        ZeroTier path type (direct / relayed)  & [Data] \\
+        Test duration (soak)                   & [Data] \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Network-Layer Reliability (ZeroTier Overlay)}
+
+The overlay is the foundation on which the communication stack runs, so its characteristics bound the performance of everything above it. The measured latency, jitter, packet loss, and throughput over the ZeroTier virtual interface are reported in Table~\ref{tab:iot_kpi}. A key question is whether ZeroTier established a \textbf{direct peer-to-peer path} via UDP hole-punching or fell back to \textbf{relayed routing}; this is reported explicitly, as it directly substantiates the claim in Chapter~5 that the effective latency is governed by the underlying internet path and the overlay's tunneling overhead rather than by any middleware-level inefficiency. To quantify that overhead, the overlay RTT is compared against a raw internet ping between the two sites.
+
+% PLACEHOLDER: Graph of latency/jitter over time on the ZeroTier overlay
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{images/zerotier_latency.png}
+    \rule{0.9\textwidth}{6cm} % Placeholder box
+    \caption{Round-trip latency and jitter measured over the ZeroTier overlay during continuous operation, with the raw internet path shown for comparison.}
+    \label{fig:zerotier_latency}
+\end{figure}
+
+\subsection{Real-Time Channel Reliability (Fast DDS / RTPS)}
+
+This subsection evaluates the DDS channel that carries the live telemetry streams --- brick detections, \texttt{/joint\_states}, and status flags. For each stream, the end-to-end message latency, the achieved publication rate relative to its target, and the message-drop rate are measured.
+
+\subsubsection{Quality-of-Service Comparison}
+
+The most important experiment here contrasts the two delivery contracts available through DDS QoS: \textbf{Reliable} versus \textbf{Best-Effort}. This empirically grounds the QoS discussion of Chapter~5 by quantifying the latency-versus-loss trade-off between the two policies, particularly as network conditions degrade.
+
+% PLACEHOLDER: Table comparing Reliable vs Best-Effort QoS
+\begin{table}[htbp]
+    \centering
+    \caption{Per-stream latency and message loss under Reliable vs.\ Best-Effort QoS.}
+    \label{tab:qos_comparison}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Stream} & \textbf{Target Rate} & \textbf{QoS} & \textbf{Mean Latency (ms)} & \textbf{Drop Rate (\%)} \\
+        \midrule
+        Brick detections        & [Data] & Reliable     & [Data] & [Data] \\
+        Brick detections        & [Data] & Best-Effort  & [Data] & [Data] \\
+        \texttt{/joint\_states} & [Data] & Reliable     & [Data] & [Data] \\
+        \texttt{/joint\_states} & [Data] & Best-Effort  & [Data] & [Data] \\
+        Status flags            & [Data] & Reliable     & [Data] & [Data] \\
+        Status flags            & [Data] & Best-Effort  & [Data] & [Data] \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Discovery and Recovery}
+
+Beyond steady-state throughput, the reliability of \textbf{unicast participant discovery} across the overlay was assessed: the time for SPDP discovery to complete on startup, and --- more importantly --- the time for the two participants to re-discover one another and resume topic traffic after a deliberate link interruption. This validates the static-unicast discovery configuration adopted in Chapter~5 and its behavior under disruption.
+
+% PLACEHOLDER: Graph of message latency under injected network degradation
+\begin{figure}[htbp]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{images/dds_latency_degraded.png}
+    \rule{0.9\textwidth}{6cm} % Placeholder box
+    \caption{End-to-end DDS message latency and delivery as controlled packet loss and delay are injected, illustrating the retransmission behavior of the Reliable QoS profile.}
+    \label{fig:dds_degraded}
+\end{figure}
+
+\subsection{End-to-End System Reliability}
+
+Finally, the architecture was assessed as experienced by the robotic application as a whole. The metrics of interest are the \textbf{end-to-end command latency} (from a plan being generated on the control laptop to the robot beginning execution on the station), the \textbf{digital-twin synchronization lag} (how far the twin trails the physical arm's true joint state), and the \textbf{operational cycle success rate} --- the fraction of assembly cycles, over an extended run, that completed without a fault attributable to the communication system, as distinct from mechanical or kinematic faults.
+
+% PLACEHOLDER: Table of end-to-end and soak-test results
+\begin{table}[htbp]
+    \centering
+    \caption{End-to-end and long-duration (soak) reliability results.}
+    \label{tab:e2e_reliability}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Metric} & \textbf{Value} \\
+        \midrule
+        End-to-end command latency (plan $\rightarrow$ execution) & [Data] \\
+        Digital-twin synchronization lag        & [Data] \\
+        Comms-induced faults over soak test      & [Data] \\
+        Successful automatic recoveries          & [Data] \\
+        Overall cycle success rate               & [Data]\% \\
+        Link uptime over test duration           & [Data]\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Consolidated Reliability Metrics}
+
+Table~\ref{tab:iot_kpi} consolidates the key performance indicators gathered across all layers of the communication stack into a single reference.
+
+% PLACEHOLDER: Master KPI table
+\begin{table}[htbp]
+    \centering
+    \caption{Consolidated key performance indicators for the IoT communication stack.}
+    \label{tab:iot_kpi}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Layer} & \textbf{Metric} & \textbf{Value} \\
+        \midrule
+        \multirow{4}{*}{Network (ZeroTier)}
+            & RTT (avg / p95 / max)       & [Data] / [Data] / [Data] ms \\
+            & Jitter                      & [Data] ms \\
+            & Packet loss                 & [Data]\% \\
+            & Throughput                  & [Data] Mbps \\
+        \midrule
+        \multirow{3}{*}{Real-time (Fast DDS)}
+            & Mean topic latency          & [Data] ms \\
+            & Achieved rate vs target     & [Data] / [Data] Hz \\
+            & Discovery / re-discovery time & [Data] / [Data] s \\
+        \midrule
+        \multirow{3}{*}{End-to-end}
+            & Command latency             & [Data] ms \\
+            & Twin synchronization lag    & [Data] ms \\
+            & Cycle success rate          & [Data]\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Failure Modes and Resilience Discussion}
+
+The quantitative results above are complemented by a qualitative analysis of how the architecture behaves when the public-internet path misbehaves. The principal failure modes anticipated for this deployment are: transient internet outages, latency spikes, packet loss, NAT rebinding, fallback of the ZeroTier path from direct to relayed routing, and interruptions caused by a laptop entering and resuming from sleep.
+
+Against these, the architecture provides several layers of built-in resilience, each of which can be cross-referenced to a design decision made in Chapters~5 and~6:
+
+\begin{itemize}
+    \item \textbf{Reliable-QoS retransmission} in DDS recovers individual lost packets on the real-time channel without application involvement.
+    \item \textbf{ZeroTier's stable virtual IPs and automatic relay fallback} preserve addressing and connectivity across NAT changes and direct-path failures.
+    \item \textbf{Static unicast discovery} removes the dependency on multicast, so discovery does not silently fail across the WAN boundary.
+\end{itemize}
+
+The recovery experiments reported in the preceding subsections quantify the effectiveness of these mechanisms in practice, demonstrating the extent to which the system tolerates a disruption-prone link while preserving correct robotic operation.
