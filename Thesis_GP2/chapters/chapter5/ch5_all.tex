@@ -21,9 +21,20 @@ In effect, ZeroTier collapses the geographically distributed deployment into a s
 % PLACEHOLDER: Network architecture diagram (physical vs. virtual topology)
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.95\textwidth]{images/network_architecture_zerotier.png}
-    \rule{0.95\textwidth}{6cm} % Placeholder box
-    \caption{Network architecture: the control and station laptops sit on separate NAT-ed local networks (dashed boxes) and are bridged by the ZeroTier virtual overlay (solid line), which assigns each node a stable, routable virtual IP across the public internet.}
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/chapter5/no_network.png}
+        \caption{Without the overlay, the control and station laptops sit behind separate NAT-ed routers and cannot reach one another directly.}\label{fig:network_no_overlay}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/chapter5/with_network.png}
+        \caption{The ZeroTier overlay bridges the two sites, assigning each node a stable, routable virtual IP so they behave as if on one LAN.}\label{fig:network_with_overlay}
+    \end{subfigure}
+    \caption{Network architecture before and after introducing the ZeroTier virtual overlay.}
     \label{fig:network_architecture}
 \end{figure}
 
@@ -42,9 +53,9 @@ By default, RTPS performs participant discovery using IP multicast, broadcasting
 % PLACEHOLDER: Communication stack layering diagram
 \begin{figure}[htbp]
     \centering
-    % \includegraphics[width=0.55\textwidth]{images/communication_stack.png}
-    \rule{0.55\textwidth}{7cm} % Placeholder box
-    \caption{Layering of the communication stack, from the ROS2 application down to the physical link: ROS2 node API $\rightarrow$ \texttt{rmw} abstraction $\rightarrow$ Fast DDS $\rightarrow$ RTPS $\rightarrow$ UDP $\rightarrow$ ZeroTier virtual interface $\rightarrow$ public internet.}
+    \includegraphics[width=0.55\textwidth]{figures/chapter5/ros2.png}
+    % \rule{0.55\textwidth}{7cm} % Placeholder box
+    \caption{Layering of ROS2 architecture stack.}
     \label{fig:communication_stack}
 \end{figure}
 
