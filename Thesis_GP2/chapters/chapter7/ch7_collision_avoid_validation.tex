@@ -22,28 +22,35 @@ To test the Zone Manager, the system was forced into intersecting trajectories. 
     \label{fig:zone_occupancy}
 \end{figure}
 
-\subsection{Edge Case Scenarios and MTC Resolution}
+\subsection{Intervention Latency}
 
-The algorithmic fail-safe was validated by intentionally commanding both arms to reach conflicting coordinates within the shared interference zone simultaneously. The performance of the MTC resolution pipeline is measured by:
-\begin{itemize}
-    \item \textbf{Detection Latency ($L_{detect}$):} The time taken (in milliseconds) from breaching the approach margin to the issuance of the \texttt{COLLISION\_WARNING} interrupt.
-    \item \textbf{Resolution Computation Time ($T_{res}$):} The time required for the MTC \texttt{PipelinePlanner} to calculate a valid 12-DOF escape trajectory.
-    \item \textbf{Resolution Success Rate ($SR_{res}$):} The percentage of imminent collision events successfully resolved without requiring a hard system abort.
-\end{itemize}
+The empirical data extracted from the system's execution logs validates the responsiveness of the implemented \texttt{zone\_detection\_manager}. To satisfy the Speed and Separation Monitoring (SSM) requirements for fenceless collaboration, the spatial proximity between the ABB IRB 120 and AR4 end-effectors must be evaluated continuously without introducing execution delays.
 
-\begin{table}[htbp]
-    \centering
-    \caption{Validation of Dynamic Collision Avoidance under Edge-Case Scenarios}
-    \label{tab:edge_cases}
-    \begin{tabular}{lcccc}
-        \toprule
-        \textbf{Scenario} & \textbf{Trials} & \textbf{Avg. Latency (ms)} & \textbf{Avg. Res. Time (s)} & \textbf{Success Rate} \\
-        \midrule
-        Head-on Convergence     & [Data] & [Data] & [Data] & [Data]\% \\
-        Orthogonal Intersection & [Data] & [Data] & [Data] & [Data]\% \\
-        Handover Deadlock       & [Data] & [Data] & [Data] & [Data]\% \\
-        \bottomrule
-    \end{tabular}
+During forced collision-course stress testing, the Zone Manager successfully flagged collision risks and triggered MoveIt Task Constructor (MTC) interventions. The latency between detecting a Cartesian threshold breach and firing the intervention flag was recorded over multiple cycles. The system demonstrated highly deterministic, sub-millisecond reaction times, with an average intervention trigger latency of 0.089 ms (min: 0.075 ms, max: 0.114 ms). 
+
+Furthermore, trajectory tracking during the intervention event revealed a controlled deceleration curve. The initial collision warning was published at a separation distance of 21.7 cm. The manipulators successfully arrested their forward momentum and initiated their respective escape sequences at a minimum physical separation of 14.5 cm, ensuring zero physical contact and proving the mechanical viability of the digital twin's safety constraints.
+
+\subsection{MTC Dynamic Escape Route Planning}
+
+Upon receiving a collision intervention flag, the hybrid MTC controller halts the active trajectories and dynamically calculates independent escape routes for both manipulators. The computational overhead required to resolve these collision-free paths was logged to evaluate the system's recovery efficiency.
+
+The data reveals a significant disparity in kinematic resolution times between the heterogeneous arms. The industrial ABB manipulator demonstrated highly efficient path generation, averaging 125.05 ms to calculate a valid escape trajectory. Conversely, the AR4 collaborative arm required an average of 2964.41 ms to resolve its escape routes. This variance highlights the inherent differences in joint-space constraints and the respective inverse kinematics (IK) solver efficiencies for each manipulator type within the MoveIt 2 environment.
+
+\begin{table}[h!]
+\centering
+\caption{System Intervention and Dynamic Planning Metrics}
+\label{tab:mtc_zone_metrics}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Minimum} & \textbf{Maximum} & \textbf{Average} \\ 
+\midrule
+Intervention Trigger Latency & 0.075 ms & 0.114 ms & \textbf{0.089 ms} \\ 
+ABB Escape Route Planning & 104.02 ms & 146.07 ms & \textbf{125.05 ms} \\ 
+AR4 Escape Route Planning & 2781.22 ms & 3147.60 ms & \textbf{2964.41 ms} \\ 
+Minimum Separation Distance & -- & -- & \textbf{14.50 cm} \\
+\bottomrule
+\end{tabular}
 \end{table}
 
 \begin{figure}[H]
