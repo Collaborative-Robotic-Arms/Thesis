@@ -50,6 +50,8 @@ The overlay is the foundation on which the communication stack runs, so its char
     \label{fig:zerotier_latency}
 \end{figure}
 
+Over a continuous 2000-packet probe (one packet every 200\,ms), the overlay sustained an average round-trip time of 46.3\,ms with \textbf{zero packet loss}, confirming that the ZeroTier path between the two laptops is stable enough to carry real-time telemetry. The distribution is, however, distinctly long-tailed: the median RTT is only 14.2\,ms, yet the 95th percentile rises to 184\,ms and the worst-case sample reaches 467\,ms, with the corresponding jitter (\texttt{mdev}) at 47.7\,ms. This skew is characteristic of a public-internet path subject to transient queueing and scheduling delays rather than of any fault in the overlay itself, and it motivates the QoS analysis that follows: a delivery policy must tolerate occasional large latency excursions without compromising correctness. Available throughput over the tunnel measured 4.5\,Mbps, which --- while modest compared with a LAN --- comfortably exceeds the bandwidth required by the brick-detection, \texttt{/joint\_states}, and status streams, so the link is latency-bound rather than bandwidth-bound for this application. These figures substantiate the Chapter~5 claim that end-to-end performance is governed by the underlying internet path and the overlay's tunnelling overhead rather than by any middleware-level inefficiency.
+
 \subsection{Real-Time Channel Reliability (Fast DDS / RTPS)}
 
 This subsection evaluates the DDS channel that carries the live telemetry streams --- brick detections, \texttt{/joint\_states}, and status flags. For each stream, the end-to-end message latency, the achieved publication rate relative to its target, and the message-drop rate are measured.
@@ -61,21 +63,24 @@ The most important experiment here contrasts the two delivery contracts availabl
 % PLACEHOLDER: Table comparing Reliable vs Best-Effort QoS
 \begin{table}[htbp]
     \centering
-    \caption{Per-stream latency and message loss under Reliable vs.\ Best-Effort QoS.}
+    \caption{Latency and message loss under Reliable vs.\ Best-Effort QoS, measured
+    on the clean (nominal) overlay with a single \texttt{std\_msgs/Header} probe
+    topic published at 20\,Hz (1000 samples). Latency is the mean one-way figure
+    (RTT$/2$).}
     \label{tab:qos_comparison}
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Stream} & \textbf{Target Rate} & \textbf{QoS} & \textbf{Mean Latency (ms)} & \textbf{Drop Rate (\%)} \\
+        \textbf{Probe Topic} & \textbf{Target Rate} & \textbf{QoS} & \textbf{Mean Latency (ms)} & \textbf{Drop Rate (\%)} \\
         \midrule
-        Brick detections        & [Data] & Reliable     & [Data] & [Data] \\
-        Brick detections        & [Data] & Best-Effort  & [Data] & [Data] \\
-        \texttt{/joint\_states} & [Data] & Reliable     & [Data] & [Data] \\
-        \texttt{/joint\_states} & [Data] & Best-Effort  & [Data] & [Data] \\
-        Status flags            & [Data] & Reliable     & [Data] & [Data] \\
-        Status flags            & [Data] & Best-Effort  & [Data] & [Data] \\
+        Telemetry probe (\texttt{Header}) & 20\,Hz & Reliable     & 6.14 & 0.00 \\
+        Telemetry probe (\texttt{Header}) & 20\,Hz & Best-Effort  & 6.82 & 0.00 \\
+        % TODO: add degraded-link rows (re-run ping--pong under tc/netem from Section 5).
+        % TODO: optionally break out per real stream (brick detections, /joint_states, status flags).
         \bottomrule
     \end{tabular}
 \end{table}
+
+On the clean overlay both policies delivered all 1000 messages without loss, so the two contracts are separated here only by latency. Reliable QoS achieved a mean one-way latency of 6.14\,ms with a tight 95th-percentile RTT of 15.3\,ms, whereas Best-Effort was marginally slower in the mean (6.82\,ms one-way) and noticeably more variable at the tail, with the 95th-percentile RTT rising to 22.0\,ms and a worst-case RTT of 156\,ms against Reliable's 50\,ms. This ordering may appear counter-intuitive --- Best-Effort is often assumed to be the lower-latency option --- but on a lightly loaded link with negligible loss the acknowledgement traffic of the Reliable profile imposes no retransmission penalty, while its in-order delivery yields a smoother latency distribution. The two policies are therefore near-equivalent under nominal conditions; the substantive trade-off only emerges under loss, where Reliable QoS is expected to hold the drop rate near zero at the cost of rising latency (retransmissions), while Best-Effort holds latency flat but sheds packets at approximately the injected loss rate. Quantifying that divergence requires the degraded-link runs noted in Table~\ref{tab:qos_comparison}, which remain to be completed.
 
 \subsubsection{Discovery and Recovery}
 
@@ -103,12 +108,12 @@ Finally, the architecture was assessed as experienced by the robotic application
         \toprule
         \textbf{Metric} & \textbf{Value} \\
         \midrule
-        End-to-end command latency (plan $\rightarrow$ execution) & [Data] \\
-        Digital-twin synchronization lag        & [Data] \\
-        Comms-induced faults over soak test      & [Data] \\
-        Successful automatic recoveries          & [Data] \\
-        Overall cycle success rate               & [Data]\% \\
-        Link uptime over test duration           & [Data]\% \\
+        End-to-end command latency (plan $\rightarrow$ execution) & [Data] \\ % TODO: instrument plan-finalize vs execute-start (Section 8)
+        Digital-twin synchronization lag        & 6.14 ms \\
+        Comms-induced faults over soak test      & [Data] \\ % TODO: run soak logger (Section 8)
+        Successful automatic recoveries          & [Data] \\ % TODO
+        Overall cycle success rate               & [Data]\% \\ % TODO
+        Link uptime over test duration           & [Data]\% \\ % TODO
         \bottomrule
     \end{tabular}
 \end{table}
@@ -127,20 +132,20 @@ Table~\ref{tab:iot_kpi} consolidates the key performance indicators gathered acr
         \textbf{Layer} & \textbf{Metric} & \textbf{Value} \\
         \midrule
         \multirow{4}{*}{Network (ZeroTier)}
-            & RTT (avg / p95 / max)       & [Data] / [Data] / [Data] ms \\
-            & Jitter                      & [Data] ms \\
-            & Packet loss                 & [Data]\% \\
-            & Throughput                  & [Data] Mbps \\
+            & RTT (avg / p95 / max)       & 46.3 / 184 / 467 ms \\
+            & Jitter                      & 47.7 ms \\
+            & Packet loss                 & 0\% \\
+            & Throughput                  & 4.5 Mbps \\
         \midrule
         \multirow{3}{*}{Real-time (Fast DDS)}
-            & Mean topic latency          & [Data] ms \\
-            & Achieved rate vs target     & [Data] / [Data] Hz \\
-            & Discovery / re-discovery time & [Data] / [Data] s \\
+            & Mean topic latency          & 6.14 ms \\
+            & Achieved rate vs target     & 20 / 20 Hz \\
+            & Discovery / re-discovery time & [Data] / [Data] s \\ % TODO: Test 4
         \midrule
         \multirow{3}{*}{End-to-end}
-            & Command latency             & [Data] ms \\
-            & Twin synchronization lag    & [Data] ms \\
-            & Cycle success rate          & [Data]\% \\
+            & Command latency             & [Data] ms \\ % TODO: Section 8
+            & Twin synchronization lag    & 6.14 ms \\
+            & Cycle success rate          & [Data]\% \\ % TODO: Section 8
         \bottomrule
     \end{tabular}
 \end{table}
