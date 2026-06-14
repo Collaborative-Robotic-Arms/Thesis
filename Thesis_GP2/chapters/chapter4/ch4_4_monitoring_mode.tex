@@ -49,7 +49,70 @@ Monitoring mode is selected in \texttt{twin.launch.py} through the \texttt{twin\
     \caption{Real-time monitoring mode data flow.}
     \label{fig:dt_monitoring_mode}
 \end{figure}
+\subsection{Brick Monitoring and Real-to-Twin Spawning}
 
+In addition to mirroring the robot motion, the monitoring mode also reflects the
+state of the workpieces on the assembly table. A RealSense D435i camera is mounted
+above the cell and provides synchronized colour and depth images. A YOLO detector
+runs on the colour stream and publishes the position, orientation, and class of each
+visible brick (I, L, T, or Z) on the topic \texttt{/yolo/detections}. The
+\texttt{real2sim\_bridge.py} node uses these detections to spawn the corresponding
+bricks in the Gazebo twin so that the virtual workspace matches the physical one.
+
+The bridge subscribes simultaneously to \texttt{/yolo/detections} and the aligned
+depth image \texttt{/camera/camera/aligned\_depth\_to\_color/image\_raw} using a
+time synchronizer. For each new detection, the depth at the bounding-box centre is
+back-projected through the camera intrinsics to obtain a three-dimensional point in
+the camera optical frame, which is then transformed into the \texttt{world} frame.
+Because the recorded camera transform tree and the simulation transform tree are
+published by independent sources, the bridge also broadcasts a single static
+transform from \texttt{world} to \texttt{camera\_color\_optical\_frame} at startup,
+so that the standard \texttt{tf2} machinery can resolve the chain.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.95\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.65cm and 0.9cm,
+        sensor/.style={draw, rounded corners=2pt, align=center, minimum width=2.5cm, minimum height=0.78cm, fill=blue!8},
+        topic/.style={draw, rounded corners=2pt, align=center, minimum width=2.5cm, minimum height=0.78cm, fill=gray!8},
+        logic/.style={draw, rounded corners=2pt, align=center, minimum width=2.7cm, minimum height=0.78cm, fill=orange!10},
+        twin/.style={draw, rounded corners=2pt, align=center, minimum width=2.5cm, minimum height=0.78cm, fill=green!8},
+        arrow/.style={-Latex, thick}
+    ]
+        \node[sensor] (cam) {RealSense D435i\\colour and depth};
+        \node[topic, right=of cam] (yolo) {\texttt{/yolo/detections}\\bbox, class, angle};
+        \node[logic, right=of yolo] (bridge) {\texttt{real2sim\_bridge.py}\\back-project and spawn};
+        \node[twin, right=of bridge] (gazebo) {Gazebo twin\\spawned bricks};
+        \node[topic, below=0.7cm of yolo] (depth) {Aligned depth\\image};
+        \node[twin, below=0.7cm of gazebo] (moveit) {MoveIt scene\\\texttt{/planning\_scene}};
+
+        \draw[arrow] (cam) -- (yolo);
+        \draw[arrow] (cam.south) |- (depth.west);
+        \draw[arrow] (yolo) -- (bridge);
+        \draw[arrow] (depth.east) -| (bridge.south);
+        \draw[arrow] (bridge) -- (gazebo);
+        \draw[arrow] (bridge.south) |- (moveit.west);
+    \end{tikzpicture}%
+    }
+    \caption{Brick monitoring data flow.}
+    \label{fig:dt_brick_monitoring}
+\end{figure}
+
+
+The spawn itself uses two complementary paths: a Gazebo entity is created through the native
+\texttt{gz~service} interface using an inline SDF description, and a matching
+\texttt{CollisionObject} is published on \texttt{/planning\_scene} so that MoveIt
+treats the brick as an obstacle during planning. Per-brick mesh-origin offsets are
+applied through the SDF link pose, so that the spawn position corresponds to the
+brick's geometric centre regardless of where the original STL author placed the
+mesh origin.
+
+This brick monitoring layer complements the joint-state mirroring described in the
+following subsections. Together they keep both the robots and the workpieces of the
+Gazebo twin consistent with the physical cell, which is the prerequisite for the
+program-mode validation introduced later in this chapter.
 \subsection{Purpose of Monitoring Mode}
 
 The main purpose of monitoring mode is to maintain a live virtual representation of the cell during real operation. This helps the operator understand the state of the robot system without relying only on the physical view of the hardware. In a dual-arm setup, this is particularly useful because the operator must track two manipulators, grippers, shared workspaces, and possible interaction regions at the same time.

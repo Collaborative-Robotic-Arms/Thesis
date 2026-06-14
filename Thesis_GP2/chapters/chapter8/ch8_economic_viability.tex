@@ -1,23 +1,21 @@
 \section{Economic Viability (Cost-Benefit Analysis)}
 
-The economic justification for deploying an advanced, multi-robot assembly cell hinges on balancing the initial Capital Expenditure (CAPEX) against the projected Return on Investment (ROI) derived from increased throughput, reduced defect rates, and lowered Operational Expenditure (OPEX). Recent industry data demonstrates that collaborative robot deployments typically achieve a rapid payback period of 12 to 18 months. Meanwhile, fully integrated industrial robotic cells average a payback period of 18 to 36 months depending on complexity.
+The economic justification for deploying an advanced, multi-robot assembly cell hinges on balancing the initial Capital Expenditure (CAPEX) against the projected Return on Investment (ROI) derived from increased throughput, reduced defect rates, and lowered Operational Expenditure (OPEX). Recent industry data demonstrates that collaborative robot deployments typically achieve a rapid payback period of 12 to 18 months \cite{ifactory2026calculator, mantec2026cobot}. Meanwhile, fully integrated industrial robotic cells average a payback period of 18 to 36 months depending on complexity \cite{oxmaint2026roi}.
 
 \subsection{Capital Expenditure (CAPEX)}
 Deploying a Digital-Twin-enabled, dual-arm system requires strategic initial investment. The primary CAPEX components include:
 \begin{itemize}
-    \item \textbf{Hardware Procurement:} Industrial robotic cells generally require an investment ranging from \$150,000 to \$500,000, while individual collaborative robots cost between \$25,000 and \$75,000 per unit. A hybrid deployment utilizing an industrial backbone (e.g., ABB) and a collaborative arm must account for these hardware costs, alongside high-resolution vision systems.
+    \item \textbf{Hardware Procurement:} Industrial robotic cells generally require an investment ranging from \$150,000 to \$500,000, while individual collaborative robots cost between \$25,000 and \$75,000 per unit \cite{szghtech2026cobot}. A hybrid deployment utilizing an industrial backbone (e.g., ABB) and a collaborative arm must account for these hardware costs, alongside high-resolution vision systems.
     \item \textbf{Software and Integration:} Development costs associated with mapping the physical cell to the RViz Digital Twin, configuring the MoveIt Task Constructor (MTC) pipelines, and setting up the IIoT cloud databases.
 \end{itemize}
 
 \subsection{Operational Expenditure (OPEX) and Targeted ROI}
-The proposed architecture offers substantial OPEX reductions. As demonstrated in Chapter 7, the multithreaded parallel execution framework minimizes arm starvation. Furthermore, pre-execution validation within the Digital Twin reduces material scrap and machine downtime by preventing mechanical collisions before they occur physically. 
-
-Quantitative benefits proven in recent manufacturing implementations include:
+The proposed architecture offers substantial OPEX reductions. As demonstrated in Chapter 7, the multithreaded parallel execution framework minimizes arm starvation. Furthermore, pre-execution validation within the Digital Twin reduces material scrap and machine downtime by preventing mechanical collisions before they occur physically. Quantitative benefits proven in recent manufacturing implementations include:
 \begin{itemize}
-    \item \textbf{Labor Savings:} A single collaborative robot replacing one full-time operator typically saves \$65,000 to \$85,000 annually in direct labor costs per shift.
-    \item \textbf{Throughput Increase:} Parallel execution and continuous operation without operator fatigue yield a 20\% to 40\% increase in production capacity and throughput.
-    \item \textbf{Defect and Waste Reduction:} Digital Twin integration in manufacturing environments has been shown to result in a 30\% reduction in material waste and a 40\% decrease in part rejection rates, achieving an ROI of 233\% over 5 years. Additionally, robotic precision can reduce overall scrap by 50\% to 92\% compared to human variability.
-    \item \textbf{Downtime Recovery:} Implementing predictive monitoring and Digital Twins reduces unplanned downtime by 35\% to 45\%.
+    \item \textbf{Labor Savings:} A single collaborative robot replacing one full-time operator typically saves \$65,000 to \$85,000 annually in direct labor costs per shift \cite{szghtech2026cobot}.
+    \item \textbf{Throughput Increase:} Parallel execution and continuous operation without operator fatigue yield a 20\% to 40\% increase in production capacity and throughput \cite{ifactory2026calculator, szghtech2026cobot}.
+    \item \textbf{Defect and Waste Reduction:} Digital Twin integration in manufacturing environments has been shown to result in a 30\% reduction in material waste and a 40\% decrease in part rejection rates, achieving an ROI of 233\% over 5 years \cite{dataparc2026dt, iotforall2026digitaltwin}. Additionally, robotic precision can reduce overall scrap by 50\% to 92\% compared to human variability.
+    \item \textbf{Downtime Recovery:} Implementing predictive monitoring and Digital Twins reduces unplanned downtime by 35\% to 45\% \cite{iotforall2026digitaltwin}.
 \end{itemize}
 
 In high-mix, medium-payload environments, the flexibility, high throughput, and tight defect tolerances heavily justify the advanced sensory and computational investments.
