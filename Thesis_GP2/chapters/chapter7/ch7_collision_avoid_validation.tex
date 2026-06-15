@@ -36,7 +36,7 @@ Upon receiving a collision intervention flag, the hybrid MTC controller halts th
 
 The data reveals a significant disparity in kinematic resolution times between the heterogeneous arms. The industrial ABB manipulator demonstrated highly efficient path generation, averaging 125.05 ms to calculate a valid escape trajectory. Conversely, the AR4 collaborative arm required an average of 2964.41 ms to resolve its escape routes. This variance highlights the inherent differences in joint-space constraints and the respective inverse kinematics (IK) solver efficiencies for each manipulator type within the MoveIt 2 environment.
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \caption{System Intervention and Dynamic Planning Metrics}
 \label{tab:mtc_zone_metrics}
@@ -53,11 +53,11 @@ Minimum Separation Distance & -- & -- & \textbf{14.50 cm} \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{figures/chapter7/collision_avoidance/Rviz_MTC_Collision.png}
-    \caption{RViz simulation captured during a conflict resolution event.}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.9\textwidth]{figures/chapter7/collision_avoidance/Rviz_MTC_Collision.png}
+%     \caption{RViz simulation captured during a conflict resolution event.}
+% \end{figure}
 
 The results tabulated above demonstrate that the hybrid control architecture successfully prioritizes mechanical safety while maintaining a significantly higher throughput than traditional sequential systems.
 

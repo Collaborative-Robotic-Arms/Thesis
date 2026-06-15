@@ -58,19 +58,24 @@ The handover was decomposed into four discrete functional stages to evaluate the
         \toprule
         \textbf{Handover Phase} & \textbf{Duration (s)} & \textbf{\% of Total Exchange} \\
         \midrule
-        MTC Pipeline Computation & [Data] & [Data]\% \\
-        Spatial Approach         & [Data] & [Data]\% \\
-        Hardware Synchronization & [Data] & [Data]\% \\
-        Safe Retraction          & [Data] & [Data]\% \\
+        MTC Pipeline Computation (s) & 13.727  & 46.5\% \\
+        Spatial Approach (s)        & 4.440 & 15.0\% \\
+        Hardware Synchronization (s) & 8.152 & 27.6\% \\
+        Safe Retraction (s)          & 3.219 & 10.9\% \\
         \midrule
-        \textbf{Total Exchange Time} & \textbf{[Data]} & \textbf{100\%} \\
+        \textbf{Total Exchange Time} & \textbf{29.538} & \textbf{100\%} \\
         \bottomrule
     \end{tabular}
 \end{table}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/chapter7/collab_efficiency/thesis_handover_performance.png}
+    \caption{Collaborative Handover Phase Durations.}
+\end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/chapter7/collab_efficiency/physical_handover.png}
+    \includegraphics[width=0.6\textwidth]{figures/chapter7/collab_efficiency/physical_handover.png}
     \caption{Physical execution of the handover sequence.}
     \label{fig:physical_handover}
 \end{figure}
