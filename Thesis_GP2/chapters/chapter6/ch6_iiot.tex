@@ -48,7 +48,7 @@ In this system, a single \textit{shared folder} is configured on both the contro
 This arrangement cleanly separates the two kinds of traffic: time-critical, high-rate telemetry travels over the real-time DDS link, while the larger, infrequently-updated program file is handled by a service purpose-built for reliable file delivery. Syncthing also provides versioning and automatic recovery from interrupted transfers, so a dropped connection during an update simply resumes once connectivity is restored, without corrupting the file the station relies on.
 
 % PLACEHOLDER: Data-exchange flow diagram between the two laptops
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/chapter6/iot/syncthing_2.png}
     % \rule{0.9\textwidth}{6cm} % Placeholder box
