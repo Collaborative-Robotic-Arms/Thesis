@@ -1,0 +1,306 @@
+% ============================================================
+%  Section 6.3 – Hardware Integration
+% ============================================================
+\section{Hardware Integration}
+\label{sec:ch6_hardware}
+
+This section describes the physical assembly, wiring, and network configuration of the
+collaborative robotic cell.  The goal is to document every connection that must be present for
+the software stack described in the preceding sections to operate correctly.
+
+% ------------------------------------------------------------------
+\subsection{Cell Layout and Component Inventory}
+\label{subsec:ch6_cell_layout}
+% ------------------------------------------------------------------
+
+The robotic cell is built around a shared assembly table to which both manipulators are rigidly
+mounted.  Table~\ref{tab:ch6_hw_inventory} lists every hardware component and its role.
+
+\begin{table}[H]
+\centering
+\caption{Hardware component inventory of the collaborative robotic cell.}
+\label{tab:ch6_hw_inventory}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lll}
+\toprule
+\textbf{Component}         & \textbf{Role}                          & \textbf{Interface} \\
+\midrule
+ABB IRB~120                & Primary industrial manipulator         & ABB IRC5 / RWS (Ethernet) \\
+AR4 Mk3 Research Arm       & Secondary collaborative arm            & Teensy 4.1 (\texttt{/dev/ttyACM0}) \\
+ABB IRC5 Controller        & Low-level ABB motion controller        & Ethernet (192.168.125.1) \\
+Intel RealSense D435i       & Global scene perception                & USB~3.0 \\
+Station Laptop             & Perception \& executor node            & ZeroTier / Wi-Fi \\
+Control Laptop             & Planner, MoveIt, Digital Twin          & ZeroTier / Wi-Fi \\
+Teensy 4.1                 & AR4 joint-angle and gripper controller & USB-CDC (\texttt{/dev/ttyACM0}) \\
+ABB Gripper (custom)       & Primary end-effector                   & ABB I/O board \\
+AR4 Gripper (custom)       & Secondary end-effector                 & Teensy GPIO \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:ch6_cell_diagram} provides a schematic top-view of the shared worktable,
+indicating the placement of both arms, the camera overhead mount, and the brick assembly region.
+
+% ------------------------------------------------------------------
+%  Figure: cell layout top-view (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    font=\small\sffamily,
+    scale=1.0,
+    table/.style={draw, thick, fill=gray!10, minimum width=9cm, minimum height=5cm},
+    arm/.style={draw, thick, fill=blue!20, rounded corners=4pt,
+                minimum width=1.4cm, minimum height=1.4cm, align=center},
+    camera/.style={draw, thick, fill=yellow!30, circle, minimum size=0.8cm, align=center},
+    brick/.style={draw, thick, fill=red!20, rounded corners=2pt,
+                  minimum width=2.5cm, minimum height=1.2cm, align=center},
+    lbl/.style={font=\footnotesize\sffamily}
+]
+
+% Table surface
+\draw[draw=gray!60, fill=gray!10, rounded corners=5pt] (-4.8,-2.8) rectangle (4.8,2.8);
+\node[lbl, gray] at (0,-2.4) {Shared Assembly Table};
+
+% ABB arm (left side)
+\node[arm] (abb) at (-3.2, 0) {\textbf{ABB}\\IRB~120};
+\draw[thick, ->, gray] (abb.east) -- ++(0.6,0);
+
+% AR4 arm (right side)
+\node[arm] (ar4) at (3.2, 0)  {\textbf{AR4}\\Mk3};
+\draw[thick, ->, gray] (ar4.west) -- ++(-0.6,0);
+
+% Assembly/handover zone (centre)
+\node[brick] (zone) at (0, 0.6) {Assembly Zone};
+\node[brick, fill=orange!20] (hzone) at (0,-0.6) {Handover Zone};
+
+% Camera overhead
+\node[camera] (cam) at (0, 2.1) {\scriptsize RS};
+\node[lbl, above=0.1cm of cam] {RealSense D435i (overhead)};
+\draw[dashed, gray] (cam.south) -- (zone.north);
+
+% Workspace boundary arcs
+\draw[dashed, blue!60, thick] (abb.center) circle (2.2cm);
+\draw[dashed, orange!70!black, thick] (ar4.center) circle (2.2cm);
+
+% Legend
+\node[lbl, blue!70] at (-3.2,-2.1)  {ABB workspace};
+\node[lbl, orange!70!black] at (3.2,-2.1) {AR4 workspace};
+
+\end{tikzpicture}
+\caption{Schematic top-view of the collaborative robotic cell.}
+\label{fig:ch6_cell_diagram}
+\end{figure}
+
+% ------------------------------------------------------------------
+\subsection{Wiring and Physical Connections}
+\label{subsec:ch6_wiring}
+% ------------------------------------------------------------------
+
+Figure~\ref{fig:ch6_wiring} shows every electrical connection in the cell.  All inter-system
+communication is either Ethernet, USB, or Wi-Fi; no proprietary fieldbuses are used, which
+simplifies integration and debugging.
+
+% ------------------------------------------------------------------
+%  Figure: wiring diagram (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.7cm and 1.4cm,
+        hw/.style={draw, thick, rounded corners=2pt, align=center, fill=blue!10,
+                   minimum width=2.6cm, minimum height=0.85cm},
+        sensor/.style={draw, thick, rounded corners=2pt, align=center, fill=red!12,
+                       minimum width=2.6cm, minimum height=0.85cm},
+        laptop/.style={draw, rounded corners=2pt, align=center,
+                       minimum width=3.0cm, minimum height=1.0cm},
+        station/.style={laptop, fill=orange!12},
+        ctrl/.style={laptop, fill=green!12},
+        cloud/.style={draw, rounded corners=10pt, align=center, fill=cyan!12,
+                      minimum width=2.8cm, minimum height=1.0cm},
+        eth/.style={-Latex, thick, color=blue!70!black},
+        prop/.style={-Latex, thick, color=gray!70!black},
+        usb/.style={-Latex, thick, color=purple!70!black},
+        cam/.style={-Latex, thick, color=red!70!black},
+        wifi/.style={Latex-Latex, thick, color=cyan!60!black},
+        lbl/.style={font=\tiny, fill=white, inner sep=1.5pt}
+    ]
+        % Hardware column (left)
+        \node[hw]                    (irc5) {ABB IRC5\\controller};
+        \node[hw, below=of irc5]     (abb)  {ABB IRB 120};
+        \node[hw, below=of abb]      (ar4)  {AR4 Mk3\\(Teensy 4.1)};
+
+        % Station laptop (centre, aligned with abb)
+        \node[station, right=2.0cm of abb] (stat) {Station laptop};
+
+        % Camera above station
+        \node[sensor, above=1.1cm of stat] (camera) {RealSense D435i};
+
+        % ZeroTier overlay (right of station)
+        \node[cloud, right=of stat]  (zt)   {ZeroTier\\overlay};
+
+        % Control laptop (far right)
+        \node[ctrl, right=of zt]     (ctrl) {Control laptop};
+
+        % Connections
+        \draw[eth]  (irc5.east) -- node[lbl, above, sloped]{Ethernet 192.168.125.0/24} (stat.north west);
+        \draw[prop] (abb.east)  -- node[lbl, above]{proprietary cable} (stat.west);
+        \draw[usb]  (ar4.east)  -- node[lbl, below, sloped]{USB-CDC \texttt{/dev/ttyACM0}} (stat.south west);
+        \draw[cam]  (camera.south) -- node[lbl, right]{USB 3.0} (stat.north);
+        \draw[wifi] (stat.east) -- node[lbl, above]{Wi-Fi} (zt.west);
+        \draw[wifi] (zt.east)   -- node[lbl, above]{Wi-Fi} (ctrl.west);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(irc5)(abb)(ar4), inner sep=0.25cm,
+                  label=above:Cell hardware] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(camera)(stat), inner sep=0.25cm,
+                  label=below:Local node] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(zt)(ctrl), inner sep=0.25cm,
+                  label=above:Remote network] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{Physical and logical wiring of the collaborative robotic cell.}
+    \label{fig:ch6_wiring}
+\end{figure}
+
+\textbf{ABB IRC5 connection.} The station laptop communicates with the IRC5 controller over a 1\,Gbps Ethernet link using the
+\textbf{ABB Robot Web Services (RWS)} HTTP/WebSocket interface.  The controller is assigned the
+static address \texttt{192.168.125.1}; the station laptop is assigned \texttt{192.168.125.100}
+on the same dedicated switch.  The \texttt{abb\_rws\_client} ROS~2 package translates RWS
+responses into standard \texttt{/joint\_states} messages.
+
+\textbf{AR4 Mk3 connection.} The AR4 arm is controlled by a Teensy~4.1 microcontroller mounted on the arm base.  The
+microcontroller enumerates as a USB CDC serial device on the station laptop at
+\texttt{/dev/ttyACM0}.  The ROS~2 AR4 driver serialises joint targets as
+\texttt{GOTO\_JOINTS} commands, receives encoder feedback, and publishes joint states at 50\,Hz.
+
+\textbf{Intel RealSense D435i.} The depth camera is mounted directly above the assembly table on a rigid aluminium bracket.
+It connects to the station laptop via USB~3.0.  The \texttt{realsense2\_camera} ROS~2 driver
+launches with aligned depth and colour streams; a YOLO detection node subscribes to the colour
+stream and publishes brick poses on \texttt{/yolo/detections}.
+
+% ------------------------------------------------------------------
+\subsection{Network Configuration}
+\label{subsec:ch6_network_config}
+% ------------------------------------------------------------------
+
+Three independent IP address spaces are active in the cell simultaneously
+(Table~\ref{tab:ch6_ip}).  Routing between them is not required: each space is confined to a
+single point-to-point link.
+
+\begin{table}[H]
+\centering
+\caption{IP address assignments for the three network interfaces in the cell.}
+\label{tab:ch6_ip}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llll}
+\toprule
+\textbf{Interface}          & \textbf{Subnet}       & \textbf{Station}    & \textbf{Control / Device} \\
+\midrule
+Ethernet (ABB)              & 192.168.125.0/24      & 192.168.125.100     & IRC5: 192.168.125.1 \\
+ZeroTier virtual NIC        & 10.19.44.0/24         & 10.19.44.30         & 10.19.44.52 \\
+Wi-Fi (physical, outbound)  & ISP-assigned (private)& DHCP                & DHCP \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On startup, each laptop runs the following initialisation sequence before any ROS~2 nodes are
+launched:
+
+\begin{enumerate}
+    \item Verify ZeroTier membership and that both virtual IPs are reachable
+          (\texttt{ping 10.19.44.52} from the station; \texttt{ping 10.19.44.30} from the
+          control laptop).
+
+    \item Set \texttt{RMW\_IMPLEMENTATION=rmw\_fastrtps\_cpp} and
+          \texttt{FASTRTPS\_DEFAULT\_PROFILES\_FILE} to the shared XML profile, then export
+          \texttt{ROS\_DOMAIN\_ID}.
+
+    \item On the station laptop, confirm the IRC5 is reachable
+          (\texttt{ping 192.168.125.1}) and the AR4 Teensy has enumerated
+          (\texttt{ls /dev/ttyACM*}).
+
+    \item Start Syncthing as a background daemon and confirm the shared
+          \texttt{program\_storage} folder shows \emph{Up to Date} on both devices.
+\end{enumerate}
+
+Figure~\ref{fig:ch6_startup_sequence} formalises this boot order as a flowchart.
+
+% ------------------------------------------------------------------
+%  Figure: startup / initialisation flowchart (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+    \centering
+    \resizebox{0.72\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.55cm and 1.1cm,
+        start/.style={draw, rounded corners=8pt, align=center, fill=green!18,
+                      minimum width=4.2cm, minimum height=0.85cm},
+        finish/.style={draw, rounded corners=8pt, align=center, fill=green!35,
+                       minimum width=4.2cm, minimum height=0.85cm},
+        proc/.style={draw, rounded corners=2pt, align=center, fill=blue!10,
+                     minimum width=4.2cm, minimum height=0.85cm},
+        dec/.style={draw, diamond, aspect=2.1, align=center, inner sep=2pt,
+                    minimum width=3.6cm, minimum height=0.9cm, fill=yellow!18},
+        retry/.style={draw, rounded corners=2pt, align=center, fill=red!10,
+                      minimum width=3.2cm, minimum height=0.85cm},
+        arrow/.style={-Latex, thick},
+        lbl/.style={font=\tiny, fill=white, inner sep=1.5pt}
+    ]
+        \node[start]                  (s1) {Power on both laptops};
+        \node[proc,  below=of s1]     (p1) {Start ZeroTier daemon};
+        \node[dec,   below=of p1]     (d1) {ZeroTier peers reachable?};
+        \node[proc,  below=of d1]     (p2) {Export ROS env vars};
+        \node[dec,   below=of p2]     (d2) {IRC5 \& Teensy available?};
+        \node[proc,  below=of d2]     (p3) {Start Syncthing daemon};
+        \node[dec,   below=of p3]     (d3) {Sync folder Up to Date?};
+        \node[proc,  below=of d3]     (p4) {Launch ROS 2 nodes\\\texttt{ros2 launch master\_launch.py}};
+        \node[finish, below=of p4]    (fin) {Cell ready};
+
+        \node[retry, right=of d1] (r1) {Check Wi-Fi};
+        \node[retry, right=of d2] (r2) {Check USB / Ethernet};
+        \node[retry, right=of d3] (r3) {Wait for sync};
+
+        % Main vertical Yes path
+        \foreach \a/\b in {s1/p1, p1/d1, d1/p2, p2/d2, d2/p3, p3/d3, d3/p4, p4/fin}
+            \draw[arrow] (\a) -- (\b);
+        \node[lbl, right=2pt] at ($(d1.south)!0.5!(p2.north)$) {Yes};
+        \node[lbl, right=2pt] at ($(d2.south)!0.5!(p3.north)$) {Yes};
+        \node[lbl, right=2pt] at ($(d3.south)!0.5!(p4.north)$) {Yes};
+
+        % No / retry: parallel offset arrows for each decision
+        \foreach \d/\r in {d1/r1, d2/r2, d3/r3} {
+            \draw[arrow] ([yshift=-0.18cm]\d.east) -- node[lbl, below]{No}
+                         ([yshift=-0.18cm]\r.west);
+            \draw[arrow] ([yshift=0.18cm]\r.west) -- node[lbl, above]{retry}
+                         ([yshift=0.18cm]\d.east);
+        }
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(d1)(r1)(p2), inner sep=0.18cm,
+                  label=right:Network check] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(d2)(r2)(p3), inner sep=0.18cm,
+                  label=right:Hardware check] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(d3)(r3)(p4), inner sep=0.18cm,
+                  label=right:Sync check] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{Hardware and software initialisation sequence on both laptops.}
+    \label{fig:ch6_startup_sequence}
+\end{figure}
+
+Once the startup sequence completes successfully on both machines, the full collaborative cell is
+operational: the station laptop drives the physical hardware and streams telemetry, the control
+laptop plans motions and maintains the digital twin, and both channels of the communication
+architecture carry their respective payloads across the ZeroTier overlay.

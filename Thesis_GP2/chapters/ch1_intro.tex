@@ -3,64 +3,132 @@
 \vspace*{0cm} % move text up to start near top of page
 
 \section{Background and Motivation}
-Collaborative robotic systems are rapidly evolving from isolated automated stations into interconnected, intelligent cells that form the backbone of Industry 4.0. While foundational capabilities such as perception and basic grasping establish the groundwork for robotic assembly, scaling these systems to true industrial efficiency requires concurrent operation, advanced spatial awareness, and remote observability. 
+Industrial robotics is undergoing a structural shift from single-arm automated workstations toward connected, multi-robot cells that combine heterogeneous manipulators, real-time perception, and cloud-aware supervisory layers. This transition is driven by the Industry~4.0/5.0 agenda: shorter product cycles, smaller batch sizes, and growing demand for flexible reconfiguration mean that the marginal cell value is no longer set by the speed of a single industrial arm, but by how well several arms~—~including lower-cost collaborative or research-grade units~—~can be made to share a workspace safely and act in parallel.
 
-Despite the advantages of multi-robot collaboration, executing parallel tasks introduces substantial technical challenges. These include:
-\begin{itemize}
-    \item Managing concurrent command streams to execute parallel operations without control bottlenecks.
-    \item Ensuring collision-free trajectories within shared physical workspaces dynamically.
-    \item Synchronizing complex, multi-stage maneuvers, such as part handovers, between heterogeneous robot architectures.
-    \item Bridging the gap between physical hardware and virtual monitoring for remote management and pre-execution safety validation.
-\end{itemize}
+Once the classical problems of perception, calibration, and grasp planning are solved at the single-arm level, the dominant engineering bottlenecks move \emph{upward} in the software stack: how to schedule work across multiple arms without serialising it; how to guarantee that a planned trajectory will not collide with the other arm's current motion; how to coordinate physical handovers between manipulators whose controllers, communication interfaces, and timing characteristics are completely different; and how to make the resulting cell observable, controllable, and safely operable from outside the physical room it lives in. Phase~II of this project takes the calibrated, perception-enabled cell delivered in Phase~I and treats those four problems explicitly.
 
-Building upon the perception and basic control frameworks established in the first semester, Phase II of this project addresses these challenges. It transitions the two-robot assembly system—integrating an ABB IRB120 industrial robot and an AR4 research arm—into a fully integrated, parallelized, and remotely monitored cell. By leveraging multithreading, advanced task construction, and a multi-mode Digital Twin architecture within ROS 2 (Jazzy Jalisco), this phase shifts the focus toward system safety, execution efficiency, and Industrial Internet of Things (IIoT) connectivity.
+The first problem is \textbf{concurrency}. A purely sequential supervisor wastes the second arm whenever the first is moving, which is a significant fraction of any pick-and-place cycle. Solving it requires a coordination layer that can dispatch goals to two arms simultaneously and react to their feedback without one arm's planning latency stalling the other.
+
+The second problem is \textbf{shared-space safety}. Once both arms can move at the same time, geometric interference is no longer a static design concern, it becomes a runtime safety obligation. The cell must continuously evaluate whether the two planned (or in-flight) end-effector paths will conflict, and must be able to preempt a goal whose execution has become unsafe.
+
+The third problem is \textbf{heterogeneous handover}. The ABB IRB~120 is a deterministic industrial controller accessed over a proprietary Ethernet protocol; the AR4 is a research-grade arm controlled via a Teensy microcontroller over a USB-CDC serial line. Building a smooth handover between them~—~with synchronised ``give'' and ``take'' phases, a guaranteed grasp transfer, and recoverable failure modes~—~is fundamentally a distributed-systems problem, not a kinematics problem.
+
+The fourth problem is \textbf{decoupled operability}. An operator should not need to be standing next to the cell to plan, validate, or supervise its work. This implies a virtual replica synchronised with the physical system that can both \emph{mirror} live motion and \emph{rehearse} a program before it touches real hardware, together with a network architecture that lets the planning and supervisory side of the cell live on a separate machine, possibly in a different geographic location, without losing real-time guarantees.
+
+These four problems define the engineering envelope of this thesis. The platform inherited from Phase~I~—~an ABB~IRB~120, a restored AR4~Mk3, a calibrated overhead RealSense~D435i, a from-scratch detection-and-grasping stack, and an end-to-end pick-and-place pipeline orchestrated by a twelve-state supervisor~—~is therefore extended along four parallel axes: a multithreaded, asynchronous supervisor built on ROS~2 (Jazzy~Jalisco); a hybrid MoveIt~Task~Constructor pipeline with a runtime zone manager for shared-workspace safety; a multi-mode digital twin running under Gazebo that supports both live monitoring and pre-execution validation; and an IIoT communication architecture~—~Fast~DDS over a ZeroTier overlay, with Syncthing-mediated program transfer~—~that bridges two laptops across the public internet while preserving the publish-subscribe semantics ROS~2 depends on.
 
 \section{Phase I Foundation and Recap}
 \label{sec:phase1_recap}
-The development of the Collaborative Robotic Arms cell was structured across two academic phases. The first phase focused on establishing the core hardware modifications, system calibration, and the foundational software and perception pipelines from the ground up. This section serves as a summary of the foundational work completed during the first phase, providing context for the advanced multi-agent orchestration detailed in the subsequent chapters of this thesis.
+The development of the Collaborative Robotic Arms cell was structured across two academic phases. Phase I (semester 1) focused on restoring and integrating the physical platform, building the spatial-awareness pipeline (calibration, perception, grasp inference, visual servoing), and orchestrating a single end-to-end pick-place-handover workflow under a centralised state machine. The system established in Phase I forms the substrate on top of which the parallelisation, safety, digital-twin, and IIoT contributions of this thesis are layered. This section summarises the concrete components, methods, and numerical results delivered in Phase I; the full treatment is available in the semester~1 thesis document.
 
-\subsection{Hardware Architecture and Customization}
-To achieve a scalable collaborative cell, Phase I identified, integrated, and physically modified the core components:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/chapter1/gp1_system.png}
+    \caption{High-level architecture of the Phase~I collaborative cell.}
+    \label{fig:gp1_system}
+\end{figure}
+
+\subsection{Hardware Platform and Restoration}
+The cell was assembled around two heterogeneous manipulators selected to expose the calibration, control, and coordination problems that motivate the Phase~II contributions:
 \begin{itemize}
-    \item \textbf{Primary Manipulator (ABB IRB120):} Selected as the industrial backbone of the cell, providing high-speed, repeatable, and deterministic execution for standard pick-and-place operations.
-    \item \textbf{Secondary Manipulator (AR4 Research Arm):} Selected as a collaborative counterpart to handle secondary tasks and dynamic handovers, showcasing the ability to bridge industrial and research-grade hardware.
-    \item \textbf{End-Effector Redesign:} The grippers for both the ABB and AR4 manipulators were entirely redesigned and customized to ensure stable, reliable grasping of the targeted assembly workpieces.
-    \item \textbf{Vision Hardware:} A perception strategy was established, utilizing an Intel RealSense depth camera for global workspace monitoring.
+    \item \textbf{Primary Manipulator (ABB IRB~120).} A six-axis industrial arm used as the deterministic, high-repeatability backbone for standard pick-and-place. The factory calibration was sufficient and required no mechanical modifications.
+    \item \textbf{Secondary Manipulator (AR4 Mk3).} A research-grade six-axis arm received from the previous project team in a worn condition. Four mechanical and electrical restoration tasks were carried out before it could be used reliably: (i) Joint~3 transmission was replaced with an upgraded gear set and timing belt, reducing backlash from approximately $6^\circ$ to $3^\circ$; (ii) the Joint~3 shaft key was re-manufactured by hot-wire machining to achieve backlash-free engagement; (iii) encoder noise on Joints~5 and 6 was eliminated by routing both encoders through a regulated 5\,V supply; and (iv) Joint~1 backlash of roughly $2^\circ$ was removed by reinstalling missing fasteners. After restoration the AR4 became suitable for the precision tasks downstream calibration would later demand.
+    \item \textbf{End-Effectors.} Custom grippers were designed and fabricated for both arms to ensure stable grasps on the targeted I-, L-, and T-shaped assembly bricks (typical dimensions \mbox{$0.058\times0.030$\,m}, \mbox{$0.060\times0.060$\,m}, and \mbox{$0.090\times0.030$\,m} respectively).
+    \item \textbf{Vision Hardware.} An Intel RealSense D435i was mounted on an overhead aluminium stand to provide a global RGB–D view of the worktable. An ESP32-CAM (OV2640 sensor, $\sim\!160^\circ$ fisheye field of view) was mounted on the AR4 wrist as an eye-in-hand camera for the final-approach refinement loop. The complete hardware layout is shown in Figure~\ref{fig:gp1_system}.
 \end{itemize}
 
-\subsection{Perception, Calibration, and Execution Strategies}
-A significant portion of Phase I was dedicated to building the spatial awareness and execution logic from scratch:
-\begin{itemize}
-    \item \textbf{Custom Detection and Grasping System:} The object detection and grasping intelligence was developed entirely from scratch, enabling the system to reliably identify, segment, and compute accurate grasp poses for standard assembly bricks.
-    \item \textbf{System-Wide Calibration:} Rigorous calibration protocols were developed to spatially align both robotic arms with the global and local camera systems, ensuring a unified and highly accurate shared Cartesian workspace.
-    \item \textbf{Pick-and-Place Foundation:} Core pick-and-place strategies were formulated, programmed, and validated to ensure stable and repeatable manipulation of parts before introducing concurrent dual-arm motion.
-\end{itemize}
+\subsection{Spatial Calibration}
+Phase~I treated calibration as a first-class engineering problem because every downstream module (perception, grasp inference, IBVS, handover) relies on a consistent world frame.
 
-\subsection{Software Integration and User Interface}
-The software backbone was initialized by migrating to modern, distributed architectures and establishing operator control:
-\begin{itemize}
-    \item \textbf{GUI and ROS 2 Integration:} A custom Graphical User Interface (GUI) wassuccessfully bridged with the underlying ROS 2 stack, providing operators with a seamless dashboard to trigger and monitor robotic sequences.
-\end{itemize}
+\textbf{AR4 Cartesian calibration.} A pointed end-effector was driven to a dense grid of commanded XY positions at two known heights ($Z=0$\,mm and $Z=50$\,mm) above a millimetre-resolution chart aligned with the ABB world frame. Three regression families were compared on the resulting residual field: a linear (affine) map, radial basis function (RBF) networks, and second-order polynomial regression. The polynomial model was selected because it combined the lowest in-domain error with smooth extrapolation behaviour, whereas the RBF model achieved slightly lower interpolation error ($\approx\!2.5$\,mm) but degraded sharply near the workspace boundary. Polynomial correction reduced the mean absolute error from \mbox{(3.96, 5.13, 1.94)\,mm} in $(X,Y,Z)$ to \mbox{(0.94, 1.32, 0.46)\,mm}~—~roughly a four-fold improvement on the worst axis (Figure~\ref{fig:gp1_ar4_calibration}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/chapter1/gp1_ar4_calibration.png}
+    \caption{Phase~I AR4 polynomial-calibration error surfaces in $X$, $Y$, and $Z$.}
+    \label{fig:gp1_ar4_calibration}
+\end{figure}
+
+\textbf{Global camera depth calibration.} The characteristic ``bowl effect'' distortion in the RealSense D435i depth stream was corrected with a polynomial model in $(u, v, \tilde d)$, trained on roughly 500 sample points collected across the full field of view using ArUco markers at known heights. The corrected depth had its mean absolute error reduced from 3.03\,mm to 1.24\,mm (a 59\% reduction) and its RMSE from 3.97\,mm to 1.45\,mm (64\% reduction). A 1D Kalman filter was added on top of the corrected stream to suppress temporal jitter.
+
+\textbf{Eye-in-hand rectification.} The fisheye-distorted ESP32-CAM was calibrated separately with a checkerboard procedure; the recovered intrinsics are used to rectify each frame inside the IBVS loop, which is required for the linearised interaction matrix in the visual-servoing control law to remain valid.
+
+\subsection{Perception Pipeline}
+Brick detection used YOLOv8s-seg trained from scratch on a custom dataset of 9{,}525 annotated images covering three brick classes (I, L, T). Each source image was augmented ten times with horizontal/vertical flips, $\pm 15^\circ$ rotations, $\pm 15\%$ brightness perturbations, and salt-and-pepper noise. Because YOLOv8's segmentation head returns axis-aligned boxes, brick orientation was recovered downstream by applying Principal Component Analysis (PCA) to each mask's contour, yielding a true rotation angle around the optical axis. A lightweight centroid tracker (60\,px association threshold, \texttt{max\_disappeared}=300 frames) maintained per-instance identity across frames so that downstream grasp inference and IBVS could lock onto a specific brick. A representative mixed-scene inference is shown in Figure~\ref{fig:gp1_detection}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/chapter1/gp1_detection_inference.png}
+    \caption{YOLOv8s-seg inference on a mixed scene of I-, L-, and T-bricks.}
+    \label{fig:gp1_detection}
+\end{figure}
+
+\subsection{Grasp Inference}
+Two grasp networks were implemented end-to-end and compared head-to-head on a hand-labelled dataset of 286 single-brick RGB–D crops at $160\times 160$ resolution: (i) a ResNet-UNet (ResNet-34 encoder taking RGB+depth as a 4-channel input, U-Net decoder with skip connections), and (ii) a Swin-T Transformer with a hierarchical patch-embedding backbone and a lightweight multi-scale fusion decoder. Both networks emit per-pixel grasp quality $Q$ and orientation $(\cos 2\theta,\sin 2\theta)$. Training used AdamW ($\text{lr}=1\!\times\!10^{-4}$, weight decay $1\!\times\!10^{-4}$), batch size 8, up to 150 epochs with early stopping (patience 15). A defining design decision was to retain explicit \emph{negative} grasp annotations and penalise wrong angles even on positive pixels, giving the model a learned notion of grasp stability instead of merely flagging acceptable poses. The ResNet-UNet reached its best validation loss of 0.0795 at epoch 62 with Top-1 accuracy 1.000 at epoch 52, edging out the Swin-T (best 0.1231 / 0.966); it was therefore selected for deployment. The ResNet-UNet architecture is shown in Figure~\ref{fig:gp1_grasp}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/chapter1/gp1_grasp_architecture.jpg}
+    \caption{ResNet-UNet grasp network architecture used in Phase~I.}
+    \label{fig:gp1_grasp}
+\end{figure}
+
+\subsection{Image-Based Visual Servoing}
+Phase~I addressed the unavoidable kinematic and perception uncertainty of the AR4 with a \textbf{global-to-local handoff}: the RealSense delivers a coarse pose roughly 15\,cm above the target, after which an IBVS loop running on the ESP32-CAM refines the final alignment before the grasp closes. Brick corners are extracted from the local view using HSV segmentation, morphological closing, and a minimum-area-rectangle fit (chosen to remain stable on L-shaped bricks). A RANSAC homography is then fitted between the global and the eye-in-hand corner sets so that the grasp point computed by the deep network in the global view can be projected into the live local view; an offset between the grasp point and the brick centroid is tracked through the same homography so that the gripper aligns to the grasp point rather than the centroid. A monocular depth surrogate, $\hat Z = Z^* \sqrt{A^*/A_\text{current}}$, with a first-order low-pass filter, drives the Z-axis approach. Control is hybrid: a conservatively tuned PID ($k_p\!\approx\!6\!\times\!10^{-4}$, chosen to absorb the $\sim\!150$\,ms WiFi round-trip of the ESP32-CAM) on the XY centroid error, area-based gain-scheduled Z control, and the ViSP solver for yaw. Linear and angular velocities are saturated at 0.15\,m/s and 0.5\,rad/s with matching acceleration limits. Figure~\ref{fig:gp1_ibvs} summarises the closed-loop architecture.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/chapter1/gp1_ibvs_diagram.png}
+    \caption{Phase~I image-based visual-servoing pipeline with global-to-local handoff.}
+    \label{fig:gp1_ibvs}
+\end{figure}
+
+\subsection{System Orchestration and Distributed Architecture}
+The end-to-end Phase~I workflow was governed by a twelve-state finite-state machine: \texttt{INIT} (fetch the assembly plan from a Firestore-backed GUI), \texttt{DETECT} (YOLOv8 segmentation and frame transformation into the ABB base frame), \texttt{PROCESS\_NEXT}, \texttt{GRASP\_PIPELINE} (grasp inference + per-brick allocation to ABB, AR4, or handover), the AR4 direct branch (\texttt{EXECUTE\_AR4\_DIRECT}: approach offset $\rightarrow$ IBVS $\rightarrow$ grasp $\rightarrow$ place), the ABB direct branch (\texttt{EXECUTE\_ABB\_PICK}/\texttt{PLACE}), the cross-side branch (\texttt{HANDOVER\_SEQUENCE} / \texttt{HANDOVER\_EXECUTION}), and \texttt{DONE}. The supervisor exposes three services (\texttt{get\_assembly\_plan}, \texttt{detect\_bricks}, \texttt{get\_grasp\_point}) and three actions (\texttt{ar4\_point\_control}, \texttt{ar4\_visual\_servo}, \texttt{abb\_control}). Recovery logic is built in at every external interface: service availability is checked with a 1\,s timeout and retried after 2\,s; grasp failures skip the offending brick; action timeouts cancel and advance. Figure~\ref{fig:gp1_states} shows the full state graph.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{figures/chapter1/gp1_state_machine.png}
+    \caption{Phase~I twelve-state finite-state machine.}
+    \label{fig:gp1_states}
+\end{figure}
+
+To partition computational load between high-rate perception and real-time motion control, the cell was deployed across two laptops sharing a single ROS~2 graph via a unified \texttt{ROS\_DOMAIN\_ID} on a wired star network. Laptop~1 hosted the GUI bridge, YOLOv8 inference, grasp inference, and the supervisor; Laptop~2 hosted the AR4 serial driver, the IBVS controller, and the ESP32-CAM WiFi interface; the ABB controller communicated over Ethernet. A high-fidelity Gazebo~Harmonic simulation mirroring the worktable, arms, camera stand, and bricks was assembled in parallel to validate grasp sequences before they were attempted on real hardware.
+
+\textbf{What Phase~I delivered.} A restored and calibrated dual-arm cell with millimetre-level positional accuracy on the AR4, a $59$--$64\%$ improvement in depth fidelity, a custom YOLOv8s-seg detector with PCA-based orientation recovery, a ResNet-UNet grasp network reaching Top-1 validation accuracy 1.000, an IBVS controller closing the final-approach loop through an eye-in-hand camera, and a twelve-state supervisor that coordinated detection, grasp inference, single-arm execution, and a synchronised AR4$\rightarrow$ABB handover. The system, however, executed strictly sequentially~—~one arm at a time~—~with no shared-space safety reasoning, no virtual rehearsal of programs before they run on real hardware, and no path for remote operation across networks. Resolving those three gaps is the explicit programme of Phase~II and is the subject of the remainder of this thesis.
 
 \section{Problem Statement}
-While Phase I successfully established the individual operation of the manipulators, it operated under strictly sequential logic. The primary problem addressed in this second phase is the specific challenge of synchronizing multiple heterogeneous manipulators, ensuring safe, collision-free workspaces, and enabling remote industrial management. Specifically, the system must be capable of:
+The cell delivered at the end of Phase~I executes correctly under strictly sequential logic: one arm is commanded, observed, and brought to rest before the next is dispatched, and every program is run directly on the physical hardware with no rehearsal step in between. This baseline is sufficient to demonstrate the perception-to-action pipeline, but it leaves the cell unable to meet the throughput, safety, and operability requirements that distinguish a research demonstrator from a deployable industrial cell. Five concrete deficiencies follow from that baseline, and together they constitute the problem this thesis addresses.
+
 \begin{enumerate}
-    \item Executing parallel processes via multithreading to eliminate idle times and maximize throughput.
-    \item Preventing mechanical interference through intelligent zone management and dynamic collision avoidance strategies.
-    \item Synchronizing the logical "Give" and "Take" states to perform seamless and safe handovers of bricks between the two distinct arms.
-    \item Providing a comprehensive virtual replica of the system that allows for real-time monitoring, efficient trajectory teaching, and pre-execution safety validation.
-    \item Extending the system's accessibility by integrating an IoT framework that separates the control room from the physical robotic cell.
+    \item \textbf{Serialised execution leaves the cell underutilised.} The Phase~I supervisor executes one arm at a time, leaving the other idle for the duration of every motion, planning call, and gripper actuation. The system must instead dispatch goals to both arms concurrently and respond to their feedback asynchronously, so that planning latency on one arm never stalls the other and so that pick-and-place cycles can be shortened by overlapping motion.
+
+    \item \textbf{Shared-workspace motion has no runtime safety guarantee.} Once both arms can move simultaneously, mechanical interference is no longer prevented by sequencing. The cell must continuously evaluate whether the two arms' current and planned end-effector paths will conflict, and must be able to preempt or replan a goal whose execution has become unsafe before any physical contact occurs.
+
+    \item \textbf{Handover between heterogeneous controllers is fragile.} The Phase~I handover treats the AR4$\rightarrow$ABB transfer as two independent point-to-point motions on two independent controllers. The cell must instead synchronise the logical \emph{give} and \emph{take} phases across the two controllers, including grasp confirmation, time-bounded rendezvous, and recovery paths if either side fails or arrives late.
+
+    \item \textbf{Programs are validated only on real hardware.} Every motion taught or generated in Phase~I is committed by running it on the physical arms, which exposes operators and hardware to mistakes in planning, scene state, or kinematic limits. The cell must provide a virtual replica of itself that mirrors the physical motion in real time \emph{and} that can rehearse a saved program end-to-end before any real controller receives a goal.
+
+    \item \textbf{The cell is locally bound.} The Phase~I supervisor, perception, and control stack must all run on machines physically attached to the robots, which prevents the supervisory side of the cell from being relocated for safety, ergonomics, or remote diagnostics. The cell must instead expose an IIoT communication path that lets the planning and operator-facing nodes live on a remote machine, while preserving the publish-subscribe semantics, latency budget, and program-storage consistency that the real-time side depends on.
 \end{enumerate}
 
 \section{Project Objectives}
-The objectives of this second-semester thesis are summarized as follows:
+Each of the five problems above maps to a concrete deliverable. The objectives of this thesis are therefore defined as engineered components with measurable acceptance criteria rather than as open-ended research themes.
+
 \begin{itemize}
-    \item Develop a parallel execution framework utilizing multithreading to manage concurrent control streams for the ABB and AR4 arms.
-    \item Implement modular task planning using MoveIt Task Constructor (MTC) to orchestrate complex operations like the handover process.
-    \item Design and integrate a Zone Manager to define shared versus exclusive workspaces, guaranteeing collision-free runs.
-    \item Establish a Multi-Mode Digital Twin mapped to RViz, featuring real-time monitoring, program storage via Forward Kinematics, and a simulated sandbox for pre-execution validation.
-    \item Architect an IIoT communication bridge to link local controllers with a remote, decentralized control room dashboard.
-    \item Conduct a comprehensive industrial feasibility analysis evaluating the economic viability, technical integration, and safety compliance of deploying the proposed system in real-world factory environments.
+    \item \textbf{Asynchronous parallel-execution supervisor.} Build a unified supervisor on ROS~2 (Jazzy~Jalisco) using Python \texttt{asyncio} and reentrant callback groups, capable of dispatching action goals to both arms concurrently and isolating the safety watchdog from the planning thread. Acceptance criterion: measurable reduction in pick-and-place cycle time and per-arm idle time against the Phase~I baseline.
+
+    \item \textbf{Hybrid MoveIt~2 / MTC planning pipeline.} Implement a MoveIt~Task~Constructor controller that composes single-arm pick-and-place stages with a coordinated 12-DOF handover stage, and that defers to standard MoveIt~2 \texttt{move\_group} calls for the simpler motions. The pipeline must be invocable as a single service from the supervisor with a bounded planning budget.
+
+    \item \textbf{Runtime zone manager with preemption.} Design and integrate a dedicated \texttt{ZoneDetectionManager} node, isolated on its own callback group, that classifies each arm into exclusive or shared workspace regions on a fixed cycle and publishes a preemption signal on a dedicated safety topic. Acceptance criterion: sub-millisecond interrupt latency from a detected violation to the supervisor action.
+
+    \item \textbf{Multi-mode digital twin.} Stand up a Gazebo-based virtual replica of the cell under the \texttt{/twin} namespace that supports two operating modes: a monitoring mode in which the twin mirrors live joint states from the real arms, and a program-validation mode in which a saved YAML program is executed end-to-end on the twin before being marked as runnable on real hardware. Acceptance criteria: visual lag below 100\,ms in monitoring mode, and a refusal of any unvalidated program at the real-execution interface.
+
+    \item \textbf{IIoT communication architecture across two laptops.} Architect a two-channel link between a ``station'' laptop co-located with the hardware and a ``control'' laptop hosting the supervisor and digital twin: Fast~DDS over a ZeroTier overlay for real-time topics, and Syncthing for the validated-program filesystem. The link must traverse the public internet, preserve ROS~2 publish-subscribe semantics, and survive transient network loss.
+
+    \item \textbf{Software emergency-stop channel.} Provide a dedicated remote e-stop path (\texttt{/dt/estop}) on its own QoS profile so that a remote operator can cancel active goals on both arms in tens of milliseconds, independent of the supervisor's planning state.
+
+    \item \textbf{Industrial feasibility analysis.} Evaluate the resulting cell against deployment criteria that go beyond technical performance: capital and operating cost, integration with legacy controllers, safety-standard compliance (ISO~10218 / ISO/TS~15066 alignment), and human-factors considerations for the remote-operator workflow.
 \end{itemize}
 \clearpage
 

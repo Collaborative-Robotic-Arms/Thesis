@@ -1,0 +1,451 @@
+% ============================================================
+%  Section 6.1 – Software Stack
+% ============================================================
+\section{Software Stack: ROS~2 Architecture, MoveIt~2 Configuration,
+         and Hardware Driver Integration}
+\label{sec:ch6_software}
+
+The software stack that drives the collaborative robotic cell is organised in four tiers:
+the ROS~2 middleware and execution layer, the MoveIt~2 motion-planning layer, the hardware
+abstraction and driver layer, and the digital-twin synchronisation layer.
+Figure~\ref{fig:ch6_sw_stack} shows how these tiers relate to one another and to the physical
+hardware.
+
+% ------------------------------------------------------------------
+%  Figure: four-tier software stack (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    font=\small\sffamily,
+    tier/.style={
+        draw, thick, rounded corners=5pt,
+        minimum width=13cm, minimum height=1.05cm,
+        align=center, text width=12.5cm
+    },
+    arr/.style={->, >=stealth, thick, gray},
+    lbl/.style={font=\footnotesize\sffamily\itshape, text=gray, align=left}
+]
+
+% Tier 4 – application / supervisory (top)
+\node[tier, fill=blue!20] (t4) at (0, 4.5)
+    {\textbf{Tier~4 – Supervisory / Application}\\
+     \texttt{UnifiedAssemblySupervisor} \quad
+     \texttt{HybridMTCController} \quad
+     Digital Twin runners};
+
+% Tier 3 – planning
+\node[tier, fill=green!20] (t3) at (0, 3.0)
+    {\textbf{Tier~3 – Motion Planning}\\
+     MoveIt~2 \texttt{move\_group} \quad
+     MoveIt Task Constructor (MTC) \quad
+     OMPL / KDL / BioIK};
+
+% Tier 2 – middleware
+\node[tier, fill=orange!20] (t2) at (0, 1.5)
+    {\textbf{Tier~2 – ROS~2 Middleware}\\
+     Fast~DDS (rmw\_fastrtps\_cpp) \quad
+     \texttt{ros2\_control} \quad
+     \texttt{robot\_state\_publisher} \quad
+     \texttt{tf2}};
+
+% Tier 1 – hardware drivers (bottom)
+\node[tier, fill=red!15] (t1) at (0, 0.0)
+    {\textbf{Tier~1 – Hardware Drivers}\\
+     \texttt{abb\_rws\_client} (IRC5/RWS) \quad
+     AR4 serial driver (\texttt{/dev/ttyACM0}) \quad
+     \texttt{realsense2\_camera}};
+
+% Arrows
+\foreach \a/\b in {t1/t2, t2/t3, t3/t4}
+    \draw[arr] (\a.north) -- (\b.south);
+
+% Side annotation
+\node[lbl, right=0.6cm of t4] {Python async\\nodes};
+\node[lbl, right=0.6cm of t3] {C++ nodes};
+\node[lbl, right=0.6cm of t2] {C++ / Python};
+\node[lbl, right=0.6cm of t1] {C++ / Python};
+
+\end{tikzpicture}
+\caption{Four-tier software stack of the collaborative robotic cell.
+         Arrows indicate the direction of data and command flow from hardware up to the
+         application layer.}
+\label{fig:ch6_sw_stack}
+\end{figure}
+
+% ------------------------------------------------------------------
+\subsection{ROS~2 Architecture}
+\label{subsec:ch6_ros2}
+% ------------------------------------------------------------------
+
+The entire system runs under \textbf{ROS~2 Jazzy Jalisco} on Ubuntu~24.04.  All nodes are
+launched from a single parameterised entry point, \texttt{master\_launch.py}, which accepts
+arguments that select the operating mode (simulation-only, real-hardware, or digital-twin) and
+conditionally starts the appropriate subset of nodes.
+
+\textbf{Node topology.} Figure~\ref{fig:ch6_node_topology} maps every ROS~2 node, its callback-group assignment, and
+the topics and actions that connect them.  The topology deliberately separates
+time-critical safety paths (the \texttt{ZoneDetectionManager}) from the high-level planning
+logic (the \texttt{UnifiedAssemblySupervisor}) so that a slow MoveIt planning call on the
+supervisor cannot block a zone-breach interrupt.
+
+% ------------------------------------------------------------------
+%  Figure: ROS 2 node topology (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.7cm and 1.1cm,
+        ext/.style={draw, dashed, rounded corners=2pt, align=center, fill=gray!10,
+                    minimum width=2.5cm, minimum height=0.85cm},
+        sup/.style={draw, rounded corners=2pt, align=center, fill=blue!10,
+                    minimum width=2.9cm, minimum height=0.85cm},
+        task/.style={draw, rounded corners=2pt, align=center, fill=orange!12,
+                     minimum width=2.5cm, minimum height=0.85cm},
+        plan/.style={draw, rounded corners=2pt, align=center, fill=green!12,
+                     minimum width=2.5cm, minimum height=0.85cm},
+        safe/.style={draw, rounded corners=2pt, align=center, fill=red!12,
+                     minimum width=2.5cm, minimum height=0.85cm},
+        twin/.style={draw, rounded corners=2pt, align=center, fill=cyan!10,
+                     minimum width=2.5cm, minimum height=0.85cm},
+        arrow/.style={-Latex, thick},
+        action/.style={-Latex, thick, dashed, color=blue!70!black},
+        service/.style={-Latex, thick, dotted, color=green!55!black},
+        safety/.style={-Latex, thick, color=red!75!black}
+    ]
+        % Column 1: external inputs
+        \node[ext]                          (yolo)      {YOLO detection};
+        \node[ext, below=of yolo]           (realsense) {RealSense camera};
+        \node[ext, below=of realsense]      (fireb)     {Firestore bridge / GUI};
+
+        % Column 2: supervisor
+        \node[sup, right=1.5cm of realsense] (sup) {Unified Assembly\\Supervisor\\(Python, asyncio)};
+
+        % Column 3: task servers
+        \node[task]                         (ar4srv) at ($(sup.east) + (2.2,  1.5)$) {AR4 task server};
+        \node[task]                         (abbsrv) at ($(sup.east) + (2.2, -1.5)$) {ABB task server};
+
+        % Column 4: planning + safety
+        \node[plan, right=of ar4srv]        (mtc)    {Hybrid MTC\\controller};
+        \node[safe, right=of abbsrv]        (zone)   {Zone detection\\manager};
+
+        % Column 5: digital twin
+        \node[twin, right=of mtc]           (jstraj) {joint\_state\_to\\\_trajectory.py};
+        \node[twin, right=of zone]          (simrun) {program\_sim\\\_runner.py};
+        \node[twin] (divmon) at ($(jstraj)!0.5!(simrun)$) {divergence\_monitor.py};
+
+        % Inputs into supervisor (converge into left side of sup)
+        \draw[arrow] (yolo.east)      -| ([xshift=-0.25cm]sup.north);
+        \draw[arrow] (realsense.east) -- (sup.west);
+        \draw[arrow] (fireb.east)     -| ([xshift=-0.25cm]sup.south);
+
+        % Supervisor to task servers (actions)
+        \draw[action] (sup.east) -- (ar4srv.west);
+        \draw[action] (sup.east) -- (abbsrv.west);
+
+        % Supervisor to MTC (service): route ABOVE the task-server row
+        % (mirror of the safety arrow's clearance — must clear ar4srv's top edge)
+        \draw[service] ([xshift=0.25cm]sup.north) -- ++(0,2.4) -| (mtc.north);
+
+        % Zone safety preempt: route BELOW the task-server row
+        \draw[safety] (zone.south) -- ++(0,-1.0) -| ([xshift=0.25cm]sup.south);
+
+        % Task servers to planning / safety
+        \draw[action] (ar4srv) -- (mtc);
+        \draw[action] (abbsrv) -- (zone);
+
+        % Twin paths
+        \draw[arrow] (mtc)  -- (jstraj);
+        \draw[arrow] (zone) -- (simrun);
+        \draw[arrow] (jstraj.south) -- (divmon.north);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(yolo)(realsense)(fireb), inner sep=0.24cm,
+                  label=above:External inputs] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(ar4srv)(abbsrv), inner sep=0.24cm,
+                  label=above:Task servers] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(mtc)(zone), inner sep=0.24cm,
+                  label=above:Planning \& safety] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(jstraj)(simrun)(divmon), inner sep=0.24cm,
+                  label=above:Digital twin] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{High-level ROS 2 node topology.}
+    \label{fig:ch6_node_topology}
+\end{figure}
+
+\textbf{Executor and callback-group strategy.} Table~\ref{tab:ch6_cbgroups} summarises the callback-group assignment that prevents
+mutual blocking between the supervisor's planning work and the safety watchdog's interrupt path.
+
+\begin{table}[H]
+\centering
+\caption{Callback-group assignments in the \texttt{UnifiedAssemblySupervisor} node.}
+\label{tab:ch6_cbgroups}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{lll}
+\toprule
+\textbf{Callback / Client}          & \textbf{Group type}           & \textbf{Rationale} \\
+\midrule
+State-machine timer                 & MutuallyExclusive             & Sequential task flow \\
+AR4 \& ABB action clients           & Reentrant                     & True parallel dispatch \\
+Perception \& gripper service calls & Reentrant                     & Non-blocking queries \\
+Zone-status subscriber              & MutuallyExclusive (separate)  & Interrupt isolation \\
+ExecuteTask action servers (C++)    & MutuallyExclusive             & One goal at a time per arm \\
+Gripper SetBool services (C++)      & MutuallyExclusive             & Sequential gripper control \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Launch file architecture.} \texttt{master\_launch.py} accepts Boolean launch arguments
+(\texttt{use\_sim}, \texttt{use\_real\_abb}, \texttt{use\_real\_ar4}, \texttt{twin\_mode})
+that select exactly which nodes are activated.  This single entry-point design means that the
+same workspace can be launched in six distinct configurations — from pure Gazebo simulation
+through full dual-hardware with digital twin — without modifying any source file.
+
+% ------------------------------------------------------------------
+\subsection{MoveIt~2 Configuration}
+\label{subsec:ch6_moveit}
+% ------------------------------------------------------------------
+
+MoveIt~2 provides the motion-planning backbone for both arms.  The configuration was generated
+by the MoveIt Setup Assistant and then hand-tuned to match the physical constraints of the
+heterogeneous cell.
+
+\textbf{Robot descriptions.} Both manipulators are described in URDF/Xacro.  The combined
+\texttt{dual\_arms\_twin.xacro} includes the ABB~IRB~120 macro, the AR4~Mk3 macro, the
+custom gripper macros, and a shared table link that provides the common world frame.  Unique
+robot-name prefixes (\texttt{abb\_} and \texttt{ar4\_}) are injected into every macro to
+prevent the link-name collision that initially produced duplicate
+\texttt{gripper\_base\_link} geometries and spurious self-collision reports.
+
+\textbf{Semantic description (SRDF).} The Semantic Robot Description Format file declares two planning groups:
+
+\begin{itemize}
+    \item \texttt{irb120\_arm} — six revolute joints of the ABB~IRB~120, with
+          \texttt{tool0} as the end-effector link.
+    \item \texttt{ar\_manipulator} — six revolute joints of the AR4~Mk3, with
+          \texttt{ar4\_ee\_link} as the end-effector link.
+\end{itemize}
+
+Separate gripper groups (\texttt{abb\_gripper} and \texttt{ar4\_gripper}) are declared for
+open/close trajectory control.  The SRDF also lists the allowed-collision pairs regenerated
+after the prefix fix; without these entries MoveIt's collision checker would report
+false-positive collisions between the table and each arm's base link.
+
+\textbf{Kinematics configuration.} Table~\ref{tab:ch6_ik} lists the IK solver assigned to each planning group.
+The ABB arm uses KDL because its well-conditioned Jacobian and high repeatability make
+numerical IK fast and reliable.  The AR4 uses BioIK, a population-based solver, because the
+arm's geometric structure occasionally leads KDL into local minima near wrist singularities.
+
+\begin{table}[H]
+\centering
+\caption{IK solver configuration per planning group.}
+\label{tab:ch6_ik}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{llll}
+\toprule
+\textbf{Group}          & \textbf{Solver} & \textbf{Timeout (s)} & \textbf{Attempts} \\
+\midrule
+\texttt{irb120\_arm}    & KDL             & 0.005                & 3 \\
+\texttt{ar\_manipulator}& BioIK           & 0.050                & 5 \\
+\texttt{abb\_gripper}   & KDL             & 0.005                & 1 \\
+\texttt{ar4\_gripper}   & KDL             & 0.005                & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{OMPL planning pipeline.} Both arm groups use \textbf{RRTConnect} as the primary planner within OMPL, with a 1.0\,s
+planning timeout for standard pick-and-place moves.  MTC escape-route computations use a
+tighter 2.0\,s budget; if no valid 12-DOF resolution path is found within that window the
+system defaults to a complete emergency shutdown to preserve hardware integrity.
+
+\textbf{Trajectory execution controllers.} \texttt{ros2\_control} loads four trajectory controllers at runtime (Table~\ref{tab:ch6_ctrls}).
+In digital-twin mode the \texttt{/twin} namespace prevents the Gazebo controllers from
+conflicting with the real-hardware controllers sharing the same ROS~2 graph.
+
+\begin{table}[H]
+\centering
+\caption{\texttt{ros2\_control} trajectory controllers and their namespace assignment.}
+\label{tab:ch6_ctrls}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lll}
+\toprule
+\textbf{Controller name}                    & \textbf{Namespace}  & \textbf{Targets} \\
+\midrule
+\texttt{irb120\_controller}                 & \texttt{/}          & ABB 6-DOF arm \\
+\texttt{ar4\_trajectory\_controller}        & \texttt{/}          & AR4 6-DOF arm \\
+\texttt{abb\_gripper\_controller}           & \texttt{/}          & ABB gripper \\
+\texttt{ar4\_gripper\_controller}           & \texttt{/}          & AR4 gripper \\
+\texttt{twin/irb120\_controller}            & \texttt{/twin}      & Gazebo ABB twin \\
+\texttt{twin/ar4\_trajectory\_controller}   & \texttt{/twin}      & Gazebo AR4 twin \\
+\texttt{twin/abb\_gripper\_controller}      & \texttt{/twin}      & Gazebo ABB gripper \\
+\texttt{twin/ar4\_gripper\_controller}      & \texttt{/twin}      & Gazebo AR4 gripper \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:ch6_moveit_pipeline} illustrates the complete motion-planning request lifecycle
+from the supervisor's goal dispatch through trajectory execution on the physical or simulated
+controllers.
+
+% ------------------------------------------------------------------
+%  Figure: MoveIt 2 planning pipeline (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.8cm and 1.1cm,
+        block/.style={draw, rounded corners=2pt, align=center,
+                      minimum width=2.5cm, minimum height=0.85cm},
+        start/.style={block, fill=blue!10},
+        proc/.style={block, fill=green!10},
+        exec/.style={block, fill=orange!12},
+        fail/.style={block, fill=red!12},
+        dec/.style={draw, diamond, aspect=1.6, align=center, inner sep=2pt,
+                    minimum width=2.5cm, minimum height=0.9cm, fill=yellow!18},
+        arrow/.style={-Latex, thick},
+        lbl/.style={font=\tiny, fill=white, inner sep=1.5pt}
+    ]
+        \node[start]                  (goal)  {Supervisor\\sends goal};
+        \node[proc,  right=of goal]   (scene) {Planning scene\\update (TF2)};
+        \node[proc,  right=of scene]  (ompl)  {OMPL planner\\RRTConnect};
+        \node[dec,   right=of ompl]   (valid) {Collision\\free?};
+        \node[exec,  right=of valid]  (traj)  {Trajectory\\parameterised};
+        \node[exec,  below=of traj]   (exec)  {\texttt{FollowJoint}\\\texttt{Trajectory}};
+        \node[fail,  below=of valid]  (failb) {Return\\FAILURE};
+
+        \draw[arrow] (goal)  -- (scene);
+        \draw[arrow] (scene) -- (ompl);
+        \draw[arrow] (ompl)  -- (valid);
+        \draw[arrow] (valid) -- node[lbl, above]{Yes} (traj);
+        \draw[arrow] (traj)  -- (exec);
+        \draw[arrow] (valid) -- node[lbl, right]{No}  (failb);
+        \draw[arrow] (failb.west) -| node[lbl, above, pos=0.25]{retry} (ompl.south);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(scene)(ompl)(valid), inner sep=0.24cm,
+                  label=above:Planning stage] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(traj)(exec), inner sep=0.24cm,
+                  label=above:Execution stage] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{MoveIt 2 motion-planning request lifecycle.}
+    \label{fig:ch6_moveit_pipeline}
+\end{figure}
+
+% ------------------------------------------------------------------
+\subsection{Hardware Driver Integration}
+\label{subsec:ch6_drivers}
+% ------------------------------------------------------------------
+
+Three hardware drivers bridge the ROS~2 control stack to the physical devices.
+
+\textbf{ABB IRC5 via Robot Web Services (RWS).} The \texttt{abb\_rws\_client} package communicates with the IRC5 controller over HTTP/WebSocket
+at \texttt{192.168.125.1}.  On connection it authenticates with the controller, subscribes to
+the joint-measurement resource, and republishes joint positions as \texttt{sensor\_msgs/JointState}
+messages on \texttt{/joint\_states} at 50\,Hz.  Outgoing trajectory goals are accepted by the
+ABB task server, converted to RAPID \texttt{MoveAbsJ} instructions via the RWS execution
+interface, and monitored through a blocking WebSocket confirmation.  The RWS interface also
+exposes the IRC5 emergency-stop status, which is mirrored as a ROS~2 diagnostic topic.
+
+\textbf{AR4 Mk3 via Teensy serial driver.} The AR4 driver node opens \texttt{/dev/ttyACM0} at 115200\,baud.  The communication protocol
+uses ASCII line-delimited commands; trajectory targets are sent as
+\texttt{GOTO\_JOINTS~j1~j2~j3~j4~j5~j6} strings, where each value is an angle in degrees.
+The Teensy firmware acknowledges each command and streams encoder-derived joint angles back at
+100\,Hz.  The driver converts these to \texttt{/joint\_states} messages and exposes a
+\texttt{SetBool} service for gripper control.  Cartesian path planning
+(\texttt{computeCartesianPath}) enforces a minimum 95\,\% linear fraction during the final
+approach and retreat phases, preventing unpredictable joint-space arcs near cluttered brick
+stacks.
+
+\textbf{Intel RealSense D435i.} The \texttt{realsense2\_camera} launch file activates the colour stream at 1280\,$\times$\,720
+at 30\,fps and the aligned depth stream at the same resolution.  A time-synchronised subscriber
+in \texttt{real2sim\_bridge.py} pairs each YOLO bounding-box detection with the corresponding
+aligned depth pixel to back-project the brick's 3D position into the world frame, which is then
+used both to update the MoveIt planning scene and to spawn the matching brick model in the
+Gazebo twin.
+
+Figure~\ref{fig:ch6_driver_integration} summarises the data paths from each hardware device
+to the ROS~2 application layer.
+
+% ------------------------------------------------------------------
+%  Figure: hardware driver data paths (TikZ)
+% ------------------------------------------------------------------
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=0.7cm and 1.0cm,
+        hw/.style={draw, thick, rounded corners=2pt, align=center, fill=red!12,
+                   minimum width=2.7cm, minimum height=0.85cm},
+        drv/.style={draw, rounded corners=2pt, align=center, fill=orange!12,
+                    minimum width=2.9cm, minimum height=0.85cm},
+        ros/.style={draw, rounded corners=2pt, align=center, fill=gray!10,
+                    minimum width=2.7cm, minimum height=0.85cm},
+        app/.style={draw, rounded corners=2pt, align=center, fill=green!12,
+                    minimum width=2.8cm, minimum height=0.85cm},
+        arrow/.style={-Latex, thick}
+    ]
+        % Row 1: ABB
+        \node[hw]                       (irc5)   {ABB IRC5};
+        \node[drv, right=of irc5]       (rws)    {\texttt{abb\_rws\_client}\\HTTP / WebSocket};
+        \node[ros, right=of rws]        (jsirc)  {\texttt{/joint\_states}\\50\,Hz};
+
+        % Row 2: AR4
+        \node[hw,  below=of irc5]       (teensy) {Teensy 4.1\\(AR4 Mk3)};
+        \node[drv, right=of teensy]     (ar4drv) {\texttt{ar4\_driver}\\serial ASCII};
+        \node[ros, right=of ar4drv]     (jsar4)  {\texttt{/joint\_states}\\100\,Hz};
+
+        % Row 3: RealSense
+        \node[hw,  below=of teensy]     (rs)     {RealSense D435i};
+        \node[drv, right=of rs]         (rsdrv)  {\texttt{realsense2\_camera}};
+        \node[ros, right=of rsdrv]      (rsout)  {\texttt{/camera/color}\\+ aligned depth};
+
+        % Application aligned to middle row (jsar4) — same height as the rest;
+        % top and bottom topics converge orthogonally into its north/south edges.
+        \node[app, right=1.2cm of jsar4] (app) {Application\\(Supervisor / MoveIt / Twin)};
+
+        \foreach \a/\b in {irc5/rws, rws/jsirc, teensy/ar4drv, ar4drv/jsar4, rs/rsdrv, rsdrv/rsout}
+            \draw[arrow] (\a) -- (\b);
+
+        \draw[arrow] (jsirc.east) -| (app.north);
+        \draw[arrow] (jsar4.east) -- (app.west);
+        \draw[arrow] (rsout.east) -| (app.south);
+
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(irc5)(teensy)(rs), inner sep=0.25cm,
+                  label=above:Hardware] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(rws)(ar4drv)(rsdrv), inner sep=0.25cm,
+                  label=above:Drivers] {};
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(jsirc)(jsar4)(rsout), inner sep=0.25cm,
+                  label=above:ROS 2 topics] {};
+        \end{scope}
+    \end{tikzpicture}%
+    }
+    \caption{Hardware driver data paths from physical devices to the ROS 2 application layer.}
+    \label{fig:ch6_driver_integration}
+\end{figure}
+
+\textbf{Sim-clock isolation for MoveIt.} When the Gazebo twin is active it enables the ROS~2 simulation clock
+(\texttt{use\_sim\_time:~true}).  The \texttt{getCurrentState()} call inside MoveIt evaluates
+IK timeouts against this clock; with a paused or non-unit-rate sim clock the timeout fires
+immediately, causing all IK solves to fail.  The fix is to supply a real-time
+\texttt{rclcpp::Clock} instance explicitly to the \texttt{PlanningSceneMonitor} constructor,
+decoupling the IK solver from the simulated time source while still allowing Gazebo to control
+the physics step rate independently.

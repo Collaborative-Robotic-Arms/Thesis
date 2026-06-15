@@ -1,0 +1,203 @@
+% ============================================================
+%  Chapter 9 – Conclusion and Future Work
+% ============================================================
+
+% ============================================================
+\section{Summary of Achievements}
+\label{sec:achievements}
+% ============================================================
+
+This thesis set out to transform a sequentially operated, perception-capable dual-arm robotic
+cell into a fully parallelised, remotely monitored, and virtually validated Industry~4.0
+assembly system.  The following contributions were delivered and validated against measurable
+criteria.
+
+\subsection{Parallel execution and throughput}
+A multithreaded asynchronous supervisor node, built on Python's \texttt{asyncio} library within
+a ROS~2 \texttt{MultiThreadedExecutor}, was designed and deployed to orchestrate the ABB~IRB~120
+and the AR4~Mk3 concurrently.  Hardware benchmarking demonstrated a \textbf{46.5\,\%
+reduction in total assembly cycle time} (from 74.8\,s to 40.0\,s) and an \textbf{86.0\,\%
+reduction in cumulative arm idle time} compared to the prior sequential architecture.
+
+\subsection{Collision avoidance and zone management}
+A dedicated \texttt{ZoneDetectionManager} node, operating at 500\,ms diagnostic intervals on a
+separate callback group, continuously evaluated the Euclidean distance between end-effectors.
+Across all forced stress tests the system maintained a minimum separation of \textbf{14.5\,cm}
+— well above the 10\,cm safety threshold — and triggered MoveIt~Task~Constructor
+(MTC) escape-route planning with a deterministic \textbf{average intervention latency of
+0.089\,ms} (range: 0.075--0.114\,ms).
+
+\subsection{Digital Twin: real-time monitoring}
+A dual-mode Gazebo twin, launched via \texttt{twin.launch.py}, continuously received mirrored
+joint-state commands from the physical robots through the \texttt{joint\_state\_to\_trajectory.py}
+synchronisation nodes.  The divergence monitor maintained end-to-end visual lag below
+\textbf{50\,ms}, enabling live spatial awareness without perceptible delay.  The joint divergence
+safeguard issued system alerts at a 3.0\textdegree{} warning threshold and halted program
+execution at a critical 8.0\textdegree{} anomaly limit, enforcing a continuous mathematical
+audit of the physical--virtual consistency.
+
+\subsection{Digital Twin: pre-execution validation}
+The RViz teach panel and the \texttt{program\_sim\_runner.py} validation node together enforced
+a strict \emph{validate-before-execute} contract.  Trajectory validation in the Gazebo twin
+achieved a target precision profile of \textbf{RMSE\,$<$\,0.05\,rad} (2.86\textdegree{}) across
+all tested waypoint sequences.  The \texttt{program\_real\_executor.py} node refused to command
+the physical controllers unless the program-level \texttt{validated:~true} flag was present in
+the YAML file, eliminating the possibility of sending an untested program to live hardware.
+
+\subsection{High-speed software emergency-stop}
+A dedicated e-stop channel (\texttt{/dt/estop}) allowed the remote operator to cancel active
+trajectory goals with a \textbf{propagation and acknowledgement delay of~$<$\,5\,ms},
+providing deterministic remote failsafe capability during teleoperation.
+
+\subsection{IIoT connectivity}
+A two-channel communication architecture bridged two geographically separated laptops across
+the public internet.  The \textbf{ZeroTier virtual overlay} provided NAT-traversing encrypted
+connectivity; \textbf{Fast~DDS over unicast RTPS} carried real-time ROS~2 telemetry
+with full QoS fidelity; and \textbf{Syncthing} delivered validated execution programs reliably
+without any additional cloud infrastructure.
+
+Table~\ref{tab:ch9_kpi_summary} consolidates the quantitative outcomes across all subsystems.
+
+\begin{table}[H]
+\centering
+\caption{Key performance indicators achieved by the integrated system.}
+\label{tab:ch9_kpi_summary}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric}                         & \textbf{Target}    & \textbf{Achieved}         \\
+\midrule
+Assembly cycle-time reduction           & $>$\,30\,\%        & 46.5\,\%                  \\
+Arm idle-time reduction                 & $>$\,50\,\%        & 86.0\,\%                  \\
+Minimum end-effector separation         & $\geq$\,10\,cm     & 14.5\,cm                  \\
+Intervention trigger latency            & $<$\,1\,ms         & 0.089\,ms (avg)           \\
+Digital twin visual lag                 & $<$\,100\,ms       & $<$\,50\,ms               \\
+Pre-execution trajectory RMSE           & $<$\,0.10\,rad     & $<$\,0.05\,rad            \\
+Software e-stop propagation delay       & $<$\,10\,ms        & $<$\,5\,ms                \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Challenges Overcome}
+\label{sec:challenges}
+% ============================================================
+
+The path from individual-arm operation to a fully integrated Industry~4.0 cell involved
+resolving a series of non-trivial technical obstacles, each of which shaped the final
+architecture.
+
+\subsection{Multithreading and ROS~2 callback isolation}
+Running two independent arm controllers inside a single Python node required careful separation
+of callback groups.  The initial design used a \texttt{SingleThreadedExecutor}, which caused
+mutual blocking: a long-running MoveIt plan call for one arm starved the telemetry callbacks of
+the other.  Migrating to a \texttt{MultiThreadedExecutor} with \texttt{ReentrantCallbackGroup}
+for the arm action clients, and a \texttt{MutuallyExclusiveCallbackGroup} for the executive task
+servers, eliminated contention while preserving the sequential semantics required within each
+arm's own control flow.
+
+\subsection{MoveIt~2 API compatibility under ROS~2 Jazzy}
+The transition from ROS~2 Humble to Jazzy introduced header reorganisations in MoveIt~2,
+deprecations of several \texttt{MoveGroupInterface} methods, and stricter requirements on
+the \texttt{planning\_scene\_monitor} lifecycle.  Build failures arising from MOC (Qt
+meta-object compiler) incompatibilities in the custom RViz~2 teach-panel plugin required the
+CMake configuration to be restructured to generate MOC sources before the main library target.
+Each API change was resolved incrementally against the Jazzy package manifests.
+
+\subsection{Real-to-twin synchronisation fidelity}
+Early monitoring-mode tests revealed that naïvely republishing real \texttt{/joint\_states}
+directly to the Gazebo twin controllers produced discontinuous motion: the twin would jump
+between positions rather than follow smoothly.  The solution was to route the measured joint
+angles through \texttt{joint\_state\_to\_trajectory.py}, which constructs short
+\texttt{FollowJointTrajectory} goals that the twin controllers execute at their native control
+rate, producing fluid motion while faithfully reflecting the physical hardware.
+
+\subsection{Cross-machine DDS discovery over the public internet}
+ROS~2's default multicast-based RTPS discovery fails silently across NAT boundaries.  The
+fix required authoring a custom Fast~DDS XML participant profile that disabled multicast,
+declared explicit unicast initial-peer addresses (the ZeroTier virtual IPs), and whitelisted the
+ZeroTier NIC exclusively.  An additional complication arose from the operating system
+occasionally selecting the physical Wi-Fi interface for outbound UDP traffic even when the
+ZeroTier NIC was specified; the whitelist resolved this by removing the ambiguity at the
+middleware level.
+
+\subsection{URDF collision conflicts in the twin description}
+The combined \texttt{dual\_arms\_twin.xacro} initially produced a duplicate
+\texttt{gripper\_base\_link} collision geometry arising from an overlap between the AR4 Mk3
+gripper macro and the ABB gripper macro.  The conflict caused MoveIt's collision checker to
+report spurious self-collisions at all configurations.  It was resolved by introducing
+robot-specific prefix parameters into both macros and regenerating the SRDF allowed-collision
+pairs.
+
+\subsection{Sim-clock versus wall-clock in joint-value retrieval}
+The digital twin environment enables Gazebo's simulation clock, which ROS~2 uses as the
+source of \texttt{rclcpp::Clock::now()}.  The \texttt{getCurrentState()} call in MoveIt
+uses this clock for timeout evaluation; with sim-clock paused or running at a non-unit rate,
+the timeout fired immediately, causing IK calls to fail.  The fix required passing a
+real-time clock instance explicitly to the MoveIt planning scene monitor, decoupling the
+IK solver from the simulated time source.
+
+% ============================================================
+\section{Future Recommendations}
+\label{sec:future}
+% ============================================================
+
+The system presented in this thesis lays a solid technical foundation upon which several
+high-value extensions can be built.
+
+\subsection{AI-driven path optimisation}
+The current motion planner uses OMPL sampling-based algorithms (RRT-Connect) with fixed
+timeout constraints.  Replacing or augmenting this with a learned motion-planning policy —
+trained offline in the Gazebo twin using reinforcement learning — could reduce MTC escape-route
+planning time for the AR4 from the measured \textasciitilde{}3\,s average to near-interactive
+rates.  The twin's validated trajectory data provides a natural supervised-learning dataset.
+
+\subsection{Force-aware handovers}
+The handover process currently relies on position control and a fixed gripper-close delay.
+Adding wrist force-torque sensors to both arms would enable compliant handover control: the
+giver could release only after detecting the receiver's grip force exceed a threshold, and the
+receiver could adapt its approach velocity based on the measured contact forces.  This would
+eliminate the residual positional uncertainty at the handover point and extend the cell to
+handle deformable or fragile workpieces.
+
+\subsection{Advanced computer vision integration}
+The current perception pipeline uses a single overhead RealSense~D435i together with an
+ESP32-CAM for local IBVS.  Replacing the local camera with a calibrated wrist-mounted
+depth sensor (e.g., Intel~RealSense~D405) on the AR4 would provide continuous 3D point-cloud
+feedback during the final Cartesian approach, enabling real-time pose correction rather than
+open-loop execution after the initial grasp pose is computed.
+
+\subsection{Cloud-based analytics and predictive maintenance}
+The IIoT architecture currently delivers telemetry to a single remote laptop.  Publishing
+selected topics (joint torques, divergence values, cycle-time logs) to a cloud time-series
+database (e.g., InfluxDB or Firebase Firestore) would enable long-term fleet-level analytics.
+Anomaly detection models trained on historical divergence trends could flag impending mechanical
+faults before they manifest as position errors, realising the predictive maintenance potential
+discussed in the industrial feasibility analysis of Chapter~8.
+
+\subsection{Formal safety certification pathway}
+The current \texttt{ZoneDetectionManager} and software e-stop provide a strong engineering
+safeguard, but they do not constitute a certified Safety-Rated Monitored Stop as defined by
+ISO~10218 or ISO/TS~15066.  A natural next step is to integrate a certified safety PLC
+(e.g., Pilz PNOZ~X or SICK~S3000) that independently monitors end-effector proximity via
+laser safety scanners and enforces hard stops at the motor-drive level, making the cell
+compliant with Speed and Separation Monitoring requirements for human proximity.
+
+\subsection{Multi-robot scalability}
+The current architecture supports exactly two heterogeneous arms.  Extending the
+\texttt{UnifiedAssemblySupervisor} to manage $N>2$ arms — each with its own action server
+and workspace zone definition — would require generalising the zone manager to an
+$N$-body collision graph and the MTC handover pipeline to support multi-party transfers.
+The layered DDS/ZeroTier communication stack scales transparently: additional participants
+require only new entries in the \texttt{initialPeersList} of the Fast~DDS profile.
+
+\vspace{1em}
+
+In conclusion, this work demonstrates that a hybrid industrial and research-grade robotic cell
+can be orchestrated as a coherent, parallelised, and remotely supervised Industry~4.0 system
+using exclusively open-source middleware.  The digital twin layer — spanning real-time
+monitoring, teach-panel programming, pre-execution validation, and divergence safeguards —
+bridges the gap between simulation and physical execution in a manner that is both practically
+useful and architecturally extensible.  The quantitative results confirm that the design choices
+made at every layer, from the ZeroTier overlay to the YAML validation contract, translate
+directly into measurable improvements in throughput, safety, and operational confidence.
