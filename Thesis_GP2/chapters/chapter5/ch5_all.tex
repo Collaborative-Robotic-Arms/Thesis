@@ -1,4 +1,4 @@
-\chapter{IIOT and Remote Control Integration}
+\chapter{IIoT and Remote Control Integration}
 \thispagestyle{fancy}
 \vspace*{0cm} % move text up to start near top of page
 
@@ -10,7 +10,7 @@ The robotic system developed in this thesis consists of two computational nodes 
 
 ROS2 was designed under the assumption that participating nodes reside on a common subnet where they can discover one another through IP multicast. In the deployment considered here, the control and station laptops sit behind separate consumer routers, each performing Network Address Translation (NAT) and assigning private, non-routable addresses. Under these conditions, neither node can address the other directly, and the multicast discovery traffic on which the middleware relies is not forwarded across subnet or NAT boundaries. A connectivity layer was therefore required that makes the two physically separated machines behave, from the operating system's perspective, as though they were attached to the same LAN.
 
-\subsection{ZeroTier Virtual Overlay Network}
+\subsection{ZeroTier Virtual Overlay Network}\label{sec:zerotier_overlay}
 
 To resolve this, the system uses \textbf{ZeroTier}, a software-defined networking platform that establishes an encrypted virtual Layer~3 overlay network across the public internet. Each participating device joins a common ZeroTier network and is assigned a stable virtual IP address from a private overlay range, independent of its physical location or the NAT configuration of its local router. ZeroTier performs NAT traversal automatically using UDP hole-punching to establish direct peer-to-peer links between members, and transparently falls back to relayed routing through its infrastructure only when a direct path cannot be negotiated.
 
@@ -24,7 +24,7 @@ In effect, ZeroTier collapses the geographically distributed deployment into a s
     \begin{subfigure}{0.65\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/chapter5/no_network.png}
-        \caption{Without the overlay, the control and station laptops sit behind separate NAT-ed routers and cannot reach one another directly.}\label{fig:network_no_overlay}
+        \caption{Without the overlay: separate NAT-ed routers block direct reachability.}\label{fig:network_no_overlay}
     \end{subfigure}
 
     \vspace{1em}
@@ -32,7 +32,7 @@ In effect, ZeroTier collapses the geographically distributed deployment into a s
     \begin{subfigure}{0.65\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/chapter5/with_network.png}
-        \caption{The ZeroTier overlay bridges the two sites, assigning each node a stable, routable virtual IP so they behave as if on one LAN.}\label{fig:network_with_overlay}
+        \caption{With the ZeroTier overlay: stable virtual IPs bridge the two sites.}\label{fig:network_with_overlay}
     \end{subfigure}
     \caption{Network architecture before and after introducing the ZeroTier virtual overlay.}
     \label{fig:network_architecture}
@@ -61,12 +61,12 @@ By default, RTPS performs participant discovery using IP multicast, broadcasting
 
 \subsection{Choice of Messaging Paradigm: DDS versus Broker-Based IoT Protocols}
 
-Before selecting a specific DDS implementation, a more fundamental question must be addressed: why a data-centric DDS/RTPS paradigm at all, rather than one of the broker-based messaging protocols that dominate the wider Internet-of-Things landscape, such as \textbf{MQTT}~\cite{oasis_mqtt5}, \textbf{AMQP}~\cite{oasis_amqp10}, or \textbf{Apache Kafka}~\cite{kreps2011kafka}, Because these protocols are the conventional choice for IIoT telemetry, the decision to retain DDS warrants explicit justification. The principal characteristics of each are contrasted in Table~\ref{tab:protocol_comparison}.
+Before selecting a specific DDS implementation, a more fundamental question must be addressed: why a data-centric DDS/RTPS paradigm at all, rather than one of the broker-based messaging protocols that dominate the wider Internet-of-Things landscape, such as \textbf{MQTT}~\cite{oasis_mqtt5}, \textbf{AMQP}~\cite{oasis_amqp10}, or \textbf{Apache Kafka}~\cite{kreps2011kafka}. Because these protocols are the conventional choice for IIoT telemetry, the decision to retain DDS warrants explicit justification. The principal characteristics of each are contrasted in Table~\ref{tab:protocol_comparison}.
 
 \begin{table}[htbp]
     \centering
     \small
-    \caption{Comparison of DDS/RTPS with common broker-based IoT messaging protocols. The qualitative characterization is informed by the protocol specifications~\cite{omg_dds14,oasis_mqtt5,oasis_amqp10,kreps2011kafka} and the comparative evaluation of Profanter \textit{et al.}~\cite{profanter2019protocols}.}
+    \caption{DDS/RTPS versus common broker-based IoT messaging protocols~\cite{omg_dds14,oasis_mqtt5,oasis_amqp10,kreps2011kafka,profanter2019protocols}.}
     \label{tab:protocol_comparison}
     \begin{tabular}{p{0.15\textwidth} p{0.17\textwidth} p{0.16\textwidth} p{0.15\textwidth} p{0.19\textwidth}}
         \toprule
@@ -114,7 +114,7 @@ Having committed to a standard DDS/RTPS stack, a specific DDS implementation had
 
 \begin{table}[htbp]
     \centering
-    \caption{Comparison of the candidate DDS implementations~\cite{eprosima_fastdds,eclipse_cyclonedds,rti_connext,kronauer2021latency}.}
+    \caption{Candidate DDS implementations~\cite{eprosima_fastdds,eclipse_cyclonedds,rti_connext,kronauer2021latency}.}
     \label{tab:dds_vendor_comparison}
     \begin{tabular}{p{0.20\textwidth} p{0.23\textwidth} p{0.23\textwidth} p{0.22\textwidth}}
         \toprule

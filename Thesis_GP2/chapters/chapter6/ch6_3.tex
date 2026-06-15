@@ -88,9 +88,7 @@ indicating the placement of both arms, the camera overhead mount, and the brick 
 \node[lbl, orange!70!black] at (3.2,-2.1) {AR4 workspace};
 
 \end{tikzpicture}
-\caption{Schematic top-view of the collaborative robotic cell.
-         Dashed circles indicate approximate reachable workspace for each arm.
-         The hatched overlap at the centre contains the handover zone.}
+\caption{Schematic top-view of the collaborative robotic cell.}
 \label{fig:ch6_cell_diagram}
 \end{figure}
 
@@ -167,7 +165,7 @@ simplifies integration and debugging.
         \end{scope}
     \end{tikzpicture}%
     }
-    \caption{Physical and logical wiring of the collaborative robotic cell. Blue links are Ethernet, purple links are USB, the red link is USB 3.0 for the camera, gray is the proprietary ABB cable, and cyan double-arrows are Wi-Fi through the ZeroTier overlay.}
+    \caption{Physical and logical wiring of the collaborative robotic cell.}
     \label{fig:ch6_wiring}
 \end{figure}
 
@@ -298,7 +296,7 @@ Figure~\ref{fig:ch6_startup_sequence} formalises this boot order as a flowchart.
         \end{scope}
     \end{tikzpicture}%
     }
-    \caption{Hardware and software initialisation sequence that must complete on both laptops before any ROS 2 nodes are launched.}
+    \caption{Hardware and software initialisation sequence on both laptops.}
     \label{fig:ch6_startup_sequence}
 \end{figure}
 

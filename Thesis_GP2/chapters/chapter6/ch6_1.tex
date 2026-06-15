@@ -177,7 +177,7 @@ supervisor cannot block a zone-breach interrupt.
         \end{scope}
     \end{tikzpicture}%
     }
-    \caption{High-level ROS 2 node topology. Solid arrows are topic subscriptions, dashed arrows are ROS 2 actions, and dotted arrows are services. The red link from the zone detector preempts ongoing motion goals on the supervisor.}
+    \caption{High-level ROS 2 node topology.}
     \label{fig:ch6_node_topology}
 \end{figure}
 
@@ -341,7 +341,7 @@ controllers.
         \end{scope}
     \end{tikzpicture}%
     }
-    \caption{MoveIt 2 motion-planning request lifecycle. A failed plan is retried up to the configured attempt count before the goal is returned as FAILURE to the supervisor.}
+    \caption{MoveIt 2 motion-planning request lifecycle.}
     \label{fig:ch6_moveit_pipeline}
 \end{figure}
 
@@ -438,7 +438,7 @@ to the ROS~2 application layer.
         \end{scope}
     \end{tikzpicture}%
     }
-    \caption{Hardware driver data paths from physical devices to the ROS 2 application layer. All three drivers publish standard ROS 2 message types, decoupling the hardware specifics from the planning and supervisory logic.}
+    \caption{Hardware driver data paths from physical devices to the ROS 2 application layer.}
     \label{fig:ch6_driver_integration}
 \end{figure}
 

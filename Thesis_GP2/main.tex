@@ -220,13 +220,13 @@ Furthermore, we wish to extend a special note of recognition to the \textbf{Clas
 
 \vspace{1cm} % space after title
 
-This thesis presents a collaborative robotic assembly system integrating an ABB industrial manipulator and an AR4 robotic arm to execute efficient brick assembly through coordinated perception, grasping, handover, and placement. The proposed system combines global scene understanding from an Intel RealSense camera with local ``eye-in-hand'' sensing using an ESP32-CAM mounted on the AR4, enabling both coarse positioning and fine alignment during grasping via Image-Based Visual Servoing (IBVS). A structured state machine governs end-to-end task allocation and execution, selecting between direct assembly and cross-side handover based on brick and robot allocation logic derived from GUI/database input and global perception.
+This thesis extends a dual-arm collaborative robotic assembly cell~—~built around an ABB~IRB~120 industrial manipulator and an AR4~Mk3 research arm sharing an instrumented worktable~—~from a strictly sequential pick-and-place demonstrator into a parallelised, safety-aware, and remotely operable system. The work is positioned as the second phase of the project: the perception, calibration, grasp-inference, and visual-servoing pipeline delivered in the first phase serves as the substrate on which five new contributions are layered.
 
 \setlength{\parskip}{1em}
-To achieve accurate interaction in a shared workspace, calibration is treated as a core requirement. AR4 calibration is performed by collecting data at multiple X--Y locations at two height levels (0 mm and 50 mm) and fitting mapping functions using multiple approaches (Radial Basis Function (RBF), linear, and polynomial). Polynomial regression demonstrated superior performance and was validated using training/testing splits. Similarly, global camera calibration based on polynomial regression is applied using samples across varying X, Y, and Z coordinates to enable reliable estimation of brick world pose across the entire table. Perception is implemented through YOLOv8 segmentation for brick and feature detection, while grasp selection is addressed using a transformer-based encoder-decoder trained with both successful grasps (True Grasps) and failure/avoidance cases (False Grasps), enabling negative reinforcement to reduce unstable grasp predictions. During fine control, homography is used to map feature points between the RealSense global view and the ESP32-CAM local view, simplifying tracking and improving approach robustness.
+A multithreaded asynchronous supervisor built on ROS~2 (Jazzy~Jalisco) replaces the previous single-threaded state machine, dispatching action goals to both arms concurrently while isolating the safety watchdog on its own callback group. A hybrid planning pipeline combining MoveIt~Task~Constructor with standard MoveIt~2 service calls plans both the simple single-arm motions and the coordinated 12-DOF handover. A dedicated Zone~Detection~Manager continuously classifies each arm into exclusive or shared workspace regions and preempts unsafe goals over a sub-millisecond interrupt path. A multi-mode Digital~Twin running under Gazebo provides both a live mirror of the physical motion and a sandbox in which saved programs are executed end-to-end before any real controller receives a goal. A two-channel IIoT communication architecture~—~Fast~DDS over a ZeroTier overlay for real-time topics and Syncthing for program files~—~bridges two laptops across the public internet while preserving full ROS~2 publish--subscribe semantics, with a dedicated software emergency-stop channel for remote-operator control.
 
 \setlength{\parskip}{1em}
-Experimental results demonstrate improved positional accuracy using polynomial calibration, effective brick detection performance using segmentation, increased grasp stability using the True/False labeling strategy, and robust end-to-end execution under a state-machine framework. The thesis concludes with limitations and future directions, including improved domain adaptation, force-aware handovers, and enhanced Digital Twin synchronization for higher fidelity planning and monitoring.
+Experimental validation produced a 46.5\% reduction in pick-and-place cycle time and an 86.0\% reduction in per-arm idle time relative to the Phase~I baseline. The Zone~Detection~Manager maintained a minimum end-effector separation of 14.5\,cm with an average intervention reaction time of 0.089\,ms; the digital twin tracked live motion at under 50\,ms of visual lag and refused execution of any unvalidated program; and the software emergency stop propagated end-to-end across the overlay link in under 5\,ms. The thesis closes with an industrial feasibility analysis covering economic viability, technical integration with legacy controllers, alignment with ISO~10218 and ISO/TS~15066 safety standards, and human-factors considerations for the remote-operator workflow.
 \clearpage
 
 \begingroup
@@ -249,36 +249,72 @@ Experimental results demonstrate improved positional accuracy using polynomial c
 
 \begin{description}
     \setlength{\itemsep}{0pt}
+    \item[AMQP:] Advanced Message Queuing Protocol
+    \item[CAD:] Computer-Aided Design
+    \item[CAPEX:] Capital Expenditure
     \item[DDS:] Data Distribution Service
+    \item[DHCP:] Dynamic Host Configuration Protocol
     \item[DOF:] Degrees of Freedom
+    \item[FK:] Forward Kinematics
     \item[FoV:] Field of View
+    \item[FSM:] Finite-State Machine
     \item[GPIO:] General Purpose Input/Output
     \item[GUI:] Graphical User Interface
     \item[HAL:] Hardware Abstraction Layer
+    \item[HRC:] Human-Robot Collaboration
     \item[HSV:] Hue, Saturation, Value (Color Space)
+    \item[HTTP:] HyperText Transfer Protocol
     \item[IBVS:] Image-Based Visual Servoing
+    \item[IIoT:] Industrial Internet of Things
     \item[IK:] Inverse Kinematics
+    \item[IoT:] Internet of Things
     \item[IoU:] Intersection over Union
+    \item[ISO:] International Organization for Standardization
     \item[JSON:] JavaScript Object Notation
     \item[KDL:] Kinematics and Dynamics Library
+    \item[KPI:] Key Performance Indicator
     \item[LAN:] Local Area Network
     \item[MAE:] Mean Absolute Error
     \item[mAP:] mean Average Precision
+    \item[MES:] Manufacturing Execution System
+    \item[MQTT:] Message Queuing Telemetry Transport
     \item[MRTA:] Multi-Robot Task Allocation
+    \item[MTC:] MoveIt Task Constructor
+    \item[NAT:] Network Address Translation
+    \item[OEM:] Original Equipment Manufacturer
+    \item[OMG:] Object Management Group
     \item[OMPL:] Open Motion Planning Library
+    \item[OPC UA:] OPC Unified Architecture
+    \item[OPEX:] Operational Expenditure
     \item[PBVS:] Position-Based Visual Servoing
+    \item[PCA:] Principal Component Analysis
     \item[PID:] Proportional-Integral-Derivative (Controller)
+    \item[PLC:] Programmable Logic Controller
+    \item[QoS:] Quality of Service
+    \item[RANSAC:] Random Sample Consensus
     \item[RBF:] Radial Basis Function
     \item[RGB:] Red, Green, Blue (Color Model)
     \item[RMSE:] Root Mean Square Error
+    \item[RMW:] ROS Middleware
     \item[ROI:] Region of Interest
     \item[ROS:] Robot Operating System
+    \item[RPY:] Roll, Pitch, Yaw
     \item[RRT:] Rapidly-exploring Random Tree
+    \item[RTI:] Real-Time Innovations
+    \item[RTPS:] Real-Time Publish-Subscribe
+    \item[RWS:] Robot Web Services
+    \item[SDF:] Simulation Description Format
+    \item[SRDF:] Semantic Robot Description Format
+    \item[SSM:] Speed and Separation Monitoring
     \item[TF2:] Transform Library version 2
+    \item[TSN:] Time-Sensitive Networking
     \item[UART:] Universal Asynchronous Receiver-Transmitter
     \item[UDP:] User Datagram Protocol
     \item[URDF:] Unified Robot Description Format
     \item[ViT:] Vision Transformer
+    \item[VPN:] Virtual Private Network
+    \item[WAN:] Wide Area Network
+    \item[WS:] WebSocket
     \item[YOLOv8:] You Only Look Once version 8
 \end{description}
 

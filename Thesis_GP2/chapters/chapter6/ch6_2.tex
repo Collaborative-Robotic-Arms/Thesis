@@ -6,7 +6,7 @@
 
 The two-site deployment relies on a layered communication stack in which each layer addresses a
 distinct class of data.  Figure~\ref{fig:ch6_comms_stack} shows how these layers are assembled on
-top of the ZeroTier virtual overlay described in Section~6.1.
+top of the ZeroTier virtual overlay described in Section~\ref{sec:zerotier_overlay}.
 
 % ------------------------------------------------------------------
 %  Figure: layered communication stack (TikZ)
@@ -57,9 +57,7 @@ top of the ZeroTier virtual overlay described in Section~6.1.
 \node[label, right=0.3cm of app]   {application};
 
 \end{tikzpicture}
-\caption{Layered communication stack used by the dual-laptop deployment.
-         ZeroTier provides cross-internet connectivity;
-         Fast~DDS and Syncthing each handle a distinct class of payload.}
+\caption{Layered communication stack used by the dual-laptop deployment.}
 \label{fig:ch6_comms_stack}
 \end{figure}
 
@@ -133,8 +131,7 @@ adapt the stack to the ZeroTier overlay:
 \draw[retmsg] (7.5,\y-6.2) -- node[above, lbl]{\texttt{status flags} (Reliable)} (0,\y-6.2);
 
 \end{tikzpicture}
-\caption{Fast~DDS unicast discovery and steady-state topic flow between the two laptops.
-         SPDP and SEDP exchanges replace the usual multicast announces.}
+\caption{Fast~DDS unicast discovery and topic flow between the two laptops.}
 \label{fig:ch6_dds_discovery}
 \end{figure}
 
@@ -211,8 +208,7 @@ Figure~\ref{fig:ch6_syncthing_flow} traces the four-step transfer lifecycle.
 \node[note] at (13.5,-1.2) {Station reads\\complete file};
 
 \end{tikzpicture}
-\caption{Syncthing program-storage transfer lifecycle.  Each step executes automatically
-         whenever the control laptop regenerates the YAML plan.}
+\caption{Syncthing program-storage transfer lifecycle.}
 \label{fig:ch6_syncthing_flow}
 \end{figure}
 
@@ -288,9 +284,7 @@ diagram, illustrating the directional asymmetry of the exchange.
     ([yshift=-1.8cm] stat.west);
 
 \end{tikzpicture}
-\caption{Complete two-channel communication architecture.
-         The Fast~DDS channel carries live telemetry from the station to the control laptop;
-         the Syncthing channel carries the planned execution program in the reverse direction.}
+\caption{Complete two-channel communication architecture.}
 \label{fig:ch6_full_flow}
 \end{figure}
 
