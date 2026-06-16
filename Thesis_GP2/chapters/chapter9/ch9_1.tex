@@ -2,14 +2,18 @@
 %  Chapter 9 – Conclusion and Future Work
 % ============================================================
 
+% Relax line-breaking rules for this chapter so long \texttt{} identifiers
+% (filenames, type names) can break gracefully across lines.
+\sloppy
+
 % ============================================================
 \section{Summary of Achievements}
 \label{sec:achievements}
 % ============================================================
 
-This thesis set out to transform a sequentially operated, perception-capable dual-arm robotic
-cell into a fully parallelised, remotely monitored, and virtually validated Industry~4.0
-assembly system.  The following contributions were delivered and validated against measurable
+This thesis set out to transform a sequentially operated, perception-capable dual-arm
+robotic cell into a fully parallelised, remotely monitored, and virtually validated
+Industry~4.0 assembly system.  The following contributions were delivered and validated against measurable
 criteria.
 
 \subsection{Parallel execution and throughput}
@@ -29,7 +33,7 @@ Across all forced stress tests the system maintained a minimum separation of \te
 
 \subsection{Digital Twin: real-time monitoring}
 A dual-mode Gazebo twin, launched via \texttt{twin.launch.py}, continuously received mirrored
-joint-state commands from the physical robots through the \texttt{joint\_state\_to\_trajectory.py}
+joint-state commands from the physical robots through the \texttt{joint\_\allowbreak state\_\allowbreak to\_\allowbreak trajectory.py}
 synchronisation nodes.  The divergence monitor maintained end-to-end visual lag below
 \textbf{50\,ms}, enabling live spatial awareness without perceptible delay.  The joint divergence
 safeguard issued system alerts at a 3.0\textdegree{} warning threshold and halted program
@@ -37,16 +41,16 @@ execution at a critical 8.0\textdegree{} anomaly limit, enforcing a continuous m
 audit of the physical--virtual consistency.
 
 \subsection{Digital Twin: pre-execution validation}
-The RViz teach panel and the \texttt{program\_sim\_runner.py} validation node together enforced
+The RViz teach panel and the \texttt{program\_\allowbreak sim\_\allowbreak runner.py} validation node together enforced
 a strict \emph{validate-before-execute} contract.  Trajectory validation in the Gazebo twin
 achieved a target precision profile of \textbf{RMSE\,$<$\,0.05\,rad} (2.86\textdegree{}) across
-all tested waypoint sequences.  The \texttt{program\_real\_executor.py} node refused to command
+all tested waypoint sequences.  The \texttt{program\_\allowbreak real\_\allowbreak executor.py} node refused to command
 the physical controllers unless the program-level \texttt{validated:~true} flag was present in
 the YAML file, eliminating the possibility of sending an untested program to live hardware.
 
 \subsection{High-speed software emergency-stop}
 A dedicated e-stop channel (\texttt{/dt/estop}) allowed the remote operator to cancel active
-trajectory goals with a \textbf{propagation and acknowledgement delay of~$<$\,5\,ms},
+trajectory goals with a \textbf{propagation and acknowledgement delay of $<$\,5\,ms},
 providing deterministic remote failsafe capability during teleoperation.
 
 \subsection{IIoT connectivity}
@@ -99,16 +103,16 @@ arm's own control flow.
 \subsection{MoveIt~2 API compatibility under ROS~2 Jazzy}
 The transition from ROS~2 Humble to Jazzy introduced header reorganisations in MoveIt~2,
 deprecations of several \texttt{MoveGroupInterface} methods, and stricter requirements on
-the \texttt{planning\_scene\_monitor} lifecycle.  Build failures arising from MOC (Qt
+the \texttt{planning\_\allowbreak scene\_\allowbreak monitor} lifecycle.  Build failures arising from MOC (Qt
 meta-object compiler) incompatibilities in the custom RViz~2 teach-panel plugin required the
 CMake configuration to be restructured to generate MOC sources before the main library target.
 Each API change was resolved incrementally against the Jazzy package manifests.
 
 \subsection{Real-to-twin synchronisation fidelity}
-Early monitoring-mode tests revealed that naïvely republishing real \texttt{/joint\_states}
+Early monitoring-mode tests revealed that naïvely republishing real \texttt{/joint\_\allowbreak states}
 directly to the Gazebo twin controllers produced discontinuous motion: the twin would jump
 between positions rather than follow smoothly.  The solution was to route the measured joint
-angles through \texttt{joint\_state\_to\_trajectory.py}, which constructs short
+angles through \texttt{joint\_\allowbreak state\_\allowbreak to\_\allowbreak trajectory.py}, which constructs short
 \texttt{FollowJointTrajectory} goals that the twin controllers execute at their native control
 rate, producing fluid motion while faithfully reflecting the physical hardware.
 
@@ -122,8 +126,8 @@ ZeroTier NIC was specified; the whitelist resolved this by removing the ambiguit
 middleware level.
 
 \subsection{URDF collision conflicts in the twin description}
-The combined \texttt{dual\_arms\_twin.xacro} initially produced a duplicate
-\texttt{gripper\_base\_link} collision geometry arising from an overlap between the AR4 Mk3
+The combined \texttt{dual\_\allowbreak arms\_\allowbreak twin.xacro} initially produced a duplicate
+\texttt{gripper\_\allowbreak base\_\allowbreak link} collision geometry arising from an overlap between the AR4 Mk3
 gripper macro and the ABB gripper macro.  The conflict caused MoveIt's collision checker to
 report spurious self-collisions at all configurations.  It was resolved by introducing
 robot-specific prefix parameters into both macros and regenerating the SRDF allowed-collision
