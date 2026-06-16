@@ -1,3 +1,4 @@
+
 \section{Collaboration Efficiency}
 
 To quantify the benefits of transitioning from a sequential, single-arm architecture to a multithreaded, dual-arm collaborative cell, several Key Performance Indicators (KPIs) were established. The primary metrics evaluated include total cycle time, parallel execution efficiency, and the reliability of the handover state machine.
@@ -98,14 +99,15 @@ Figure~\ref{fig:sequential_hybrid_mtc_comparison} presents both the phase-level 
 
 The collaborative handover process is mechanically and logically complex, requiring precise dynamic orientation, particularly when dealing with asymmetric components such as Z-shape bricks. The handover state machine was analyzed based on its computational overhead and temporal efficiency during a successful execution sequence.
 
-The handover was decomposed into four discrete functional stages to evaluate the performance of both the MoveIt Task Constructor (MTC) and the physical hardware. The performance metrics collected include:
+The handover was decomposed into three principal functional phases to remain consistent with the timing boundaries reported by the Hybrid MoveIt Task Constructor (MTC) implementation. Each principal phase contains internal computational and physical operations. The performance metrics collected include:
 
 \begin{itemize}
-    \item \textbf{MTC Computation Time:} The duration required by the pipeline planner to calculate the synchronized Cartesian approach and the dynamic presentation yaw.
-    \item \textbf{Spatial Approach Latency:} The physical execution time for both manipulators to converge at the predefined handover coordinate in the shared workspace.
-    \item \textbf{Hardware Synchronization Delay:} The latency associated with the ROS 2 hardware handshake, measuring the time between the receiver's gripper closing and the giver's gripper opening.
-    \item \textbf{Safe Retraction Time:} The time taken for both arms to safely exit the shared critical zone and resume independent operations.
+    \item \textbf{MTC Planning, AR4 Pick, and Transport to Handover Pose:} This phase includes the MTC computation time required by the pipeline planner to calculate the synchronized Cartesian motion and the dynamic presentation yaw. It also includes the physical execution of the AR4 object-picking motion and transport to the predefined handover pose.
+    \item \textbf{ABB Grasp-Point Generation at Handover Pose:} After the AR4 reaches and maintains the handover pose, the grasping model analyzes the presented object and generates a valid grasp point for the ABB manipulator. The measured grasp-point generation time was 17~ms.
+    \item \textbf{ABB Spatial Approach, Transfer, Placement, and Safe Retraction:} This phase includes the spatial approach time required for the ABB to converge with the AR4 at the predefined handover coordinate. It also includes the internal ROS 2 gripper handshake, object transfer, safe retraction of both manipulators, ABB placement, and the final return-home motion.
 \end{itemize}
+
+The MTC computation time is included within the first principal phase. Grasp-point generation is reported as the second phase because it occurs after the AR4 reaches the handover pose. The ABB spatial approach, gripper synchronization, object transfer, safe retraction, placement, and return-home operations are grouped within the third phase. Hardware synchronization is therefore treated as an internal operation rather than as a separate main phase.
 
 \begin{table}[H]
     \centering
@@ -115,12 +117,11 @@ The handover was decomposed into four discrete functional stages to evaluate the
         \toprule
         \textbf{Handover Phase} & \textbf{Duration (s)} & \textbf{\% of Total Exchange} \\
         \midrule
-        MTC Pipeline Computation (s) & 2.489 & 7.7\% \\
-        Spatial Approach (s) & 25.849 & 80.4\% \\
-        Hardware Synchronization (s) & 0.600 & 1.9\% \\
-        Safe Retraction (s) & 3.219 & 10.0\% \\
+        MTC Planning, AR4 Pick, and Handover Transport & 18.894 & 52.35\% \\
+        ABB Grasp-Point Generation & 0.017 & 0.05\% \\
+        ABB Approach, Transfer, Placement, and Retraction & 17.180 & 47.60\% \\
         \midrule
-        \textbf{Total Exchange Time} & \textbf{32.157} & \textbf{100.0\%} \\
+        \textbf{Total Exchange Time} & \textbf{36.091} & \textbf{100.0\%} \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -133,7 +134,7 @@ The handover was decomposed into four discrete functional stages to evaluate the
 
 \subsection{Handover Reliability}
 
-The reliability of the collaborative handover process was evaluated across 15 experimental trials. A trial was considered successful when the complete handover sequence was executed, including grasp-point generation, object acquisition by the AR4, synchronized object transfer to the ABB, and safe retraction of both manipulators.
+The reliability of the collaborative handover process was evaluated across 15 experimental trials. A trial was considered successful when the complete handover sequence was executed, including MTC planning, object acquisition by the AR4, movement to the handover pose, valid grasp-point generation for the ABB, synchronized object transfer, final placement, and safe retraction of both manipulators.
 
 Out of the 15 experimental trials, 12 trials successfully completed the full handover process, while three trials failed at different stages of the sequence. Therefore, the collaborative handover system achieved an overall success rate of 80.0\%.
 
@@ -153,7 +154,7 @@ Out of the 15 experimental trials, 12 trials successfully completed the full han
     \end{tabular}
 \end{table}
 
-The three failed trials occurred at different stages of the handover process. One trial failed when the AR4 was unable to grasp the object, one trial failed when the grasping model was unable to generate a valid grasp point at the final stage of the spatial approach, and one trial failed when the ABB was unable to securely acquire the object during the handover.
+The three failed trials occurred at different stages of the handover process. In the first failed trial, the AR4 was unable to grasp the object during Phase~1. In the second failed trial, the AR4 successfully grasped the object but failed to reach the predefined handover pose during the transport stage of Phase~1. In the third failed trial, the ABB completed the handover but failed to reach the pre-place pose during Phase~3 because its gripper did not close securely after receiving the object.
 
 The failed trials were included in the reliability calculation but were excluded from the average temporal execution metrics because they did not complete the full handover sequence.
 
