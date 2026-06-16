@@ -4,7 +4,7 @@ To validate the performance, reliability, and correctness of the digital twin mo
 
 \subsection{Mirror Latency Evaluation}
 
-The first evaluation assessed the end-to-end latency of the real-time mirroring pipeline that underlies Monitor Mode. This test measured the wall-clock time elapsed between a change in joint position appearing on the physical robot's \texttt{/joint\_states} topic and the corresponding change being reflected on \texttt{/twin/joint\_states} after propagating through the mirror node (\texttt{joint\_state\_to\_trajectory.py}) and the Gazebo twin's trajectory controller. With the mirror node publishing at 30~Hz and a \texttt{time\_from\_start} of 0.10~s per trajectory goal, the system was expected to maintain a 95th-percentile latency at or below 50~ms, ensuring that the operator's RViz and Gazebo visualization remains an actionable real-time view rather than a delayed recording.
+The first evaluation assessed the end-to-end latency of the real-time mirroring pipeline that underlies Monitor Mode. This test measured the wall-clock time elapsed between a change in joint position appearing on the physical robot's \texttt{/joint\_states} topic and the corresponding change being reflected on \texttt{/twin/joint\_states} after propagating through the mirror node (\texttt{joint\_state\_to\_trajectory.py}) and the Gazebo twin's trajectory controller. With the mirror node publishing at 30~Hz and a \texttt{time\_from\_start} of 0.10~s per trajectory goal, the system was expected to maintain a 95th-percentile latency at or below 30~ms, ensuring that the operator's RViz and Gazebo visualization remains an actionable real-time view rather than a delayed recording.
 
 \begin{figure}[h]
     \centering
@@ -13,11 +13,11 @@ The first evaluation assessed the end-to-end latency of the real-time mirroring 
     \label{fig:mirror_latency}
 \end{figure}
 
-The results confirm that the digital twin maintains a tight synchronization window between the physical and simulated arms, with the measured p95 latency falling within the target threshold of 50~ms. This demonstrates that the mirroring architecture is suitable for live operator monitoring during active assembly tasks, where any noticeable lag would undermine confidence in the simulated view as a faithful real-time representation of the physical cell.
+The results confirm that the digital twin maintains a tight synchronization window between the physical and simulated arms, with the measured p95 latency falling within the target threshold of 30~ms. This demonstrates that the mirroring architecture is suitable for live operator monitoring during active assembly tasks, where any noticeable lag would undermine confidence in the simulated view as a faithful real-time representation of the physical cell.
 \newpage
 \subsection{Divergence Statistics Evaluation}
 
-The second evaluation quantified the steady-state synchronization quality between the physical robots and their simulated counterparts during sustained operation. By sampling the \texttt{/twin/divergence} topic at 10~Hz over an extended operation period, per-joint mean and maximum divergence values were computed, along with the rate of threshold violations. The divergence monitor applies the shortest angular distance calculation for revolute joints to correctly handle wrap-around at the $\pm\pi$ boundary, and a linear difference metric for gripper joints. The target criteria specified a worst-joint mean divergence below 1\textdegree{} (or 1~mm for grippers), with fewer than 5\% of readings exceeding the 3.0\textdegree{} warning threshold and zero readings exceeding the 8.0\textdegree{} emergency-stop threshold.
+The second evaluation quantified the steady-state synchronization quality between the physical robots and their simulated counterparts during sustained operation. By sampling the \texttt{/twin/divergence} topic at 10~Hz over an extended operation period, per-joint mean and maximum divergence values were computed, along with the rate of threshold violations. The divergence monitor applies the shortest angular distance calculation for revolute joints to correctly handle wrap-around at the $\pm\pi$ boundary, and a linear difference metric for gripper joints. The target criteria specified a worst-joint mean divergence below 1\textdegree{} (or 1~mm for grippers), with fewer than 5\% of readings exceeding the 2.5\textdegree{} warning threshold and zero readings exceeding the 4.0\textdegree{} emergency-stop threshold.
 
 \begin{figure}[h]
     \centering
@@ -64,7 +64,7 @@ The results show that the software e-stop consistently acknowledges and initiate
 %         \hline
 %         \textbf{Metric} & \textbf{Target} & \textbf{Result} \\
 %         \hline
-%         M1 -- Mirror latency (p95) & $\leq 50$ ms & [Placeholder] \\
+%         M1 -- Mirror latency (p95) & $\leq 30$ ms & [Placeholder] \\
 %         M2 -- Divergence mean (worst joint) & $< 1^{\circ}$ / 1 mm & [Placeholder] \\
 %         M2 -- Warn threshold violations & $< 5\%$ of readings & [Placeholder] \\
 %         M3 -- Overall trajectory RMSE & $< 0.05$ rad & [Placeholder] \\
