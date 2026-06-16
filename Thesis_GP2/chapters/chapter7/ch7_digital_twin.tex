@@ -43,7 +43,7 @@ The measured RMSE values across all joints remained within the 0.05~rad target, 
 
 \subsection{E-Stop Latency Evaluation}
 
-The final evaluation examined the responsiveness of the software-level emergency stop mechanism available to operators during program execution. While a multi-step program was actively running, an ``estop'' message was published to \texttt{/dt/estop} at a randomized point during motion, and the time until receipt of the corresponding acknowledgment status (``E-stop received. Stopping program execution.'') was recorded. Internally, the executor's \texttt{estop\_callback} immediately sets a stop flag and cancels the active trajectory goal before publishing the acknowledgment. The target was a 95th-percentile response time below 200~ms.
+The final evaluation examined the responsiveness of the software-level emergency stop mechanism available to operators during program execution. While a multi-step program was actively running, an ``estop'' message was published to \texttt{/dt/estop} at a randomized point during motion, and the time until receipt of the corresponding acknowledgment status (``E-stop received. Stopping program execution.'') was recorded. Internally, the executor's \texttt{estop\_callback} immediately sets a stop flag and cancels the active trajectory goal before publishing the acknowledgment. The target was a 95th-percentile response time below 5~ms.
 
 \begin{figure}[h]
     \centering
