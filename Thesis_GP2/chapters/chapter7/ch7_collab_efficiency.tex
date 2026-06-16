@@ -1,3 +1,4 @@
+```latex
 \section{Collaboration Efficiency}
 
 To quantify the benefits of transitioning from a sequential, single-arm architecture to a multithreaded, dual-arm collaborative cell, several Key Performance Indicators (KPIs) were established. The primary metrics evaluated include total cycle time, parallel execution efficiency, and the reliability of the handover state machine.
@@ -37,6 +38,63 @@ Throughput and cycle time were measured by executing a standardized assembly seq
     \label{fig:gantt_chart}
 \end{figure}
 
+\subsection{Sequential and Hybrid MTC Execution Comparison}
+
+A focused cycle-time comparison was conducted between the conventional sequential handover implementation and the Hybrid MoveIt Task Constructor (MTC) implementation. In the sequential approach, each AR4 and ABB operation was executed individually, with the following operation starting only after the previous operation had completed. In comparison, the Hybrid MTC approach coordinated the complete pick, handover, placement, and return sequence through a unified task pipeline.
+
+The sequential handover cycle was divided into seven individual execution phases, while the Hybrid MTC implementation was represented by three main functional phases. The measured durations are presented in Table~\ref{tab:sequential_mtc_comparison}.
+
+\begin{table}[H]
+    \centering
+    \caption{Execution Time Comparison Between Sequential and Hybrid MTC Approaches}
+    \label{tab:sequential_mtc_comparison}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Execution Phase} & \textbf{Approach} & \textbf{Duration (s)} \\
+        \midrule
+        AR4 Pick Phase & Sequential & 13.297 \\
+        AR4 Handover Approach & Sequential & 4.561 \\
+        ABB Handover Synchronization & Sequential & 7.991 \\
+        AR4 Post-Handover Retraction & Sequential & 3.231 \\
+        AR4 Return to Home & Sequential & 4.966 \\
+        ABB Transfer to Placement & Sequential & 5.900 \\
+        ABB Return to Home & Sequential & 4.680 \\
+        \midrule
+        \textbf{Total Sequential Time} & \textbf{Sequential} & \textbf{44.626} \\
+        \midrule
+        Object Pick and Handover & Hybrid MTC & 18.894 \\
+        Waiting for Grasp-Point Generation & Hybrid MTC & 0.017 \\
+        Object Placement and Return Home & Hybrid MTC & 17.180 \\
+        \midrule
+        \textbf{Total Hybrid MTC Time} & \textbf{Hybrid MTC} & \textbf{36.091} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The Hybrid MTC approach reduced the total cycle time from 44.626~s to 36.091~s. This corresponds to an absolute reduction of 8.535~s and a cycle-time improvement of approximately 19.1\%, calculated as:
+
+\begin{equation}
+    \text{Cycle-Time Improvement}
+    =
+    \frac{44.626 - 36.091}{44.626}
+    \times 100
+    =
+    19.1\%
+\end{equation}
+
+The Hybrid MTC implementation therefore completed the full handover cycle approximately 1.23 times faster than the sequential implementation. The improvement resulted from combining the manipulation stages into a coordinated task pipeline and reducing the waiting periods introduced by individually triggered sequential actions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/chapter7/collab_efficiency/handover_comparison_chart.png}
+    \caption{Full-cycle execution-time comparison between the sequential and Hybrid MTC handover approaches.}
+    \label{fig:sequential_hybrid_mtc_comparison}
+\end{figure}
+
+Figure~\ref{fig:sequential_hybrid_mtc_comparison} presents both the phase-level execution breakdown and the total cycle time of the two approaches. Although the Hybrid MTC approach contains fewer reported phases, each phase represents a broader coordinated part of the handover workflow. Therefore, the comparison should primarily be interpreted using the complete cycle duration rather than by directly comparing individual phases between the two implementations.
+
+
+
 \subsection{Handover Phase Execution Metrics}
 
 The collaborative handover process is mechanically and logically complex, requiring precise dynamic orientation, particularly when dealing with asymmetric components such as Z-shape bricks. The handover state machine was analyzed based on its computational overhead and temporal efficiency during a successful execution sequence.
@@ -58,20 +116,47 @@ The handover was decomposed into four discrete functional stages to evaluate the
         \toprule
         \textbf{Handover Phase} & \textbf{Duration (s)} & \textbf{\% of Total Exchange} \\
         \midrule
-        MTC Pipeline Computation (s) & 2.486  & 13.6\% \\
-        Spatial Approach (s)        & 4.440 & 24.3\% \\
-        Hardware Synchronization (s) & 8.152 & 44.6\% \\
-        Safe Retraction (s)          & 3.219 & 17.6\% \\
+        MTC Pipeline Computation (s) & 2.489 & 7.7\% \\
+        Spatial Approach (s) & 25.849 & 80.4\% \\
+        Hardware Synchronization (s) & 0.600 & 1.9\% \\
+        Safe Retraction (s) & 3.219 & 10.0\% \\
         \midrule
-        \textbf{Total Exchange Time} & \textbf{18.297} & \textbf{100\%} \\
+        \textbf{Total Exchange Time} & \textbf{32.157} & \textbf{100.0\%} \\
         \bottomrule
     \end{tabular}
 \end{table}
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/chapter7/collab_efficiency/thesis_handover_performance.png}
+    \includegraphics[width=1\textwidth]{figures/chapter7/collab_efficiency/thesis_handover_performance.png}
     \caption{Collaborative Handover Phase Durations.}
 \end{figure}
+
+\subsection{Handover Reliability}
+
+The reliability of the collaborative handover process was evaluated across 15 experimental trials. A trial was considered successful when the complete handover sequence was executed, including grasp-point generation, object acquisition by the AR4, synchronized object transfer to the ABB, and safe retraction of both manipulators.
+
+Out of the 15 experimental trials, 12 trials successfully completed the full handover process, while three trials failed at different stages of the sequence. Therefore, the collaborative handover system achieved an overall success rate of 80.0\%.
+
+\begin{table}[H]
+    \centering
+    \caption{Collaborative Handover Reliability Results}
+    \label{tab:handover_reliability}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Reliability Metric} & \textbf{Result} \\
+        \midrule
+        Total Trials & 15 \\
+        Successful Trials & 12 \\
+        Failed Trials & 3 \\
+        \textbf{Success Rate} & \textbf{80.0\%} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The three failed trials occurred at different stages of the handover process. One trial failed when the AR4 was unable to grasp the object, one trial failed when the grasping model was unable to generate a valid grasp point at the final stage of the spatial approach, and one trial failed when the ABB was unable to securely acquire the object during the handover.
+
+The failed trials were included in the reliability calculation but were excluded from the average temporal execution metrics because they did not complete the full handover sequence.
 
 \begin{figure}[H]
     \centering
@@ -81,3 +166,4 @@ The handover was decomposed into four discrete functional stages to evaluate the
 \end{figure}
 
 \clearpage
+```
