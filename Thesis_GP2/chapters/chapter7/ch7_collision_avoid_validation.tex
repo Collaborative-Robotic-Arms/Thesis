@@ -28,7 +28,7 @@ The empirical data extracted from the system's execution logs validates the resp
 
 During forced collision-course stress testing, the Zone Manager successfully flagged collision risks and triggered MoveIt Task Constructor (MTC) interventions. The latency between detecting a Cartesian threshold breach and firing the intervention flag was recorded over multiple cycles. The system demonstrated highly deterministic, sub-millisecond reaction times, with an average intervention trigger latency of 0.089 ms (min: 0.075 ms, max: 0.114 ms). 
 
-Furthermore, trajectory tracking during the intervention event revealed a controlled deceleration curve. The initial collision warning was published at a separation distance of 21.7 cm. The manipulators successfully arrested their forward momentum and initiated their respective escape sequences at a minimum physical separation of 14.5 cm, ensuring zero physical contact and proving the mechanical viability of the digital twin's safety constraints.
+Furthermore, trajectory tracking during the intervention event revealed a controlled deceleration curve. The initial collision warning was published at a separation distance of 21.7 cm. The manipulators successfully arrested their forward momentum and initiated their respective escape sequences at a minimum physical separation of 16 cm, ensuring zero physical contact and proving the mechanical viability of the digital twin's safety constraints.
 
 \subsection{MTC Dynamic Escape Route Planning}
 
@@ -45,10 +45,10 @@ The data reveals a significant disparity in kinematic resolution times between t
 \toprule
 \textbf{Metric} & \textbf{Minimum} & \textbf{Maximum} & \textbf{Average} \\ 
 \midrule
-Intervention Trigger Latency & 0.075 ms & 0.114 ms & \textbf{0.089 ms} \\ 
+Detection Trigger Latency & 0.075 ms & 0.114 ms & \textbf{0.089 ms} \\ 
 ABB Escape Route Planning & 104.02 ms & 146.07 ms & \textbf{125.05 ms} \\ 
 AR4 Escape Route Planning & 2781.22 ms & 3147.60 ms & \textbf{2964.41 ms} \\ 
-Minimum Separation Distance & -- & -- & \textbf{14.50 cm} \\
+Minimum Separation Distance & -- & -- & \textbf{16.00 cm} \\
 \bottomrule
 \end{tabular}
 \end{table}
